@@ -18,6 +18,7 @@
 #include <limits>
 #include <algorithm>
 
+#include "GP2_Shader.h"
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
@@ -67,6 +68,7 @@ private:
 		createImageViews();
 		
 		// week 03
+		m_GradientShader.Initialize(device);
 		createRenderPass();
 		createGraphicsPipeline();
 		createFrameBuffers();
@@ -118,17 +120,16 @@ private:
 		glfwTerminate();
 	}
 
-	
-
-	
-
 	void createSurface() {
 		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create window surface!");
 		}
 	}
 
-	
+	GP2_Shader m_GradientShader{ 
+		"shaders/shader.vert.spv", 
+		"shaders/shader.frag.spv" 
+	};
 
 	// Week 01: 
 	// Actual window
@@ -138,13 +139,6 @@ private:
 
 	GLFWwindow* window;
 	void initWindow();
-
-	VkPipelineShaderStageCreateInfo createFragmentShaderInfo();
-	VkPipelineShaderStageCreateInfo createVertexShaderInfo();
-	VkPipelineVertexInputStateCreateInfo createVertexInputStateInfo();
-	VkPipelineInputAssemblyStateCreateInfo createInputAssemblyStateInfo();
-	VkShaderModule createShaderModule(const std::vector<char>& code);
-
 	void drawScene();
 
 	// Week 02
