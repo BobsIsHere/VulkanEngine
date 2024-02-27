@@ -1,6 +1,7 @@
 #include "vulkanbase/VulkanBase.h"
 
-void VulkanBase::createFrameBuffers() {
+void VulkanBase::createFrameBuffers() 
+{
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
 		VkImageView attachments[] = {
@@ -24,7 +25,8 @@ void VulkanBase::createFrameBuffers() {
 
 
 
-void VulkanBase::createRenderPass() {
+void VulkanBase::createRenderPass() 
+{
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = swapChainImageFormat;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -56,7 +58,8 @@ void VulkanBase::createRenderPass() {
 	}
 }
 
-void VulkanBase::createGraphicsPipeline() {
+void VulkanBase::createGraphicsPipeline() 
+{
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewportState.viewportCount = 1;
