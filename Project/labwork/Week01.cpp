@@ -10,7 +10,9 @@ void VulkanBase::initWindow()
 
 void VulkanBase::drawScene() 
 {
-	vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+	VkBuffer vertexBuffers[] = { m_VertexBuffer };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-	int font{};
+	vkCmdDraw(commandBuffer, static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);
 }

@@ -120,7 +120,9 @@ void VulkanBase::createGraphicsPipeline()
 
 	pipelineInfo.stageCount = 2;
 	pipelineInfo.pStages = &m_GradientShader.GetShaderStages()[0];
-	pipelineInfo.pVertexInputState = &m_GradientShader.CreateVertexInputStateInfo();
+	
+	auto vis = m_GradientShader.CreateVertexInputStateInfo();
+	pipelineInfo.pVertexInputState = &vis;
 	pipelineInfo.pInputAssemblyState = &m_GradientShader.CreateInputAssemblyStateInfo();
 
 	pipelineInfo.pViewportState = &viewportState;

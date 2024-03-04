@@ -69,9 +69,13 @@ private:
 		
 		// week 03
 		m_GradientShader.Initialize(device);
+		
 		createRenderPass();
 		createGraphicsPipeline();
 		createFrameBuffers();
+
+		CreateVertexBuffer();
+
 		// week 02
 		createCommandPool();
 		createCommandBuffer();
@@ -98,6 +102,7 @@ private:
 		for (auto framebuffer : swapChainFramebuffers) {
 			vkDestroyFramebuffer(device, framebuffer, nullptr);
 		}
+		DestroyVertexBuffer(device);
 
 		vkDestroyPipeline(device, graphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
@@ -164,9 +169,68 @@ private:
 	VkPipeline graphicsPipeline;
 	VkRenderPass renderPass;
 
+	VkBuffer m_VertexBuffer;
+	VkDeviceMemory m_VertexBufferMemory;  
+
 	void createFrameBuffers();
 	void createRenderPass();
 	void createGraphicsPipeline();
+	void CreateVertexBuffer()
+	{
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = sizeof(m_Vertices[0]) * m_Vertices.size();
+		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+
+		if (vkCreateBuffer(device, &bufferInfo, nullptr, &m_VertexBuffer) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create vertex buffer!");
+		}
+
+		VkMemoryRequirements memRequirements{};
+		vkGetBufferMemoryRequirements(device, m_VertexBuffer, &memRequirements);
+
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		if (vkAllocateMemory(device, &allocInfo, nullptr, &m_VertexBufferMemory) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to allocate vertex buffer memory!");
+		}
+
+		vkBindBufferMemory(device, m_VertexBuffer, m_VertexBufferMemory, 0);
+
+		void* data{};
+		vkMapMemory(device, m_VertexBufferMemory, 0, bufferInfo.size, 0, &data); 
+		memcpy(data, m_Vertices.data(), (size_t)bufferInfo.size); 
+		vkUnmapMemory(device, m_VertexBufferMemory);
+	}
+
+	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+	{
+		VkPhysicalDeviceMemoryProperties memProperties{};
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+		{
+			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+			{
+				return i;
+			}
+		}
+
+		throw std::runtime_error("failed to find suitable memory type!");
+	}
+
+	void DestroyVertexBuffer(const VkDevice& vkDevice)
+	{
+		vkDestroyBuffer(vkDevice, m_VertexBuffer, nullptr);
+		vkFreeMemory(vkDevice, m_VertexBufferMemory, nullptr);
+	}
 
 	// Week 04
 	// Swap chain and image view support

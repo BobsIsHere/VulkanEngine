@@ -1,4 +1,5 @@
 #include "vulkanbase/VulkanBase.h"
+#include "GP2_Shader.h"
 
 void VulkanBase::createCommandPool(){
 	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
@@ -14,7 +15,8 @@ void VulkanBase::createCommandPool(){
 }
 
 
-void VulkanBase::createCommandBuffer() {
+void VulkanBase::createCommandBuffer() 
+{
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.commandPool = commandPool;
@@ -26,7 +28,8 @@ void VulkanBase::createCommandBuffer() {
 	}
 }
 
-void VulkanBase::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+void VulkanBase::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) 
+{
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
@@ -37,13 +40,15 @@ void VulkanBase::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t ima
 	}
 	drawFrame(imageIndex);
 
-
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
+
+	//vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 }
 
-void VulkanBase::drawFrame(uint32_t imageIndex) {
+void VulkanBase::drawFrame(uint32_t imageIndex) 
+{
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = renderPass;
@@ -77,7 +82,8 @@ void VulkanBase::drawFrame(uint32_t imageIndex) {
 	vkCmdEndRenderPass(commandBuffer);
 }
 
-QueueFamilyIndices VulkanBase::findQueueFamilies(VkPhysicalDevice device) {
+QueueFamilyIndices VulkanBase::findQueueFamilies(VkPhysicalDevice device) 
+{
 	QueueFamilyIndices indices;
 
 	uint32_t queueFamilyCount = 0;

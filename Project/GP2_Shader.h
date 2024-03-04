@@ -20,7 +20,7 @@ struct Vertex
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() 
+	static std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions() 
 	{
 		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
 		//POSITION
@@ -38,6 +38,12 @@ struct Vertex
 	}
 };
 
+const std::vector<Vertex> m_Vertices = {
+	{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+};
+
 class GP2_Shader
 {
 public:
@@ -47,9 +53,9 @@ public:
 	GP2_Shader(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
 	~GP2_Shader() = default;
 
-	//-------------
+	//------------
 	// Rule of 5
-	//-------------
+	//------------
 	GP2_Shader(const GP2_Shader&) = delete;
 	GP2_Shader(const GP2_Shader&&) = delete;
 	GP2_Shader& operator=(const GP2_Shader&) = delete;
@@ -59,7 +65,15 @@ public:
 	// Functions
 	//-----------
 	void Initialize(const VkDevice& vkDevice);
+	//void CreateVertexBuffer(const VkDevice& vkDevice);
+
+	std::vector<Vertex> GetVertices() const;
+	//VkBuffer GetVertexBuffer() const;
+
 	void DestroyShaderModule(const VkDevice& vkDevice);
+	//void DestroyVertexBuffer(const VkDevice& vkDevice);
+
+	//uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 	std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages() { return m_ShaderStages; };
 
@@ -80,10 +94,9 @@ private:
 	std::string m_VertexShaderFile;
 	std::string m_FragmentShaderFile;
 
+	VkPhysicalDevice m_PhysicalDevice;
+	VkVertexInputBindingDescription m_BindingDescription;
+	std::array<VkVertexInputAttributeDescription, 2Ui64> m_AttributeDescriptions;
+
 	std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
-	const std::vector<Vertex> m_Vertices = {
-	{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-	};
 };
