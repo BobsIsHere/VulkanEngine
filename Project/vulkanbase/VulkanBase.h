@@ -19,6 +19,8 @@
 #include <algorithm>
 
 #include "GP2_Shader.h"
+#include "GP2_CommandPool.h"
+#include "GP2_CommandBuffer.h"
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
@@ -53,7 +55,8 @@ public:
 	}
 
 private:
-	void initVulkan() {
+	void initVulkan() 
+	{
 		// week 06
 		createInstance();
 		setupDebugMessenger();
@@ -73,19 +76,22 @@ private:
 		createRenderPass();
 		createGraphicsPipeline();
 		createFrameBuffers();
-
+		m_CommandPool.Initialize(device, findQueueFamilies(physicalDevice));
+		m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
 		CreateVertexBuffer();
 
 		// week 02
-		createCommandPool();
-		createCommandBuffer();
+		//createCommandPool();
+		//createCommandBuffer();
 
 		// week 06
 		createSyncObjects();
 	}
 
-	void mainLoop() {
-		while (!glfwWindowShouldClose(window)) {
+	void mainLoop() 
+	{
+		while (!glfwWindowShouldClose(window)) 
+		{
 			glfwPollEvents();
 			// week 06
 			drawFrame();
@@ -93,12 +99,13 @@ private:
 		vkDeviceWaitIdle(device);
 	}
 
-	void cleanup() {
+	void cleanup() 
+	{
 		vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
 		vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
 		vkDestroyFence(device, inFlightFence, nullptr);
 
-		vkDestroyCommandPool(device, commandPool, nullptr);
+		m_CommandPool.Destroy();
 		for (auto framebuffer : swapChainFramebuffers) {
 			vkDestroyFramebuffer(device, framebuffer, nullptr);
 		}
@@ -107,7 +114,6 @@ private:
 		vkDestroyPipeline(device, graphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 		vkDestroyRenderPass(device, renderPass, nullptr);
-
 		for (auto imageView : swapChainImageViews) {
 			vkDestroyImageView(device, imageView, nullptr);
 		}
@@ -150,15 +156,18 @@ private:
 	// Queue families
 	// CommandBuffer concept
 
-	VkCommandPool commandPool;
-	VkCommandBuffer commandBuffer;
+	//VkCommandPool commandPool; 
+	//VkCommandBuffer commandBuffer; 
+
+	GP2_CommandPool m_CommandPool;
+	GP2_CommandBuffer m_CommandBuffer;
 
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 	void drawFrame(uint32_t imageIndex);
-	void createCommandBuffer();
-	void createCommandPool(); 
-	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+	//void createCommandBuffer();
+	//void createCommandPool(); 
+	//void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	
 	// Week 03
 	// Renderpass concept

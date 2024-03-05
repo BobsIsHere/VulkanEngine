@@ -23,8 +23,6 @@ void VulkanBase::createFrameBuffers()
 	}
 }
 
-
-
 void VulkanBase::createRenderPass() 
 {
 	VkAttachmentDescription colorAttachment{};

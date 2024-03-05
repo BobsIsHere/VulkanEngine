@@ -1,6 +1,7 @@
 #include "vulkanbase/VulkanBase.h"
 
-void VulkanBase::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+void VulkanBase::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) 
+{
 	createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -8,8 +9,8 @@ void VulkanBase::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInf
 	createInfo.pfnUserCallback = debugCallback;
 }
 
-
-void VulkanBase::setupDebugMessenger() {
+void VulkanBase::setupDebugMessenger() 
+{
 	if (!enableValidationLayers) return;
 
 	VkDebugUtilsMessengerCreateInfoEXT createInfo;
@@ -20,7 +21,8 @@ void VulkanBase::setupDebugMessenger() {
 	}
 }
 
-void VulkanBase::createSyncObjects() {
+void VulkanBase::createSyncObjects() 
+{
 	VkSemaphoreCreateInfo semaphoreInfo{};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -33,18 +35,21 @@ void VulkanBase::createSyncObjects() {
 		vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create synchronization objects for a frame!");
 	}
-
 }
 
-void VulkanBase::drawFrame() {
+void VulkanBase::drawFrame() 
+{
 	vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 	vkResetFences(device, 1, &inFlightFence);
 
 	uint32_t imageIndex;
 	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
-	vkResetCommandBuffer(commandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
-	recordCommandBuffer(commandBuffer, imageIndex);
+	m_CommandBuffer.Reset();
+	m_CommandBuffer.BeginRecording();
+	// recordCommandBuffer in Week02.cpp
+	drawFrame(imageIndex);
+	m_CommandBuffer.EndRecording();
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -55,8 +60,10 @@ void VulkanBase::drawFrame() {
 	submitInfo.pWaitSemaphores = waitSemaphores;
 	submitInfo.pWaitDstStageMask = waitStages;
 
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffer;
+	m_CommandBuffer.Sumbit(submitInfo);
+
+	//submitInfo.commandBufferCount = 1;
+	//submitInfo.pCommandBuffers = &commandBuffer; 
 
 	VkSemaphore signalSemaphores[] = { renderFinishedSemaphore };
 	submitInfo.signalSemaphoreCount = 1;
@@ -81,7 +88,8 @@ void VulkanBase::drawFrame() {
 	vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
-bool checkValidationLayerSupport() {
+bool checkValidationLayerSupport() 
+{
 	uint32_t layerCount;
 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -106,21 +114,24 @@ bool checkValidationLayerSupport() {
 	return true;
 }
 
-std::vector<const char*> VulkanBase::getRequiredExtensions() {
+std::vector<const char*> VulkanBase::getRequiredExtensions() 
+{
 	uint32_t glfwExtensionCount = 0;
 	const char** glfwExtensions;
 	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
 	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-	if (enableValidationLayers) {
+	if (enableValidationLayers) 
+	{
 		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	}
 
 	return extensions;
 }
 
-bool VulkanBase::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+bool VulkanBase::checkDeviceExtensionSupport(VkPhysicalDevice device) 
+{
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -136,8 +147,10 @@ bool VulkanBase::checkDeviceExtensionSupport(VkPhysicalDevice device) {
 	return requiredExtensions.empty();
 }
 
-void VulkanBase::createInstance() {
-	if (enableValidationLayers && !checkValidationLayerSupport()) {
+void VulkanBase::createInstance() 
+{
+	if (enableValidationLayers && !checkValidationLayerSupport()) 
+	{
 		throw std::runtime_error("validation layers requested, but not available!");
 	}
 
