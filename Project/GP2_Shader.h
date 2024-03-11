@@ -38,12 +38,6 @@ struct Vertex
 	}
 };
 
-const std::vector<Vertex> m_Vertices = {
-	{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-};
-
 class GP2_Shader
 {
 public:
@@ -65,15 +59,9 @@ public:
 	// Functions
 	//-----------
 	void Initialize(const VkDevice& vkDevice);
-	//void CreateVertexBuffer(const VkDevice& vkDevice);
-
-	std::vector<Vertex> GetVertices() const;
-	//VkBuffer GetVertexBuffer() const;
 
 	void DestroyShaderModule(const VkDevice& vkDevice);
-	//void DestroyVertexBuffer(const VkDevice& vkDevice);
 
-	//uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 	std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages() { return m_ShaderStages; };
 

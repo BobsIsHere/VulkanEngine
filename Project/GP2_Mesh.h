@@ -18,7 +18,7 @@ public:
 private:
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-	VkBuffer m_VkBuffer;
-	VkDeviceMemory m_VkBufferMemory;
+	VkBuffer m_VkVertexBuffer;
+	VkDeviceMemory m_VkVertexBufferMemory;
 	std::vector<Vertex> m_MeshVertices; 
 };

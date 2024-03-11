@@ -18,11 +18,6 @@ void GP2_Shader::Initialize(const VkDevice& vkDevice)
 	m_ShaderStages.push_back(CreateFragmentShaderInfo(vkDevice));
 }
 
-std::vector<Vertex> GP2_Shader::GetVertices() const
-{
-	return m_Vertices;
-}
-
 void GP2_Shader::DestroyShaderModule(const VkDevice& vkDevice)
 {
 	for (auto& stageInfo : m_ShaderStages)

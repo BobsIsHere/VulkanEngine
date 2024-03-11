@@ -1,4 +1,5 @@
 #include "vulkanbase/VulkanBase.h"
+#include "GP2_Mesh.h"
 
 void VulkanBase::initWindow() 
 {
@@ -10,9 +11,10 @@ void VulkanBase::initWindow()
 
 void VulkanBase::drawScene() 
 {
-	VkBuffer vertexBuffers[] = { m_VertexBuffer };
+	/*VkBuffer vertexBuffers[] = { m_VertexBuffer };
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers(m_CommandBuffer.GetVkCommandBuffer(), 0, 1, vertexBuffers, offsets);
+	vkCmdDraw(m_CommandBuffer.GetVkCommandBuffer(), static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);*/
 
-	vkCmdDraw(m_CommandBuffer.GetVkCommandBuffer(), static_cast<uint32_t>(m_Vertices.size()), 1, 0, 0);
+	m_Mesh.Draw(m_CommandBuffer.GetVkCommandBuffer());
 }
