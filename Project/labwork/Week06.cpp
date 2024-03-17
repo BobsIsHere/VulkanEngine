@@ -43,10 +43,10 @@ void VulkanBase::drawFrame()
 	vkResetFences(device, 1, &inFlightFence);
 
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	vkAcquireNextImageKHR(device, m_SwapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
 	m_CommandBuffer.Reset();
-	m_CommandBuffer.BeginRecording();
+	m_CommandBuffer.BeginRecording(0);
 	// recordCommandBuffer in Week02.cpp
 	drawFrame(imageIndex);
 	m_CommandBuffer.EndRecording();
@@ -79,7 +79,7 @@ void VulkanBase::drawFrame()
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = signalSemaphores;
 
-	VkSwapchainKHR swapChains[] = { swapChain };
+	VkSwapchainKHR swapChains[] = { m_SwapChain };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
 

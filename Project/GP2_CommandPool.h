@@ -13,6 +13,7 @@ public:
 	void Destroy();
 
 	GP2_CommandBuffer CreateCommandBuffer() const;
+	VkCommandPool GetVkCommandPool() const;
 
 private:
 	VkCommandPool m_CommandPool;

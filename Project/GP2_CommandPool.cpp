@@ -48,3 +48,8 @@ GP2_CommandBuffer GP2_CommandPool::CreateCommandBuffer() const
 
 	return cmdBuffer; 
 }
+
+VkCommandPool GP2_CommandPool::GetVkCommandPool() const
+{
+	return m_CommandPool;
+}

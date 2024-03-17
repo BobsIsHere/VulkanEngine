@@ -10,6 +10,11 @@ struct Vertex
 	glm::vec2 position;
 	glm::vec3 color;
 
+	glm::vec2 uv;
+	glm::vec3 normal;
+	glm::vec3 tangent;
+	glm::vec3 viewDirection;
+
 	static VkVertexInputBindingDescription GetBindingDescription() 
 	{
 		VkVertexInputBindingDescription bindingDescription{};

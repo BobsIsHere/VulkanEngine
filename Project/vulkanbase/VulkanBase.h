@@ -17,6 +17,7 @@
 #include <set>
 #include <limits>
 #include <algorithm>
+#include <memory>
 
 #include "GP2_Shader.h"
 #include "GP2_Mesh.h"
@@ -78,21 +79,43 @@ private:
 		// week 03
 		m_GradientShader.Initialize(device);
 
-		//make meshes here
-		m_Mesh.AddVertex({ 0.f, -0.5f }, {0.25f, 0.25f, 1.f});
-		m_Mesh.AddVertex({ 0.5f, 0.5f }, {0.25f, 1.f, 0.25f});
-		m_Mesh.AddVertex({ -0.5f, 0.5f }, {1.f, 0.25f, 0.25f});
+		//Draw Triangle
+		m_TriangleMesh = std::make_unique<GP2_Mesh>(device, physicalDevice);
 
-		m_Mesh.Initialize(physicalDevice, device); 
+		m_TriangleMesh->AddVertex({ -0.75f, -0.25f }, { 0.25f, 1.f, 0.25f }); // 0
+		m_TriangleMesh->AddVertex({ -0.25f, -0.25f }, { 0.25f, 0.25f, 1.f }); // 1
+		m_TriangleMesh->AddVertex({ -0.75f, -0.75f }, { 1.f, 0.25f, 0.25f }); // 2
+
+		//std::vector<uint32_t> triangleIndices{ 0, 1, 2 };
+		std::vector<uint32_t> triangleIndices{ 2, 1, 0 };
+		m_TriangleMesh->AddIndices(triangleIndices);
+
+		m_TriangleMesh->Initialize(graphicsQueue, findQueueFamilies(physicalDevice));
+
+		//Draw Rectangle
+		m_RectangleMesh = std::make_unique<GP2_Mesh>(device, physicalDevice);
+
+		m_RectangleMesh->AddVertex({0.25f, -0.25f}, {0.25f, 0.75f, 0.25f}); // 0
+		m_RectangleMesh->AddVertex({0.75f, -0.25f}, {0.25f, 0.75f, 0.25f}); // 1
+		m_RectangleMesh->AddVertex({0.25f, -0.75f}, {0.25f, 0.75f, 0.25f}); // 2
+		m_RectangleMesh->AddVertex({ 0.75f, -0.75f }, { 0.25f, 0.75f, 0.25f }); // 3
+
+		//std::vector<uint32_t> rectIndices{ 0, 1, 2, 2, 1, 3 };
+		std::vector<uint32_t> rectIndices{ 2, 1, 0, 2, 1, 3 };
+		m_RectangleMesh->AddIndices(rectIndices);
+
+		m_RectangleMesh->Initialize(graphicsQueue, findQueueFamilies(physicalDevice));
+
+		//Draw Oval
+		//m_OvalMesh.Initialize(physicalDevice, device);
 		
 		createRenderPass();
 		createGraphicsPipeline();
 		createFrameBuffers();
 
 		// week 02
-		m_CommandPool.Initialize(device, findQueueFamilies(physicalDevice));
-		m_CommandBuffer = m_CommandPool.CreateCommandBuffer();
-		//CreateVertexBuffer();
+		m_CommandPool.Initialize(device, findQueueFamilies(physicalDevice)); 
+		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
 		// week 06
 		createSyncObjects();
@@ -100,7 +123,7 @@ private:
 
 	void mainLoop() 
 	{
-		while (!glfwWindowShouldClose(window)) 
+		while (!glfwWindowShouldClose(m_Window)) 
 		{
 			glfwPollEvents();
 			// week 06
@@ -116,35 +139,37 @@ private:
 		vkDestroyFence(device, inFlightFence, nullptr);
 
 		m_CommandPool.Destroy();
-		for (auto framebuffer : swapChainFramebuffers) {
+		for (auto framebuffer : m_SwapChainFramebuffers) {
 			vkDestroyFramebuffer(device, framebuffer, nullptr);
 		}
 
-		vkDestroyPipeline(device, graphicsPipeline, nullptr);
-		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-		vkDestroyRenderPass(device, renderPass, nullptr);
-		for (auto imageView : swapChainImageViews) {
+		vkDestroyPipeline(device, m_GraphicsPipeline, nullptr);
+		vkDestroyPipelineLayout(device, m_PipelineLayout, nullptr);
+		vkDestroyRenderPass(device, m_RenderPass, nullptr);
+		for (auto imageView : m_SwapChainImageViews) {
 			vkDestroyImageView(device, imageView, nullptr);
 		}
 
-		m_Mesh.DestroyMesh(device);
+		m_TriangleMesh->DestroyMesh();
+		m_RectangleMesh->DestroyMesh();
+		//m_OvalMesh.DestroyMesh(device); 
 
 		if (enableValidationLayers) {
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		}
-		vkDestroySwapchainKHR(device, swapChain, nullptr);
+		vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
 		vkDestroyDevice(device, nullptr);
 
 		vkDestroySurfaceKHR(instance, surface, nullptr);
 		vkDestroyInstance(instance, nullptr);
 
-		glfwDestroyWindow(window);
+		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
 
 	void createSurface() 
 	{
-		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+		if (glfwCreateWindowSurface(instance, m_Window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create window surface!");
 		}
 	}
@@ -161,7 +186,7 @@ private:
 	// These 5 functions should be refactored into a separate C++ class
 	// with the correct internal state.
 
-	GLFWwindow* window;
+	GLFWwindow* m_Window;
 	void initWindow();
 	void drawScene();
 
@@ -179,15 +204,14 @@ private:
 	// Week 03
 	// Renderpass concept
 	// Graphics pipeline
-	GP2_Mesh m_Mesh;
+	std::unique_ptr<GP2_Mesh> m_TriangleMesh;
+	std::unique_ptr<GP2_Mesh> m_RectangleMesh;
+	//GP2_Mesh m_OvalMesh;
 	
-	std::vector<VkFramebuffer> swapChainFramebuffers;
-	VkPipelineLayout pipelineLayout;
-	VkPipeline graphicsPipeline;
-	VkRenderPass renderPass;
-
-	VkBuffer m_VertexBuffer;
-	VkDeviceMemory m_VertexBufferMemory;  
+	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
+	VkPipelineLayout m_PipelineLayout;
+	VkPipeline m_GraphicsPipeline;
+	VkRenderPass m_RenderPass;
 
 	void createFrameBuffers();
 	void createRenderPass();
@@ -196,12 +220,12 @@ private:
 	// Week 04
 	// Swap chain and image view support
 
-	VkSwapchainKHR swapChain;
-	std::vector<VkImage> swapChainImages;
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
+	VkSwapchainKHR m_SwapChain;
+	std::vector<VkImage> m_SwapChainImages;
+	VkFormat m_SwapChainImageFormat;
+	VkExtent2D m_SwapChainExtent;
 
-	std::vector<VkImageView> swapChainImageViews;
+	std::vector<VkImageView> m_SwapChainImageViews;
 
 	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);

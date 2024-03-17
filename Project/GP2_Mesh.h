@@ -1,24 +1,34 @@
 #pragma once
-#include <glm/glm.hpp>
-#include <GP2_Shader.h>
 #include <vector>
+#include <memory>
+#include <glm/glm.hpp>
+#include "GP2_Shader.h"
+#include "GP2_Buffer.h"
 #include "vulkanbase/VulkanUtil.h"
 
 class GP2_Mesh
 {
 public:
-	GP2_Mesh();
+	GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice);
 	~GP2_Mesh() = default;
 
-	void Initialize(VkPhysicalDevice physicalDevice, VkDevice device);
-	void DestroyMesh(VkDevice device);
+	void Initialize(VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
+	void DestroyMesh();
 	void Draw(VkCommandBuffer buffer);
-	void AddVertex(glm::vec2 pos, glm::vec3 color);
+
+	void AddVertex(const glm::vec2 pos, const glm::vec3 color);
+	void AddIndices(const std::vector<uint32_t> indices); 
+
+	bool ParseOBJ(const std::string& filename, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, bool flipAxisAndWinding = true);
 
 private:
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-	VkBuffer m_VkVertexBuffer;
-	VkDeviceMemory m_VkVertexBufferMemory;
+	std::unique_ptr<GP2_Buffer> m_pBuffer;
+
+	VkDevice m_Device; 
+	VkPhysicalDevice m_PhysicalDevice; 
+	
 	std::vector<Vertex> m_MeshVertices; 
+	std::vector<uint32_t> m_MeshIndices;
 };
