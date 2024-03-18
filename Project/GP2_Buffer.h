@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+
+#include "Vertex.h"
 #include "GP2_Shader.h"
 #include "GP2_CommandPool.h"
 #include "vulkan/vulkan_core.h"
@@ -19,8 +21,8 @@ public:
 	void DestroyVertexBuffer();
 	void DestroyIndexBuffer();
 
-	VkBuffer GetVertexBuffer() { return m_VertexBuffer; }
-	VkDeviceMemory GetVertexBufferMemory() { return m_VertexBufferMemory; }
+	VkBuffer GetVertexBuffer() const { return m_VertexBuffer; }
+	VkDeviceMemory GetVertexBufferMemory() const { return m_VertexBufferMemory; }
 	
 private:
 	void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);

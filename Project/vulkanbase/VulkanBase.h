@@ -94,8 +94,8 @@ private:
 		//Draw Rectangle
 		m_RectangleMesh = std::make_unique<GP2_Mesh>(device, physicalDevice);
 
-		m_RectangleMesh->AddVertex({0.25f, -0.25f}, {0.25f, 0.75f, 0.25f}); // 0
-		m_RectangleMesh->AddVertex({0.75f, -0.25f}, {0.25f, 0.75f, 0.25f}); // 1
+		m_RectangleMesh->AddVertex({ 0.25f, -0.25f }, { 0.25f, 0.75f, 0.25f }); // 0
+		m_RectangleMesh->AddVertex({ 0.75f, -0.25f }, { 0.25f, 0.75f, 0.25f }); // 1
 		m_RectangleMesh->AddVertex({ 0.25f, -0.75f }, { 0.75f, 0.25f, 0.75f }); // 2
 		m_RectangleMesh->AddVertex({ 0.75f, -0.75f }, { 0.75f, 0.25f, 0.75f }); // 3
 

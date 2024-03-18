@@ -1,5 +1,7 @@
 #include <vulkanbase/VulkanUtil.h>
 #include <stdexcept>
+
+#include "Vertex.h"
 #include "GP2_Shader.h"
 
 GP2_Shader::GP2_Shader(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) :

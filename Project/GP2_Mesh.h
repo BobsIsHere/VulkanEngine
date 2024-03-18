@@ -2,6 +2,8 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
+
+#include "Vertex.h"
 #include "GP2_Shader.h"
 #include "GP2_Buffer.h"
 #include "vulkanbase/VulkanUtil.h"
