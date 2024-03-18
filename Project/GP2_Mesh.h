@@ -17,9 +17,9 @@ public:
 	void Draw(VkCommandBuffer buffer);
 
 	void AddVertex(const glm::vec2 pos, const glm::vec3 color);
-	void AddIndices(const std::vector<uint32_t> indices); 
+	void AddIndices(const std::vector<uint16_t> indices); 
 
-	bool ParseOBJ(const std::string& filename, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, bool flipAxisAndWinding = true);
+	bool ParseOBJ(const std::string& filename, std::vector<Vertex>& vertices, std::vector<uint16_t>& indices, bool flipAxisAndWinding = true);
 
 private:
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
@@ -30,5 +30,5 @@ private:
 	VkPhysicalDevice m_PhysicalDevice; 
 	
 	std::vector<Vertex> m_MeshVertices; 
-	std::vector<uint32_t> m_MeshIndices;
+	std::vector<uint16_t> m_MeshIndices;
 };

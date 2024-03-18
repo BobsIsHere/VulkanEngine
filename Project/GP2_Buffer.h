@@ -11,7 +11,7 @@ public:
 	~GP2_Buffer();
 
 	void CreateVertexBuffer(std::vector<Vertex> vertices, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
-	void CreateIndexBuffer(const std::vector<uint32_t> indices, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
+	void CreateIndexBuffer(const std::vector<uint16_t> indices, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
 
 	void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
 	void BindBuffers(VkCommandBuffer commandBuffer, VkBuffer vertexBuffers[], VkDeviceSize offsets[]);

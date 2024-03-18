@@ -70,7 +70,7 @@ void GP2_Buffer::CreateVertexBuffer(std::vector<Vertex> vertices, VkQueue graphi
     vkFreeMemory(m_Device, stagingBufferMemory, nullptr);
 }
 
-void GP2_Buffer::CreateIndexBuffer(const std::vector<uint32_t> indices, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices)
+void GP2_Buffer::CreateIndexBuffer(const std::vector<uint16_t> indices, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices)
 {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 

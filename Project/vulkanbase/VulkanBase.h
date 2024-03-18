@@ -86,8 +86,7 @@ private:
 		m_TriangleMesh->AddVertex({ -0.25f, -0.25f }, { 0.25f, 0.25f, 1.f }); // 1
 		m_TriangleMesh->AddVertex({ -0.75f, -0.75f }, { 1.f, 0.25f, 0.25f }); // 2
 
-		//std::vector<uint32_t> triangleIndices{ 0, 1, 2 };
-		std::vector<uint32_t> triangleIndices{ 2, 1, 0 };
+		std::vector<uint16_t> triangleIndices{ 2, 1, 0 };
 		m_TriangleMesh->AddIndices(triangleIndices);
 
 		m_TriangleMesh->Initialize(graphicsQueue, findQueueFamilies(physicalDevice));
@@ -97,11 +96,10 @@ private:
 
 		m_RectangleMesh->AddVertex({0.25f, -0.25f}, {0.25f, 0.75f, 0.25f}); // 0
 		m_RectangleMesh->AddVertex({0.75f, -0.25f}, {0.25f, 0.75f, 0.25f}); // 1
-		m_RectangleMesh->AddVertex({0.25f, -0.75f}, {0.25f, 0.75f, 0.25f}); // 2
-		m_RectangleMesh->AddVertex({ 0.75f, -0.75f }, { 0.25f, 0.75f, 0.25f }); // 3
+		m_RectangleMesh->AddVertex({ 0.25f, -0.75f }, { 0,1,0 }); // 2
+		m_RectangleMesh->AddVertex({ 0.75f, -0.75f }, { 1,0,0 }); // 3
 
-		//std::vector<uint32_t> rectIndices{ 0, 1, 2, 2, 1, 3 };
-		std::vector<uint32_t> rectIndices{ 2, 1, 0, 2, 1, 3 };
+		std::vector<uint16_t> rectIndices{ 2, 1, 0, 3, 1, 2 };
 		m_RectangleMesh->AddIndices(rectIndices);
 
 		m_RectangleMesh->Initialize(graphicsQueue, findQueueFamilies(physicalDevice));

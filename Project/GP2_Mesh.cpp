@@ -35,12 +35,12 @@ void GP2_Mesh::AddVertex(const glm::vec2 pos, const glm::vec3 color)
 	m_MeshVertices.push_back(Vertex{ pos, color }); 
 }
 
-void GP2_Mesh::AddIndices(const std::vector<uint32_t> indices)
+void GP2_Mesh::AddIndices(const std::vector<uint16_t> indices)
 {
 	m_MeshIndices = indices;
 }
 
-bool GP2_Mesh::ParseOBJ(const std::string& filename, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, bool flipAxisAndWinding)
+bool GP2_Mesh::ParseOBJ(const std::string& filename, std::vector<Vertex>& vertices, std::vector<uint16_t>& indices, bool flipAxisAndWinding)
 {
 	std::ifstream file(filename);
 	if (!file)
