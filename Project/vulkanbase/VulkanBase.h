@@ -82,9 +82,9 @@ private:
 		//Draw Triangle
 		m_TriangleMesh = std::make_unique<GP2_Mesh>(device, physicalDevice);
 
-		m_TriangleMesh->AddVertex({ -0.75f, -0.25f }, { 0.25f, 1.f, 0.25f }); // 0
-		m_TriangleMesh->AddVertex({ -0.25f, -0.25f }, { 0.25f, 0.25f, 1.f }); // 1
-		m_TriangleMesh->AddVertex({ -0.75f, -0.75f }, { 1.f, 0.25f, 0.25f }); // 2
+		m_TriangleMesh->AddVertex({ -0.25f, 0.75f }, { 0.f, 1.f, 0.f }); // 0
+		m_TriangleMesh->AddVertex({ 0.25f, 0.75f }, { 0.f, 0.f, 1.f }); // 1
+		m_TriangleMesh->AddVertex({ 0, 0.25f }, { 0.f, 1.f, 0.f }); // 2
 
 		std::vector<uint16_t> triangleIndices{ 2, 1, 0 };
 		m_TriangleMesh->AddIndices(triangleIndices);
@@ -96,8 +96,8 @@ private:
 
 		m_RectangleMesh->AddVertex({0.25f, -0.25f}, {0.25f, 0.75f, 0.25f}); // 0
 		m_RectangleMesh->AddVertex({0.75f, -0.25f}, {0.25f, 0.75f, 0.25f}); // 1
-		m_RectangleMesh->AddVertex({ 0.25f, -0.75f }, { 0,1,0 }); // 2
-		m_RectangleMesh->AddVertex({ 0.75f, -0.75f }, { 1,0,0 }); // 3
+		m_RectangleMesh->AddVertex({ 0.25f, -0.75f }, { 0.75f, 0.25f, 0.75f }); // 2
+		m_RectangleMesh->AddVertex({ 0.75f, -0.75f }, { 0.75f, 0.25f, 0.75f }); // 3
 
 		std::vector<uint16_t> rectIndices{ 2, 1, 0, 3, 1, 2 };
 		m_RectangleMesh->AddIndices(rectIndices);
@@ -105,7 +105,20 @@ private:
 		m_RectangleMesh->Initialize(graphicsQueue, findQueueFamilies(physicalDevice));
 
 		//Draw Oval
-		//m_OvalMesh.Initialize(physicalDevice, device);
+		m_OvalMesh = std::make_unique<GP2_Mesh>(device, physicalDevice);
+
+		m_OvalMesh->AddVertex({ -0.625f, -0.625f }, { 1.f, 1.f, 0.f }); // 0
+		m_OvalMesh->AddVertex({ -0.625f, -0.375f }, { 0.f, 1.f, 0.f }); // 1
+		m_OvalMesh->AddVertex({ -0.5f, -0.25f }, { 0.f, 1.f, 1.f }); // 2
+		m_OvalMesh->AddVertex({ -0.375f, -0.375f }, { 0.f, 0.f, 1.f }); // 3
+		m_OvalMesh->AddVertex({ -0.375f, -0.625f }, { 1.f, 0.f, 1.f }); // 4
+		m_OvalMesh->AddVertex({ -0.5f, -0.75f }, { 1.f,0.f,0.f }); // 5
+		m_OvalMesh->AddVertex({ -0.5f, -0.5f }, { 1.f,1.f,1.f }); // center, 6
+
+		std::vector<uint16_t> ovalIndices{ 0, 1, 6, 1, 2, 6, 2, 3, 6, 3, 4, 6, 4, 5, 6, 5, 0, 6 };
+		m_OvalMesh->AddIndices(ovalIndices); 
+
+		m_OvalMesh->Initialize(graphicsQueue, findQueueFamilies(physicalDevice));
 		
 		createRenderPass();
 		createGraphicsPipeline();
@@ -150,7 +163,7 @@ private:
 
 		m_TriangleMesh->DestroyMesh();
 		m_RectangleMesh->DestroyMesh();
-		//m_OvalMesh.DestroyMesh(device); 
+		m_OvalMesh->DestroyMesh(); 
 
 		if (enableValidationLayers) {
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
@@ -204,7 +217,7 @@ private:
 	// Graphics pipeline
 	std::unique_ptr<GP2_Mesh> m_TriangleMesh;
 	std::unique_ptr<GP2_Mesh> m_RectangleMesh;
-	//GP2_Mesh m_OvalMesh;
+	std::unique_ptr<GP2_Mesh> m_OvalMesh;
 	
 	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
 	VkPipelineLayout m_PipelineLayout;
