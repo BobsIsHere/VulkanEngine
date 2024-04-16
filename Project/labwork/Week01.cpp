@@ -1,7 +1,7 @@
 #include "vulkanbase/VulkanBase.h"
 #include "GP2_Mesh.h"
 
-void VulkanBase::initWindow() 
+void VulkanBase::InitWindow() 
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -9,7 +9,7 @@ void VulkanBase::initWindow()
 	m_Window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 }
 
-void VulkanBase::drawScene() 
+void VulkanBase::DrawScene() 
 {
 	m_TriangleMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
 	m_RectangleMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());

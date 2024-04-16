@@ -5,7 +5,7 @@
 #include <string>
 #include <array>
 
-class GP2_Shader
+class GP2_Shader final 
 {
 public:
 	//---------------------------

@@ -1,6 +1,6 @@
 #include "vulkanbase/VulkanBase.h"
 #include "GP2_Shader.h"
-void VulkanBase::drawFrame(uint32_t imageIndex) 
+void VulkanBase::DrawFrame(uint32_t imageIndex) 
 {
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -33,11 +33,11 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 
 	m_DescriptorPool->BindDescriptorSet(m_CommandBuffer.GetVkCommandBuffer(), m_PipelineLayout, m_CurrentFrame);
 
-	drawScene();
+	DrawScene();
 	vkCmdEndRenderPass(m_CommandBuffer.GetVkCommandBuffer());
 }
 
-QueueFamilyIndices VulkanBase::findQueueFamilies(VkPhysicalDevice device) 
+QueueFamilyIndices VulkanBase::FindQueueFamilies(VkPhysicalDevice device) 
 {
 	QueueFamilyIndices indices;
 

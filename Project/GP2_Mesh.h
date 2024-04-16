@@ -8,7 +8,7 @@
 #include "GP2_Buffer.h"
 #include "vulkanbase/VulkanUtil.h"
 
-class GP2_Mesh
+class GP2_Mesh final
 {
 public:
 	GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice);

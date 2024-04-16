@@ -1,7 +1,7 @@
 #pragma once
 #include "vulkan/vulkan_core.h"
 
-class GP2_CommandBuffer
+class GP2_CommandBuffer final
 {
 public:
 	GP2_CommandBuffer();

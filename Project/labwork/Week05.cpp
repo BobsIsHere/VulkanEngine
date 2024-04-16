@@ -1,6 +1,6 @@
 #include "vulkanbase/VulkanBase.h"
 
-void VulkanBase::pickPhysicalDevice() {
+void VulkanBase::PickPhysicalDevice() {
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(m_Instance, &deviceCount, nullptr);
 
@@ -16,7 +16,7 @@ void VulkanBase::pickPhysicalDevice() {
 	}
 
 	for (const auto& device : devices) {
-		if (isDeviceSuitable(device)) {
+		if (IsDeviceSuitable(device)) {
 			m_PhysicalDevice = device;
 			break;
 		}
@@ -27,15 +27,15 @@ void VulkanBase::pickPhysicalDevice() {
 	}
 }
 
-bool VulkanBase::isDeviceSuitable(VkPhysicalDevice device) {
-	QueueFamilyIndices indices = findQueueFamilies(device);
-	bool extensionsSupported = checkDeviceExtensionSupport(device);
+bool VulkanBase::IsDeviceSuitable(VkPhysicalDevice device) {
+	QueueFamilyIndices indices = FindQueueFamilies(device);
+	bool extensionsSupported = CheckDeviceExtensionSupport(device);
 	return indices.isComplete() && extensionsSupported;
 
 }
 
-void VulkanBase::createLogicalDevice() {
-	QueueFamilyIndices indices = findQueueFamilies(m_PhysicalDevice);
+void VulkanBase::CreateLogicalDevice() {
+	QueueFamilyIndices indices = FindQueueFamilies(m_PhysicalDevice);
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };

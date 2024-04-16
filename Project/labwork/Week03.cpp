@@ -1,7 +1,7 @@
 #include "vulkanbase/VulkanBase.h"
 #include "GP2_GraphicsPipeline.h"
 
-void VulkanBase::createFrameBuffers()
+void VulkanBase::CreateFrameBuffers()
 {
 	m_SwapChainFramebuffers.resize(m_SwapChainImageViews.size());
 
@@ -27,7 +27,7 @@ void VulkanBase::createFrameBuffers()
 	}
 }
 
-void VulkanBase::createRenderPass()
+void VulkanBase::CreateRenderPass()
 {
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = m_SwapChainImageFormat;
@@ -61,7 +61,7 @@ void VulkanBase::createRenderPass()
 	}
 }
 
-void VulkanBase::createGraphicsPipeline()
+void VulkanBase::CreateGraphicsPipeline()
 {
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -113,10 +113,12 @@ void VulkanBase::createGraphicsPipeline()
 	pipelineLayoutInfo.pSetLayouts = &m_DescriptorPool->GetDescriptorSetLayout();
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 
-	GP2_GraphicsPipeline pipeline{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };
-	VkPushConstantRange pushConstantRange = pipeline.CreatePushConstantRange();
-	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+	VkPushConstantRange pushConstantRange{};
+	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	pushConstantRange.offset = 0;
+	pushConstantRange.size = sizeof(MeshData);
 
+	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
 	if (vkCreatePipelineLayout(m_Device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) 
 	{
@@ -165,8 +167,6 @@ void VulkanBase::CreateUniformBuffer()
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
 		m_UniformBuffers[i] = new GP2_Buffer(m_Device, m_PhysicalDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, bufferSize);
-		//uniformBuffers[i]->Map(bufferSize, &uniformBuffersMapped[i]);
-
-		m_UniformBuffersMapped[i] = &m_UniformBuffersMapped[i]; 
+		m_UniformBuffers[i]->Map(&m_UniformBuffersMapped[i]);
 	}
 }

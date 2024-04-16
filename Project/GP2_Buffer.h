@@ -5,14 +5,14 @@
 #include "GP2_CommandPool.h"
 #include "vulkan/vulkan_core.h"
 
-class GP2_Buffer 
+class GP2_Buffer final
 {
 public:
 	GP2_Buffer(VkDevice device, VkPhysicalDevice physicalDevice, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size);
 	~GP2_Buffer();
 
 	void Upload(VkDeviceSize size, void* data);
-	void Map(VkDeviceSize size, void* data);
+	void Map(void** data);
 
 	void Destroy();
 	

@@ -31,6 +31,9 @@ void GP2_Mesh::DestroyMesh()
 {
 	DestroyIndexBuffer(); 
 	DestroyVertexBuffer(); 
+
+	m_pVertexBuffer->Destroy();
+	m_pIndexBuffer->Destroy();
 }
 
 void GP2_Mesh::DestroyVertexBuffer()
@@ -55,7 +58,7 @@ void GP2_Mesh::Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer buffer)
 		pipelineLayout,
 		VK_SHADER_STAGE_VERTEX_BIT, // Stage flag should match the push constant range in the layout
 		0,                          // Offset within the push constant block
-		sizeof(MeshData),          // Size of the push constants to update
+		sizeof(MeshData),					// Size of the push constants to update
 		&m_VertexConstant		   // Pointer to the data
 	);
 		 

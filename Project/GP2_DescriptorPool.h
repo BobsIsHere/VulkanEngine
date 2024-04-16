@@ -7,13 +7,14 @@
 #include "GP2_UniformBufferObject.h"
 
 template <class VertexUBO> 
-class GP2_DescriptorPool
+class GP2_DescriptorPool final
 {
 public:
 	GP2_DescriptorPool(VkDevice device, size_t count);
 	~GP2_DescriptorPool();
 
 	void Initialize(const VulkanContext& context);
+	void Destroy();
 
 	void SetUBO(VertexUBO data, size_t index);
 
@@ -68,12 +69,6 @@ GP2_DescriptorPool<VertexUBO>::GP2_DescriptorPool(VkDevice device, size_t count)
 template <class VertexUBO>
 GP2_DescriptorPool<VertexUBO>::~GP2_DescriptorPool()
 {
-	for (GP2_UniformBufferObjectPtr<VertexUBO>& buffer : m_UBOs) 
-	{
-		buffer.reset();
-	}
-	vkDestroyDescriptorSetLayout(m_Device, m_DescriptorSetLayout, nullptr);
-	vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
 }
 
 template<class VertexUBO>
@@ -84,10 +79,23 @@ inline void GP2_DescriptorPool<VertexUBO>::Initialize(const VulkanContext& conte
 	CreateDescriptorSets(); 
 }
 
+template<class VertexUBO>
+inline void GP2_DescriptorPool<VertexUBO>::Destroy()
+{
+	for (GP2_UniformBufferObjectPtr<VertexUBO>& buffer : m_UBOs)
+	{
+		buffer.reset();
+	}
+
+	vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
+	vkDestroyDescriptorSetLayout(m_Device, m_DescriptorSetLayout, nullptr);
+}
+
 template <class VertexUBO>
 void GP2_DescriptorPool<VertexUBO>::CreateDescriptorSets()
 {
 	std::vector<VkDescriptorSetLayout> layouts(m_Count, m_DescriptorSetLayout);
+
 	VkDescriptorSetAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	allocInfo.descriptorPool = m_DescriptorPool;
@@ -125,7 +133,7 @@ void GP2_DescriptorPool<VertexUBO>::CreateDescriptorSets()
 template <class VertexUBO>
 void GP2_DescriptorPool<VertexUBO>::BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, size_t index)
 {
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, 
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
 				&m_DescriptorSets[index], 0, nullptr);
 }
 

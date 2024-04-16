@@ -1,6 +1,6 @@
 #include "vulkanbase/VulkanBase.h"
 
-SwapChainSupportDetails VulkanBase::querySwapChainSupport(VkPhysicalDevice device) {
+SwapChainSupportDetails VulkanBase::QuerySwapChainSupport(VkPhysicalDevice device) {
 	SwapChainSupportDetails details;
 
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface, &details.capabilities);
@@ -24,7 +24,7 @@ SwapChainSupportDetails VulkanBase::querySwapChainSupport(VkPhysicalDevice devic
 	return details;
 }
 
-VkSurfaceFormatKHR VulkanBase::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+VkSurfaceFormatKHR VulkanBase::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
 	for (const auto& availableFormat : availableFormats) {
 		if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
 			return availableFormat;
@@ -34,7 +34,7 @@ VkSurfaceFormatKHR VulkanBase::chooseSwapSurfaceFormat(const std::vector<VkSurfa
 	return availableFormats[0];
 }
 
-VkPresentModeKHR VulkanBase::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+VkPresentModeKHR VulkanBase::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
 	for (const auto& availablePresentMode : availablePresentModes) {
 		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
 			return availablePresentMode;
@@ -44,7 +44,7 @@ VkPresentModeKHR VulkanBase::chooseSwapPresentMode(const std::vector<VkPresentMo
 	return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D VulkanBase::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+VkExtent2D VulkanBase::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
 	if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)()) {
 		return capabilities.currentExtent;
 	}
@@ -64,12 +64,12 @@ VkExtent2D VulkanBase::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabili
 	}
 }
 
-void VulkanBase::createSwapChain() {
-	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(m_PhysicalDevice);
+void VulkanBase::CreateSwapChain() {
+	SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(m_PhysicalDevice);
 
-	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+	VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
+	VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
+	VkExtent2D extent = ChooseSwapExtent(swapChainSupport.capabilities);
 
 	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 	if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
@@ -87,7 +87,7 @@ void VulkanBase::createSwapChain() {
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-	QueueFamilyIndices indices = findQueueFamilies(m_PhysicalDevice);
+	QueueFamilyIndices indices = FindQueueFamilies(m_PhysicalDevice);
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 	if (indices.graphicsFamily != indices.presentFamily) {
@@ -118,7 +118,7 @@ void VulkanBase::createSwapChain() {
 	m_SwapChainExtent = extent;
 }
 
-void VulkanBase::createImageViews() {
+void VulkanBase::CreateImageViews() {
 	m_SwapChainImageViews.resize(m_SwapChainImages.size());
 
 	for (size_t i = 0; i < m_SwapChainImages.size(); i++) {

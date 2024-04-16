@@ -57,33 +57,15 @@ void GP2_Buffer::Upload(VkDeviceSize size, void* data)
 }
 
 //make visible or make host visible as name?
-void GP2_Buffer::Map(VkDeviceSize size, void* data)
+void GP2_Buffer::Map(void** data)
 {
-    //void* mappedData{};
-    //vkMapMemory(m_Device, m_VkBufferMemory, 0, size, 0, &mappedData);
-
-    //// Copy data from mapped memory to provided buffer
-    //memcpy(data, mappedData, static_cast<size_t>(size));
-
-    //// Unmap buffer memoryf
-    //vkUnmapMemory(m_Device, m_VkBufferMemory);
-
-    vkMapMemory(m_Device, m_VkBufferMemory, 0, size, 0, &data);
+    vkMapMemory(m_Device, m_VkBufferMemory, 0, m_Size, 0, data);
 }
 
 void GP2_Buffer::Destroy()
 {
-    if (m_VkBuffer != VK_NULL_HANDLE)
-    {
-		vkDestroyBuffer(m_Device, m_VkBuffer, nullptr);
-		m_VkBuffer = VK_NULL_HANDLE;
-	}
-
-    if (m_VkBufferMemory != VK_NULL_HANDLE)
-    {
-		vkFreeMemory(m_Device, m_VkBufferMemory, nullptr);
-		m_VkBufferMemory = VK_NULL_HANDLE;
-	}
+	vkDestroyBuffer(m_Device, m_VkBuffer, nullptr);
+	vkFreeMemory(m_Device, m_VkBufferMemory, nullptr);
 }
 
 void GP2_Buffer::BindAsVertexBuffer(VkCommandBuffer commandBuffer)

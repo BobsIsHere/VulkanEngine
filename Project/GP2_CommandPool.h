@@ -3,7 +3,7 @@
 
 struct QueueFamilyIndices;
 
-class GP2_CommandPool
+class GP2_CommandPool final
 {
 public:
 	GP2_CommandPool();
