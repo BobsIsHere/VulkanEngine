@@ -29,19 +29,18 @@ public:
 
 	void DestroyShaderModule(const VkDevice& vkDevice);
 
-
 	std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages() { return m_ShaderStages; };
 
-	VkPipelineShaderStageCreateInfo CreateFragmentShaderInfo(const VkDevice& vkDevice); 
-	VkPipelineShaderStageCreateInfo CreateVertexShaderInfo(const VkDevice& vkDevice); 
-	VkPipelineVertexInputStateCreateInfo CreateVertexInputStateInfo(); 
-	VkPipelineInputAssemblyStateCreateInfo CreateInputAssemblyStateInfo(); 
+	VkPipelineShaderStageCreateInfo CreateFragmentShaderInfo(const VkDevice& vkDevice);
+	VkPipelineShaderStageCreateInfo CreateVertexShaderInfo(const VkDevice& vkDevice);
+	VkPipelineVertexInputStateCreateInfo CreateVertexInputStateInfo();
+	VkPipelineInputAssemblyStateCreateInfo CreateInputAssemblyStateInfo();
 
 private:
 	//-----------
 	// Functions
 	//----------- 
-	VkShaderModule CreateShaderModule(const VkDevice& vkDevice, const std::vector<char>& code); 
+	VkShaderModule CreateShaderModule(const VkDevice& vkDevice, const std::vector<char>& code);
 
 	//-----------
 	// Variables
@@ -51,7 +50,7 @@ private:
 
 	VkPhysicalDevice m_PhysicalDevice;
 	VkVertexInputBindingDescription m_BindingDescription;
-	std::array<VkVertexInputAttributeDescription, 2Ui64> m_AttributeDescriptions;
+	std::array<VkVertexInputAttributeDescription, 3Ui64> m_AttributeDescriptions;
 
 	std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 };

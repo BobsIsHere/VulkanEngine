@@ -1,9 +1,12 @@
 #include "vulkanbase/VulkanBase.h"
+#include "GP2_GraphicsPipeline.h"
 
-void VulkanBase::createFrameBuffers() 
+void VulkanBase::createFrameBuffers()
 {
 	m_SwapChainFramebuffers.resize(m_SwapChainImageViews.size());
-	for (size_t i = 0; i < m_SwapChainImageViews.size(); i++) {
+
+	for (size_t i = 0; i < m_SwapChainImageViews.size(); i++) 
+	{
 		VkImageView attachments[] = {
 			m_SwapChainImageViews[i]
 		};
@@ -17,13 +20,14 @@ void VulkanBase::createFrameBuffers()
 		framebufferInfo.height = m_SwapChainExtent.height;
 		framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &m_SwapChainFramebuffers[i]) != VK_SUCCESS) {
+		if (vkCreateFramebuffer(m_Device, &framebufferInfo, nullptr, &m_SwapChainFramebuffers[i]) != VK_SUCCESS) 
+		{
 			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
 }
 
-void VulkanBase::createRenderPass() 
+void VulkanBase::createRenderPass()
 {
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = m_SwapChainImageFormat;
@@ -51,12 +55,13 @@ void VulkanBase::createRenderPass()
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &subpass;
 
-	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS) {
+	if (vkCreateRenderPass(m_Device, &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS) 
+	{
 		throw std::runtime_error("failed to create render pass!");
 	}
 }
 
-void VulkanBase::createGraphicsPipeline() 
+void VulkanBase::createGraphicsPipeline()
 {
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -104,10 +109,17 @@ void VulkanBase::createGraphicsPipeline()
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 0;
-	pipelineLayoutInfo.pushConstantRangeCount = 0;
+	pipelineLayoutInfo.setLayoutCount = 1;
+	pipelineLayoutInfo.pSetLayouts = &m_DescriptorPool->GetDescriptorSetLayout();
+	pipelineLayoutInfo.pushConstantRangeCount = 1;
 
-	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) {
+	GP2_GraphicsPipeline pipeline{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };
+	VkPushConstantRange pushConstantRange = pipeline.CreatePushConstantRange();
+	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+
+
+	if (vkCreatePipelineLayout(m_Device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) 
+	{
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
@@ -118,7 +130,7 @@ void VulkanBase::createGraphicsPipeline()
 
 	pipelineInfo.stageCount = 2;
 	pipelineInfo.pStages = &m_GradientShader.GetShaderStages()[0];
-	
+
 	auto vis = m_GradientShader.CreateVertexInputStateInfo();
 	pipelineInfo.pVertexInputState = &vis;
 	pipelineInfo.pInputAssemblyState = &m_GradientShader.CreateInputAssemblyStateInfo();
@@ -134,9 +146,27 @@ void VulkanBase::createGraphicsPipeline()
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 #pragma endregion pipelineInfo
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, 
+		&pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) 
+	{
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 
-	m_GradientShader.DestroyShaderModule(device);
+	m_GradientShader.DestroyShaderModule(m_Device);
+}
+
+void VulkanBase::CreateUniformBuffer()
+{
+	VkDeviceSize bufferSize = sizeof(VertexUBO);
+
+	m_UniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	m_UniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		m_UniformBuffers[i] = new GP2_Buffer(m_Device, m_PhysicalDevice, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, bufferSize);
+		//uniformBuffers[i]->Map(bufferSize, &uniformBuffersMapped[i]);
+
+		m_UniformBuffersMapped[i] = &m_UniformBuffersMapped[i]; 
+	}
 }

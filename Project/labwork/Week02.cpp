@@ -31,6 +31,8 @@ void VulkanBase::drawFrame(uint32_t imageIndex)
 	scissor.extent = m_SwapChainExtent;
 	vkCmdSetScissor(m_CommandBuffer.GetVkCommandBuffer(), 0, 1, &scissor);
 
+	m_DescriptorPool->BindDescriptorSet(m_CommandBuffer.GetVkCommandBuffer(), m_PipelineLayout, m_CurrentFrame);
+
 	drawScene();
 	vkCmdEndRenderPass(m_CommandBuffer.GetVkCommandBuffer());
 }
@@ -46,19 +48,23 @@ QueueFamilyIndices VulkanBase::findQueueFamilies(VkPhysicalDevice device)
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
 	int i = 0;
-	for (const auto& queueFamily : queueFamilies) {
-		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+	for (const auto& queueFamily : queueFamilies) 
+	{
+		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) 
+		{
 			indices.graphicsFamily = i;
 		}
 
 		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface, &presentSupport);
 
-		if (presentSupport) {
+		if (presentSupport) 
+		{
 			indices.presentFamily = i;
 		}
 
-		if (indices.isComplete()) {
+		if (indices.isComplete()) 
+		{
 			break;
 		}
 

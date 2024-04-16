@@ -19,6 +19,26 @@ const bool enableValidationLayers = true;
 
 #include <vector>
 #include <fstream>
+#include <optional>
+
+struct QueueFamilyIndices
+{
+	std::optional<uint32_t> graphicsFamily;
+	std::optional<uint32_t> presentFamily;
+
+	bool isComplete() {
+		return graphicsFamily.has_value() && presentFamily.has_value();
+	}
+};
+
+struct VulkanContext 
+{
+	VkDevice device;
+	VkPhysicalDevice physicalDevice;
+	VkRenderPass renderPass;
+	VkExtent2D swapChainExtent;
+};
+
 
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 

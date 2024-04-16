@@ -11,7 +11,7 @@ void VulkanBase::initWindow()
 
 void VulkanBase::drawScene() 
 {
-	m_TriangleMesh->Draw(m_CommandBuffer.GetVkCommandBuffer());
-	m_RectangleMesh->Draw(m_CommandBuffer.GetVkCommandBuffer());
-	m_OvalMesh->Draw(m_CommandBuffer.GetVkCommandBuffer());
+	m_TriangleMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
+	m_RectangleMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
+	m_OvalMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
 }

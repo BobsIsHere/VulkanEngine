@@ -18,7 +18,7 @@ VkCommandBuffer GP2_CommandBuffer::GetVkCommandBuffer() const
 
 void GP2_CommandBuffer::Reset() const
 {
-	vkResetCommandBuffer(m_CommandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
+	vkResetCommandBuffer(m_CommandBuffer, 0);
 }
 
 void GP2_CommandBuffer::BeginRecording(VkCommandBufferUsageFlags flags) const
