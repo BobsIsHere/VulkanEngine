@@ -26,44 +26,31 @@ void VulkanBase::SetupDebugMessenger()
 	}
 }
 
-void VulkanBase::UpdateUniformBuffer(uint32_t currentImage)
-{
-	static auto startTime = std::chrono::high_resolution_clock::now();
-
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-	VertexUBO ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), m_SwapChainExtent.width / (float)m_SwapChainExtent.height, 0.1f, 10.0f);
-	ubo.proj[1][1] *= -1;
-
-	memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
-}
+//void VulkanBase::UpdateUniformBuffer(uint32_t currentImage)
+//{
+//	static auto startTime = std::chrono::high_resolution_clock::now();
+//
+//	auto currentTime = std::chrono::high_resolution_clock::now();
+//	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+//
+//	VertexUBO ubo{};
+//	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+//	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+//	ubo.proj = glm::perspective(glm::radians(45.0f), m_SwapChainExtent.width / (float)m_SwapChainExtent.height, 0.1f, 10.0f);
+//	ubo.proj[1][1] *= -1;
+//	
+//	//m_DescriptorPool->SetUBO(ubo, currentImage);
+//	memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+//}
 
 void VulkanBase::CreateSyncObjects()
 {
-	/*m_ImageAvailableSemaphore.resize(MAX_FRAMES_IN_FLIGHT);
-	m_RenderFinishedSemaphore.resize(MAX_FRAMES_IN_FLIGHT);
-	m_InFlightFence.resize(MAX_FRAMES_IN_FLIGHT);*/
-
 	VkSemaphoreCreateInfo semaphoreInfo{};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
 	VkFenceCreateInfo fenceInfo{};
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-	/*for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
-	{
-		if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphore[i]) != VK_SUCCESS ||
-			vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphore[i]) != VK_SUCCESS ||
-			vkCreateFence(m_Device, &fenceInfo, nullptr, &m_InFlightFence[i]) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create synchronization objects for a frame!");
-		}
-	}*/
 
 	if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphore) != VK_SUCCESS ||
 		vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphore) != VK_SUCCESS ||
@@ -82,16 +69,24 @@ void VulkanBase::DrawFrame()
 
 	vkAcquireNextImageKHR(m_Device, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
-	//switch command buffers here
-
 	m_CommandBuffer.Reset();
 	m_CommandBuffer.BeginRecording(0); 
 
-	UpdateUniformBuffer(m_CurrentFrame);
-	DrawFrame(imageIndex); 
+	BeginRenderPass(m_CommandBuffer, m_SwapChainFramebuffers[imageIndex], m_SwapChainExtent);
+	//UpdateUniformBuffer(m_CurrentFrame);
+
+	VertexUBO vp{ glm::mat4(1.0f) ,glm::mat4(1.0f) };
+	glm::vec3 scaleFactors(1 / 1.0f, 1 / 1.0f, 1.0f);
+	vp.view = glm::scale(glm::mat4(1.0f), scaleFactors);
+	vp.view = glm::translate(vp.view, glm::vec3(0, 0, 0));
+
+	//Draw 2d graphics pipeline
+	m_GP2D.SetUBO(vp, 0);
+	m_GP2D.Record(m_CommandBuffer, m_SwapChainExtent, m_CurrentFrame);
+
+	EndRenderPass(m_CommandBuffer);
 
 	m_CommandBuffer.EndRecording(); 
-
 
 	VkCommandBuffer commandBuffer{ m_CommandBuffer.GetVkCommandBuffer() }; 
 
