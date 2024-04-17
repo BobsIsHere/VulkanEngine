@@ -212,7 +212,7 @@ private:
 
 	GLFWwindow* m_Window;
 	void InitWindow();
-	//void DrawScene();
+	void DrawScene(); 
 
 	// Week 02
 	// Queue families

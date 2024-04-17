@@ -9,9 +9,9 @@ void VulkanBase::InitWindow()
 	m_Window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 }
 
-//void VulkanBase::DrawScene() 
-//{
-//	m_TriangleMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
-//	m_RectangleMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
-//	m_OvalMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
-//}
+void VulkanBase::DrawScene() 
+{
+	m_TriangleMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
+	m_RectangleMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
+	m_OvalMesh->Draw(m_PipelineLayout, m_CommandBuffer.GetVkCommandBuffer());
+}
