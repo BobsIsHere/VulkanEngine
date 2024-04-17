@@ -69,8 +69,6 @@ private:
 		// week 04 
 		CreateSwapChain();
 		CreateImageViews();
-		
-		//m_GP3D = std::make_unique<GP2_GraphicsPipeline>("shaders/shader.vert.spv", "shaders/shader.frag.spv");
 
 		// week 02
 		m_CommandPool.Initialize(m_Device, FindQueueFamilies(m_PhysicalDevice)); 
@@ -149,6 +147,10 @@ private:
 		
 		m_CommandPool.Destroy();
 
+		m_TriangleMesh->DestroyMesh();
+		m_RectangleMesh->DestroyMesh();
+		m_OvalMesh->DestroyMesh();
+
 		/*for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) 
 		{
 			m_UniformBuffers[i]->Destroy(); 
@@ -170,15 +172,16 @@ private:
 			vkDestroyImageView(m_Device, imageView, nullptr);
 		}
 
+		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+		vkDestroyDevice(m_Device, nullptr);
+
+		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+
 		if (enableValidationLayers) 
 		{
 			DestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
 		}
 
-		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
-		vkDestroyDevice(m_Device, nullptr);
-
-		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 		vkDestroyInstance(m_Instance, nullptr);
 
 		glfwDestroyWindow(m_Window);

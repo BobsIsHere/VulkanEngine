@@ -175,6 +175,7 @@ template <class UBO2D>
 void GP2_2DGraphicsPipeline<UBO2D>::Cleanup()
 {
 	m_Shader->DestroyShaderModule(m_Device);
+	m_DescriptorPool.release();
 
 	vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
