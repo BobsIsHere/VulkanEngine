@@ -75,22 +75,22 @@ private:
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
 		// week 03
+		std::unique_ptr<GP2_Mesh> m_TriangleMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh> m_RectangleMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh> m_OvalMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
+		
 		//Draw Triangle
-		m_TriangleMesh = std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice);
-
 		m_TriangleMesh->AddVertex({ -0.25f, 0.75f }, { 0.f, 1.f, 0.f }); // 0
 		m_TriangleMesh->AddVertex({ 0.25f, 0.75f }, { 0.f, 0.f, 1.f }); // 1
 		m_TriangleMesh->AddVertex({ 0, 0.25f }, { 0.f, 1.f, 0.f }); // 2
 
 		std::vector<uint16_t> triangleIndices{ 2, 1, 0 };
-		m_TriangleMesh->AddIndices(triangleIndices);
+		m_TriangleMesh->AddIndices(triangleIndices); 
 
 		m_TriangleMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP2D.AddMesh(std::move(m_TriangleMesh));
 
 		//Draw Rectangle
-		m_RectangleMesh = std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice);
-
 		m_RectangleMesh->AddVertex({ 0.25f, -0.25f }, { 0.25f, 0.75f, 0.25f }); // 0
 		m_RectangleMesh->AddVertex({ 0.75f, -0.25f }, { 0.25f, 0.75f, 0.25f }); // 1
 		m_RectangleMesh->AddVertex({ 0.25f, -0.75f }, { 0.75f, 0.25f, 0.75f }); // 2
@@ -103,8 +103,6 @@ private:
 		m_GP2D.AddMesh(std::move(m_RectangleMesh));
 
 		//Draw Oval
-		m_OvalMesh = std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice);
-
 		m_OvalMesh->AddVertex({ -0.625f, -0.625f }, { 1.f, 1.f, 0.f }); // 0
 		m_OvalMesh->AddVertex({ -0.625f, -0.375f }, { 0.f, 1.f, 0.f }); // 1
 		m_OvalMesh->AddVertex({ -0.5f, -0.25f }, { 0.f, 1.f, 1.f }); // 2
@@ -145,26 +143,15 @@ private:
 		vkDestroySemaphore(m_Device, m_ImageAvailableSemaphore, nullptr);
 		vkDestroyFence(m_Device, m_InFlightFence, nullptr);
 		
-		m_CommandPool.Destroy();
-
-		m_TriangleMesh->DestroyMesh();
-		m_RectangleMesh->DestroyMesh();
-		m_OvalMesh->DestroyMesh();
-
-		/*for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) 
-		{
-			m_UniformBuffers[i]->Destroy(); 
-		}*/
-
-		m_GP2D.Cleanup();   
+		m_CommandPool.Destroy();  
 
 		for (auto framebuffer : m_SwapChainFramebuffers) 
 		{
 			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
 		}
 
-		/*vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
-		vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);*/
+		m_GP2D.Cleanup(); 
+
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 
 		for (auto imageView : m_SwapChainImageViews) 
@@ -202,7 +189,7 @@ private:
 		"shaders/shader.frag.spv"
 	};
 
-	GP2_2DGraphicsPipeline<VertexUBO> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };
+	GP2_2DGraphicsPipeline<VertexUBO> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" }; 
 
 	// Week 01: 
 	// Actual window
@@ -212,7 +199,6 @@ private:
 
 	GLFWwindow* m_Window;
 	void InitWindow();
-	//void DrawScene(); 
 
 	// Week 02
 	// Queue families
@@ -225,20 +211,12 @@ private:
 	
 	// Week 03
 	// Renderpass concept
-	
-	std::unique_ptr<GP2_Mesh> m_TriangleMesh;
-	std::unique_ptr<GP2_Mesh> m_RectangleMesh;
-	std::unique_ptr<GP2_Mesh> m_OvalMesh;
-	
+		
 	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
 	VkRenderPass m_RenderPass;
 
 	void CreateFrameBuffers(); 
 	void CreateRenderPass(); 
-	 
-	/*std::vector<GP2_Buffer*> m_UniformBuffers;  
-	std::vector<void*> m_UniformBuffersMapped; */
-	//void CreateUniformBuffer();
 
 	// Week 04
 	// Swap chain and image view support
@@ -288,7 +266,6 @@ private:
 	bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
 	void CreateInstance();
 
-	//void UpdateUniformBuffer(uint32_t currentImage);
 	void CreateSyncObjects();
 	void DrawFrame();
 	void BeginRenderPass(const GP2_CommandBuffer& buffer, VkFramebuffer currentBuffer, VkExtent2D extent);

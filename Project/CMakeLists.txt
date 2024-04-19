@@ -38,7 +38,7 @@ set(SOURCES
  "GP2_Shader.h" "GP2_Shader.cpp")
 
 # Create the executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "vulkanbase/VulkanUtil.cpp" "labwork/Week03.cpp"  "GP2_CommandPool.h" "GP2_CommandPool.cpp" "GP2_CommandBuffer.h" "GP2_CommandBuffer.cpp" "GP2_Mesh.h" "GP2_Mesh.cpp" "GP2_Buffer.h" "GP2_Buffer.cpp" "Vertex.h" "GP2_Camera.h" "GP2_Camera.cpp"     "GP2_UniformBufferObject.h"   "GP2_DescriptorPool.h" "GP2_2DGraphicsPipeline.h" "GP2_3DGraphicsPipeline.h")
+add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "vulkanbase/VulkanUtil.cpp" "labwork/Week03.cpp"  "GP2_CommandPool.h" "GP2_CommandPool.cpp" "GP2_CommandBuffer.h" "GP2_CommandBuffer.cpp" "GP2_Mesh.h" "GP2_Mesh.cpp" "GP2_Buffer.h" "GP2_Buffer.cpp" "Vertex.h" "GP2_Camera.h" "GP2_Camera.cpp"     "GP2_UniformBufferObject.h"   "GP2_DescriptorPool.h" "GP2_2DGraphicsPipeline.h" "GP2_3DGraphicsPipeline.h"  )
 add_dependencies(${PROJECT_NAME} Shaders)
 # Link libraries
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

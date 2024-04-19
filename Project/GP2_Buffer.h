@@ -11,8 +11,9 @@ public:
 	GP2_Buffer(VkDevice device, VkPhysicalDevice physicalDevice, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size);
 	~GP2_Buffer();
 
-	void Upload(VkDeviceSize size, void* data);
+	void TransferDeviceLocal(void* data);
 	void Map(void** data);
+	void CopyBuffer(GP2_Buffer srcBuffer, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
 
 	void Destroy();
 	

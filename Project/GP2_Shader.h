@@ -50,7 +50,7 @@ private:
 
 	VkPhysicalDevice m_PhysicalDevice;
 	VkVertexInputBindingDescription m_BindingDescription;
-	std::array<VkVertexInputAttributeDescription, 3Ui64> m_AttributeDescriptions;
+	std::array<VkVertexInputAttributeDescription, 2Ui64> m_AttributeDescriptions;
 
 	std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 };

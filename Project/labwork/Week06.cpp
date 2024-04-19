@@ -26,23 +26,6 @@ void VulkanBase::SetupDebugMessenger()
 	}
 }
 
-//void VulkanBase::UpdateUniformBuffer(uint32_t currentImage)
-//{
-//	static auto startTime = std::chrono::high_resolution_clock::now();
-//
-//	auto currentTime = std::chrono::high_resolution_clock::now();
-//	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-//
-//	VertexUBO ubo{};
-//	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-//	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-//	ubo.proj = glm::perspective(glm::radians(45.0f), m_SwapChainExtent.width / (float)m_SwapChainExtent.height, 0.1f, 10.0f);
-//	ubo.proj[1][1] *= -1;
-//	
-//	//m_DescriptorPool->SetUBO(ubo, currentImage);
-//	memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
-//}
-
 void VulkanBase::CreateSyncObjects()
 {
 	VkSemaphoreCreateInfo semaphoreInfo{};
@@ -73,7 +56,6 @@ void VulkanBase::DrawFrame()
 	m_CommandBuffer.BeginRecording(0); 
 
 	BeginRenderPass(m_CommandBuffer, m_SwapChainFramebuffers[imageIndex], m_SwapChainExtent);
-	//UpdateUniformBuffer(m_CurrentFrame);
 
 	VertexUBO vp{ glm::mat4(1.0f) ,glm::mat4(1.0f) };
 	glm::vec3 scaleFactors(1 / 1.0f, 1 / 1.0f, 1.0f);

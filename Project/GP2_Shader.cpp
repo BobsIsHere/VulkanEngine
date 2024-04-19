@@ -6,10 +6,9 @@
 
 GP2_Shader::GP2_Shader(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) :
 	m_VertexShaderFile{ vertexShaderFile },
-	m_FragmentShaderFile{ fragmentShaderFile }
+	m_FragmentShaderFile{ fragmentShaderFile },
+	m_PhysicalDevice{}
 {
-	m_PhysicalDevice = VK_NULL_HANDLE;
-
 	m_BindingDescription = Vertex::GetBindingDescription();
 	m_AttributeDescriptions = Vertex::GetAttributeDescriptions(); 
 }

@@ -39,7 +39,7 @@ inline void GP2_UniformBufferObject<VertexUBO>::Initialize(const VulkanContext& 
 template<class VertexUBO>
 inline void GP2_UniformBufferObject<VertexUBO>::Upload()
 {
-	m_UBOBuffer->Upload(sizeof(VertexUBO), &m_UBOSrc); 
+	m_UBOBuffer->TransferDeviceLocal(sizeof(VertexUBO), &m_UBOSrc); 
 }
 
 template<class VertexUBO>

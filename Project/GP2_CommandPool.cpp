@@ -2,8 +2,8 @@
 #include "vulkanbase/VulkanBase.h"
 
 GP2_CommandPool::GP2_CommandPool() :
-	m_CommandPool{ VK_NULL_HANDLE },
-	m_VkDevice{ VK_NULL_HANDLE }
+	m_CommandPool{},
+	m_VkDevice{}
 {
 
 }

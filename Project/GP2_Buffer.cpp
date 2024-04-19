@@ -10,29 +10,29 @@ GP2_Buffer::GP2_Buffer(VkDevice device, VkPhysicalDevice physicalDevice, VkBuffe
     m_VkBufferMemory{} 
 {
     // Create the buffer
-    VkBufferCreateInfo bufferInfo{}; 
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; 
-    bufferInfo.size = size; 
-    bufferInfo.usage = usage; 
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; 
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(device, &bufferInfo, nullptr, &m_VkBuffer) != VK_SUCCESS) 
+    if (vkCreateBuffer(device, &bufferInfo, nullptr, &m_VkBuffer) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to create buffer!"); 
+        throw std::runtime_error("Failed to create buffer!");
     }
 
     // Allocate memory for the buffer
-    VkMemoryRequirements memRequirements; 
+    VkMemoryRequirements memRequirements{};
     vkGetBufferMemoryRequirements(device, m_VkBuffer, &memRequirements);
 
-    VkMemoryAllocateInfo allocInfo{}; 
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO; 
-    allocInfo.allocationSize = memRequirements.size; 
-    allocInfo.memoryTypeIndex = FindMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties); 
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = FindMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(device, &allocInfo, nullptr, &m_VkBufferMemory) != VK_SUCCESS) 
+    if (vkAllocateMemory(device, &allocInfo, nullptr, &m_VkBufferMemory) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to allocate buffer memory!"); 
+        throw std::runtime_error("Failed to allocate buffer memory!");
     }
 
     // Bind buffer memory
@@ -41,17 +41,16 @@ GP2_Buffer::GP2_Buffer(VkDevice device, VkPhysicalDevice physicalDevice, VkBuffe
 
 GP2_Buffer::~GP2_Buffer()
 {
-    Destroy();
 }
 
 //transfer to device local as name?
-void GP2_Buffer::Upload(VkDeviceSize size, void* data)
+void GP2_Buffer::TransferDeviceLocal(void* data)
 {
     void* mappedData{};
-    vkMapMemory(m_Device, m_VkBufferMemory, 0, size, 0, &mappedData);
+    vkMapMemory(m_Device, m_VkBufferMemory, 0, m_Size, 0, &mappedData);
 
     // Copy data to mapped memory
-    memcpy(mappedData, data, static_cast<size_t>(size));
+    memcpy(mappedData, data, static_cast<size_t>(m_Size));
 
     // Unmap buffer memory
     vkUnmapMemory(m_Device, m_VkBufferMemory);
@@ -61,6 +60,35 @@ void GP2_Buffer::Upload(VkDeviceSize size, void* data)
 void GP2_Buffer::Map(void** data)
 {
     vkMapMemory(m_Device, m_VkBufferMemory, 0, m_Size, 0, data);
+}
+
+void GP2_Buffer::CopyBuffer(GP2_Buffer srcBuffer, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices)
+{
+    GP2_CommandPool commandPool{};
+    commandPool.Initialize(m_Device, queueFamilyIndices);
+
+    GP2_CommandBuffer commandBuffer{ commandPool.CreateCommandBuffer() };
+
+    commandBuffer.BeginRecording(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+    VkBufferCopy copyRegion{};
+    copyRegion.srcOffset = 0;
+    copyRegion.dstOffset = 0;
+    copyRegion.size = m_Size;
+    vkCmdCopyBuffer(commandBuffer.GetVkCommandBuffer(), srcBuffer.GetVkBuffer(), m_VkBuffer, 1, &copyRegion);
+
+    commandBuffer.EndRecording();
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    commandBuffer.Sumbit(submitInfo);
+    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(graphicsQueue);
+
+    const VkCommandBuffer commandBufferVk = commandBuffer.GetVkCommandBuffer();
+    vkFreeCommandBuffers(m_Device, commandPool.GetVkCommandPool(), 1, &commandBufferVk);
+
+    commandPool.Destroy();
 }
 
 void GP2_Buffer::Destroy()

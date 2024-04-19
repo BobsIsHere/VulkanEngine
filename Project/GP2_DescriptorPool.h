@@ -171,5 +171,5 @@ inline void GP2_DescriptorPool<UBO>::CreateUBOs(const VulkanContext& context)
 template<class UBO>
 inline void GP2_DescriptorPool<UBO>::SetUBO(UBO src, size_t index)
 {
-	memcpy(m_UBOs[index], &src, m_Size); 
+	memcpy(m_UBOsMapped[index], &src, m_Size); 
 }
