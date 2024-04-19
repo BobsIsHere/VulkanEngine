@@ -15,8 +15,8 @@ GP2_Mesh::GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice) :
 
 void GP2_Mesh::Initialize(VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices)
 {
-	CreateVertexBuffer(m_MeshVertices, graphicsQueue, queueFamilyIndices); 
-	CreateIndexBuffer(m_MeshIndices, graphicsQueue, queueFamilyIndices); 
+	//CreateVertexBuffer(m_MeshVertices, graphicsQueue, queueFamilyIndices); 
+	//CreateIndexBuffer(m_MeshIndices, graphicsQueue, queueFamilyIndices); 
 
 	m_pVertexBuffer = std::make_unique<GP2_Buffer>(m_Device, m_PhysicalDevice, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(Vertex) * m_MeshVertices.size()); 
@@ -25,15 +25,15 @@ void GP2_Mesh::Initialize(VkQueue graphicsQueue, QueueFamilyIndices queueFamilyI
 	m_pIndexBuffer = std::make_unique<GP2_Buffer>(m_Device, m_PhysicalDevice, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeof(uint16_t) * m_MeshIndices.size());
 	m_pIndexBuffer->Upload(sizeof(uint16_t) * m_MeshIndices.size(), m_MeshIndices.data());  
+
+	//DestroyIndexBuffer();
+	//DestroyVertexBuffer(); 
 }
 
 void GP2_Mesh::DestroyMesh()
 {
-	DestroyIndexBuffer(); 
-	DestroyVertexBuffer(); 
-
-	m_pVertexBuffer->Destroy();
-	m_pIndexBuffer->Destroy();
+	//m_pVertexBuffer->Destroy();
+	//m_pIndexBuffer->Destroy();
 }
 
 void GP2_Mesh::DestroyVertexBuffer()

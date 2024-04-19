@@ -41,6 +41,7 @@ GP2_Buffer::GP2_Buffer(VkDevice device, VkPhysicalDevice physicalDevice, VkBuffe
 
 GP2_Buffer::~GP2_Buffer()
 {
+    Destroy();
 }
 
 //transfer to device local as name?
