@@ -5,7 +5,7 @@
 GP2_Mesh::GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice) :
 	m_Device{ device },
 	m_PhysicalDevice{ physicalDevice },
-	m_VertexConstant{},
+	m_VertexConstant{glm::mat4(1.f)},
 	m_pVertexBuffer{},
 	m_pIndexBuffer{}
 {
@@ -66,6 +66,10 @@ void GP2_Mesh::AddVertex(const glm::vec2 pos, const glm::vec3 color)
 void GP2_Mesh::AddIndices(const std::vector<uint16_t> indices)
 {
 	m_MeshIndices = indices;
+}
+
+void GP2_Mesh::MakeTriangle()
+{
 }
 
 uint32_t GP2_Mesh::FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties)

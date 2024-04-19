@@ -20,7 +20,7 @@ public:
 	void AddVertex(const glm::vec2 pos, const glm::vec3 color);
 	void AddIndices(const std::vector<uint16_t> indices); 
 
-	//bool ParseOBJ(const std::string& filename, std::vector<Vertex>& vertices, std::vector<uint16_t>& indices, bool flipAxisAndWinding = true);
+	void MakeTriangle();
 
 private:
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
@@ -34,5 +34,5 @@ private:
 	std::vector<Vertex> m_MeshVertices; 
 	std::vector<uint16_t> m_MeshIndices;
 
-	const void* m_VertexConstant; 
+	MeshData m_VertexConstant; 
 };

@@ -117,7 +117,6 @@ private:
 		m_OvalMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP2D.AddMesh(std::move(m_OvalMesh));
 		
-		//CreateUniformBuffer();
 		CreateRenderPass(); 
 		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
 		CreateFrameBuffers(); 
