@@ -58,7 +58,7 @@ void GP2_Mesh::Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer buffer)
 	vkCmdDrawIndexed(buffer, static_cast<uint32_t>(m_MeshIndices.size()), 1, 0, 0, 0);
 }
 
-void GP2_Mesh::AddVertex(const glm::vec2 pos, const glm::vec3 color)
+void GP2_Mesh::AddVertex(const glm::vec3 pos, const glm::vec3 color)
 {
 	m_MeshVertices.push_back(Vertex{ pos, color }); 
 }

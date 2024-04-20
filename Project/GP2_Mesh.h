@@ -17,7 +17,7 @@ public:
 	void DestroyMesh();
 	void Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer buffer);
 
-	void AddVertex(const glm::vec2 pos, const glm::vec3 color);
+	void AddVertex(const glm::vec3 pos, const glm::vec3 color);
 	void AddIndices(const std::vector<uint16_t> indices); 
 
 	void MakeTriangle();
