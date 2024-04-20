@@ -18,9 +18,10 @@ public:
 	void Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer buffer);
 
 	void AddVertex(const glm::vec3 pos, const glm::vec3 color);
+	void AddVertices(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const glm::vec3 color);
 	void AddIndices(const std::vector<uint16_t> indices); 
 
-	void MakeTriangle();
+	bool ParseOBJ(const std::string& filename, std::vector<glm::vec3>& positions, std::vector<glm::vec3>& normals, std::vector<uint16_t>& indices); 
 
 private:
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);

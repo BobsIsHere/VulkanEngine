@@ -17,6 +17,7 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
+#include <glm/glm.hpp>
 #include <vector>
 #include <fstream>
 #include <optional>
@@ -46,3 +47,6 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 
 std::vector<char> readFile(const std::string& filename);
 
+glm::vec3 CrossProduct(glm::vec3 a, glm::vec3 b);
+
+glm::vec3 Normalize(glm::vec3 a);

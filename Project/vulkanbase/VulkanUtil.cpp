@@ -33,3 +33,15 @@ std::vector<char> readFile(const std::string& filename) {
 	file.close();
 	return buffer;
 }
+
+glm::vec3 CrossProduct(glm::vec3 a, glm::vec3 b)
+{
+	return glm::vec3(a.y * b.z - a.z * b.y,
+					 a.z * b.x - a.x * b.z,
+					 a.x * b.y - a.y * b.x);
+}
+
+glm::vec3 Normalize(glm::vec3 a)
+{
+	return a / glm::length(a);
+}

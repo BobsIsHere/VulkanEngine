@@ -66,6 +66,14 @@ void VulkanBase::DrawFrame()
 	m_GP2D.SetUBO(vp, 0);
 	m_GP2D.Record(m_CommandBuffer, m_SwapChainExtent, m_CurrentFrame);
 
+	VertexUBO ubo{};
+	ubo.model = glm::mat4(1.0f);
+	ubo.view = glm::lookAt(m_CameraPosition, m_CameraForward, m_CameraUp);
+	ubo.proj = glm::perspective(glm::radians(m_FOV), m_AspectRatio, 0.1f, 10.0f);
+
+	m_GP3D.SetUBO(ubo, 0);
+	m_GP3D.Record(m_CommandBuffer, m_SwapChainExtent, m_CurrentFrame);
+
 	EndRenderPass(m_CommandBuffer);
 
 	m_CommandBuffer.EndRecording(); 

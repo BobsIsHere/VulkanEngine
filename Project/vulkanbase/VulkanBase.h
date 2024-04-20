@@ -19,12 +19,12 @@
 #include <algorithm>
 #include <memory>
 
-#include "GP2_Shader.h"
 #include "GP2_Mesh.h"
 #include "GP2_CommandPool.h"
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
 #include "GP2_2DGraphicsPipeline.h"
+#include "GP2_3DGraphicsPipeline.h"
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -74,7 +74,7 @@ private:
 		m_CommandPool.Initialize(m_Device, FindQueueFamilies(m_PhysicalDevice)); 
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
-		// week 03
+		// GRAPHICS PIPELINE 2D
 		std::unique_ptr<GP2_Mesh> m_RectangleMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
 		std::unique_ptr<GP2_Mesh> m_OvalMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
 		
@@ -92,14 +92,14 @@ private:
 
 		//Draw Oval
 		m_OvalMesh->AddVertex({ 0.71f / 4 - 0.5f, 0.71f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 0.f }); // 0
-		m_OvalMesh->AddVertex({ 0.f / 4 - 0.5f, 1.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 1
+		m_OvalMesh->AddVertex({ 0.f - 0.5f, 1.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 1
 		m_OvalMesh->AddVertex({ -0.71f / 4 - 0.5f, 0.71f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 1.f }); // 2
-		m_OvalMesh->AddVertex({ -1.f / 4 - 0.5f, 0.f / 4 - 0.5f, 0.f }, { 0.f, 0.f, 1.f }); // 3
+		m_OvalMesh->AddVertex({ -1.f / 4 - 0.5f, 0.f - 0.5f, 0.f }, { 0.f, 0.f, 1.f }); // 3
 		m_OvalMesh->AddVertex({ -0.71f / 4 - 0.5f, -0.71f / 4 - 0.5f, 0.f }, { 1.f, 0.f, 1.f }); // 4
 		m_OvalMesh->AddVertex({ 0.f / 4 - 0.5f, -1.f / 4 - 0.5f, 0.f }, { 1.f,0.f,0.f }); // 5
 		m_OvalMesh->AddVertex({ 0.71f / 4 - 0.5f, -0.71f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 0.f }); // 6
 		m_OvalMesh->AddVertex({ 1.f / 4 - 0.5f, 0.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 7
-		m_OvalMesh->AddVertex({ 0.f / 4 - 0.5f, 0.f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 1.f }); // center, 8
+		m_OvalMesh->AddVertex({ 0.f - 0.5f, 0.f - 0.5f, 0.f }, { 1.f, 1.f, 1.f }); // center, 8
 
 		const std::vector<uint16_t> ovalIndices{ 
 			0, 8, 1,
@@ -115,6 +115,34 @@ private:
 
 		m_OvalMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP2D.AddMesh(std::move(m_OvalMesh));
+
+		// GRAPHICS PIPELINE 3D
+		std::unique_ptr<GP2_Mesh> m_BunnyMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh> m_BirdHouseMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
+
+		//Draw Bunny
+		std::vector<glm::vec3> bunnyVertices{};
+		std::vector<glm::vec3> bunnyNormals{};
+		std::vector<uint16_t> bunnyIndices{};
+
+		m_BunnyMesh->ParseOBJ("resources/bunny.obj", bunnyVertices, bunnyNormals, bunnyIndices);
+		m_BunnyMesh->AddVertices(bunnyVertices, bunnyNormals, {0.5f, 0.5f, 0.5f}); 
+		m_BunnyMesh->AddIndices(bunnyIndices);  
+
+		m_BunnyMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
+		m_GP3D.AddMesh(std::move(m_BunnyMesh)); 
+
+		//Draw BirdHouse
+		std::vector<glm::vec3> birdHouseVertices{};
+		std::vector<glm::vec3> birdHouseNormals{};
+		std::vector<uint16_t> birdHouseIndices{};
+
+		m_BirdHouseMesh->ParseOBJ("resources/birdhouse.obj", birdHouseVertices, birdHouseNormals, birdHouseIndices);
+		m_BirdHouseMesh->AddVertices(birdHouseVertices, birdHouseNormals, { 0.5f, 0.5f, 0.5f });
+		m_BirdHouseMesh->AddIndices(birdHouseIndices); 
+
+		m_BirdHouseMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
+		m_GP3D.AddMesh(std::move(m_BirdHouseMesh));
 		
 		CreateRenderPass(); 
 		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
@@ -183,14 +211,23 @@ private:
 		}
 	}
 
-	GP2_Shader m_GradientShader
-	{
-		"shaders/shader.vert.spv",
-		"shaders/shader.frag.spv"
-	};
-
+	// Graphics Pipelines
 	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };   
 	GP2_2DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
+
+	// Camera
+	glm::vec2 m_LastMousePosition{ 0.f, 0.f };
+
+	glm::vec3 m_Target{ 0.f, 0.f, 0.f };
+	glm::vec3 m_CameraPosition{ 0.f, 0.f, 3.f };
+	glm::vec3 m_CameraForward{ 0.f, 0.f, -1.f };
+	glm::vec3 m_CameraUp{ 0.f, 1.f, 0.f };
+	glm::vec3 m_CameraRight{ 1.f, 0.f, 0.f };
+
+	const float m_FOV{ 45.f };
+	const float m_AspectRatio{ m_SwapChainExtent.width / static_cast<float>(m_SwapChainExtent.height) };
+	const float m_Radius{ 5.f };
+	float m_Rotation{ 0.f };
 
 	// Week 01: 
 	// Actual window
@@ -200,6 +237,10 @@ private:
 
 	GLFWwindow* m_Window;
 	void InitWindow();
+
+	void KeyEvent(int key, int scancode, int action, int mods);
+	void MouseMove(GLFWwindow* window, double xpos, double ypos);
+	void MouseEvent(GLFWwindow* window, int button, int action, int mods);
 
 	// Week 02
 	// Queue families
