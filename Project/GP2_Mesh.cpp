@@ -5,7 +5,7 @@
 GP2_Mesh::GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice) :
 	m_Device{ device },
 	m_PhysicalDevice{ physicalDevice },
-	m_VertexConstant{glm::mat4(1.f)},
+	m_VertexConstant{ glm::mat4(1.f) },
 	m_pVertexBuffer{},
 	m_pIndexBuffer{}
 {

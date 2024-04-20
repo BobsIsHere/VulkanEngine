@@ -57,7 +57,7 @@ void VulkanBase::DrawFrame()
 
 	BeginRenderPass(m_CommandBuffer, m_SwapChainFramebuffers[imageIndex], m_SwapChainExtent);
 
-	VertexUBO vp{ glm::mat4(1.0f) ,glm::mat4(1.0f) };
+	ViewProjection vp{ glm::mat4(1.0f) ,glm::mat4(1.0f) };
 	glm::vec3 scaleFactors(1 / 1.0f, 1 / 1.0f, 1.0f);
 	vp.view = glm::scale(glm::mat4(1.0f), scaleFactors);
 	vp.view = glm::translate(vp.view, glm::vec3(0, 0, 0));

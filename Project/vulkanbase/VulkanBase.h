@@ -75,21 +75,9 @@ private:
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
 		// week 03
-		std::unique_ptr<GP2_Mesh> m_TriangleMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
 		std::unique_ptr<GP2_Mesh> m_RectangleMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
 		std::unique_ptr<GP2_Mesh> m_OvalMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
 		
-		//Draw Triangle
-		m_TriangleMesh->AddVertex({ -0.25f, 0.75f, 0.f }, { 0.f, 1.f, 0.f }); // 0
-		m_TriangleMesh->AddVertex({ 0.25f, 0.75f, 0.f }, { 0.f, 0.f, 1.f }); // 1
-		m_TriangleMesh->AddVertex({ 0, 0.25f, 0.f }, { 0.f, 1.f, 0.f }); // 2
-
-		const std::vector<uint16_t> triangleIndices{ 2, 1, 0 };
-		m_TriangleMesh->AddIndices(triangleIndices); 
-
-		m_TriangleMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_TriangleMesh));
-
 		//Draw Rectangle
 		m_RectangleMesh->AddVertex({ 0.25f, -0.25f, 0.f }, { 0.25f, 0.75f, 0.25f }); // 0
 		m_RectangleMesh->AddVertex({ 0.75f, -0.25f, 0.f }, { 0.25f, 0.75f, 0.25f }); // 1
@@ -103,22 +91,34 @@ private:
 		m_GP2D.AddMesh(std::move(m_RectangleMesh));
 
 		//Draw Oval
-		m_OvalMesh->AddVertex({ -0.625f, -0.625f, 0.f }, { 1.f, 1.f, 0.f }); // 0
-		m_OvalMesh->AddVertex({ -0.625f, -0.375f, 0.f }, { 0.f, 1.f, 0.f }); // 1
-		m_OvalMesh->AddVertex({ -0.5f, -0.25f, 0.f }, { 0.f, 1.f, 1.f }); // 2
-		m_OvalMesh->AddVertex({ -0.375f, -0.375f, 0.f }, { 0.f, 0.f, 1.f }); // 3
-		m_OvalMesh->AddVertex({ -0.375f, -0.625f, 0.f }, { 1.f, 0.f, 1.f }); // 4
-		m_OvalMesh->AddVertex({ -0.5f, -0.75f, 0.f }, { 1.f,0.f,0.f }); // 5
-		m_OvalMesh->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.f,1.f,1.f }); // center, 6
+		m_OvalMesh->AddVertex({ 0.71f / 4 - 0.5f, 0.71f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 0.f }); // 0
+		m_OvalMesh->AddVertex({ 0.f / 4 - 0.5f, 1.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 1
+		m_OvalMesh->AddVertex({ -0.71f / 4 - 0.5f, 0.71f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 1.f }); // 2
+		m_OvalMesh->AddVertex({ -1.f / 4 - 0.5f, 0.f / 4 - 0.5f, 0.f }, { 0.f, 0.f, 1.f }); // 3
+		m_OvalMesh->AddVertex({ -0.71f / 4 - 0.5f, -0.71f / 4 - 0.5f, 0.f }, { 1.f, 0.f, 1.f }); // 4
+		m_OvalMesh->AddVertex({ 0.f / 4 - 0.5f, -1.f / 4 - 0.5f, 0.f }, { 1.f,0.f,0.f }); // 5
+		m_OvalMesh->AddVertex({ 0.71f / 4 - 0.5f, -0.71f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 0.f }); // 6
+		m_OvalMesh->AddVertex({ 1.f / 4 - 0.5f, 0.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 7
+		m_OvalMesh->AddVertex({ 0.f / 4 - 0.5f, 0.f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 1.f }); // center, 8
 
-		const std::vector<uint16_t> ovalIndices{ 0, 1, 6, 1, 2, 6, 2, 3, 6, 3, 4, 6, 4, 5, 6, 5, 0, 6 }; 
-		m_OvalMesh->AddIndices(ovalIndices); 
+		const std::vector<uint16_t> ovalIndices{ 
+			0, 8, 1,
+			1, 8, 2,
+			2, 8, 3,
+			3, 8, 4,
+			4, 8, 5,
+			5, 8, 6,
+			6, 8, 7,
+			7, 8, 0 
+		};
+		m_OvalMesh->AddIndices(ovalIndices);
 
 		m_OvalMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP2D.AddMesh(std::move(m_OvalMesh));
 		
 		CreateRenderPass(); 
 		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
+		m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
 		CreateFrameBuffers(); 
 
 		// week 06
@@ -150,6 +150,7 @@ private:
 		}
 
 		m_GP2D.Cleanup(); 
+		m_GP3D.Cleanup();
 
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 
@@ -188,7 +189,8 @@ private:
 		"shaders/shader.frag.spv"
 	};
 
-	GP2_2DGraphicsPipeline<VertexUBO> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" }; 
+	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };   
+	GP2_2DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
 
 	// Week 01: 
 	// Actual window
