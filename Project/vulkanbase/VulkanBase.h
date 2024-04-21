@@ -75,8 +75,8 @@ private:
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
 		// GRAPHICS PIPELINE 2D
-		std::unique_ptr<GP2_Mesh> m_RectangleMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
-		std::unique_ptr<GP2_Mesh> m_OvalMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex2D>> m_RectangleMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex2D>> m_OvalMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
 		
 		//Draw Rectangle
 		m_RectangleMesh->AddVertex({ 0.25f, -0.25f, 0.f }, { 0.25f, 0.75f, 0.25f }); // 0
@@ -117,8 +117,8 @@ private:
 		m_GP2D.AddMesh(std::move(m_OvalMesh));
 
 		// GRAPHICS PIPELINE 3D
-		std::unique_ptr<GP2_Mesh> m_BunnyMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
-		std::unique_ptr<GP2_Mesh> m_BirdHouseMesh{ std::make_unique<GP2_Mesh>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_BunnyMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_BirdHouseMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
 
 		//Draw Bunny
 		std::vector<glm::vec3> bunnyVertices{};
@@ -213,7 +213,7 @@ private:
 
 	// Graphics Pipelines
 	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };   
-	GP2_2DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
+	GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
 
 	// Camera
 	glm::vec2 m_LastMousePosition{ 0.f, 0.f };

@@ -11,6 +11,8 @@
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
 
+using pMesh3D = std::unique_ptr<GP2_Mesh<Vertex3D>>;
+
 template <class UBO3D>
 class GP2_3DGraphicsPipeline
 {
@@ -24,7 +26,7 @@ public:
 
 	void Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx);
 	void DrawScene(const GP2_CommandBuffer& buffer);
-	void AddMesh(std::unique_ptr<GP2_Mesh> mesh);
+	void AddMesh(pMesh3D mesh);
 
 	void SetUBO(UBO3D ubo, size_t uboIndex);
 
@@ -37,8 +39,8 @@ private:
 	VkPipeline m_GraphicsPipeline;
 	VkPipelineLayout m_PipelineLayout;
 
-	GP2_Shader m_Shader;
-	std::vector<std::unique_ptr<GP2_Mesh>> m_pMeshes;
+	GP2_Shader<Vertex3D> m_Shader;
+	std::vector<pMesh3D> m_pMeshes;
 	GP2_DescriptorPool<UBO3D>* m_pDescriptorPool;
 };
 
@@ -221,7 +223,7 @@ void GP2_3DGraphicsPipeline<UBO3D>::DrawScene(const GP2_CommandBuffer& buffer)
 }
 
 template <class UBO3D>
-void GP2_3DGraphicsPipeline<UBO3D>::AddMesh(std::unique_ptr<GP2_Mesh> mesh)
+void GP2_3DGraphicsPipeline<UBO3D>::AddMesh(pMesh3D mesh) 
 {
 	m_pMeshes.push_back(std::move(mesh));
 }

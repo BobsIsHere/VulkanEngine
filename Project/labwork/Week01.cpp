@@ -55,11 +55,11 @@ void VulkanBase::MouseMove(GLFWwindow * window, double xpos, double ypos)
 		float dx = static_cast<float>(xpos) - m_LastMousePosition.x;
 		if (dx > 0) 
 		{
-			m_Rotation += 0.01;
+			m_Rotation += 0.01f;
 		}
 		else 
 		{
-			m_Rotation -= 0.01;
+			m_Rotation -= 0.01f;
 		}
 	}
 }
