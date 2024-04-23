@@ -91,9 +91,11 @@ void GP2_Mesh<VertexType>::DestroyMesh()
 {
 	m_pIndexBuffer->Destroy();
 	delete m_pIndexBuffer;
+	m_pIndexBuffer = nullptr;
 
 	m_pVertexBuffer->Destroy();
 	delete m_pVertexBuffer;
+	m_pVertexBuffer = nullptr; 
 }
 
 template<typename VertexType>

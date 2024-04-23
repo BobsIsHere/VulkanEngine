@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 #include <vulkanbase/VulkanUtil.h>
 #include <vulkanbase/VulkanBase.h>
 
