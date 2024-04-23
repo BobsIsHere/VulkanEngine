@@ -10,9 +10,15 @@ template <class UBO>
 class GP2_DescriptorPool final
 {
 public:
+	//---------------------------
+	// Constructors & Destructor
+	//---------------------------
 	GP2_DescriptorPool(VkDevice device, size_t count);
 	~GP2_DescriptorPool();
 
+	//-----------
+	// Functions
+	//-----------
 	void Initialize(const VulkanContext& context);
 
 	void SetUBO(UBO data, size_t index);
@@ -27,9 +33,15 @@ public:
 	void BindDescriptorSet(VkCommandBuffer buffer, VkPipelineLayout layout, size_t index);
 
 private:
+	//-----------
+	// Functions
+	//-----------
 	void CreateDescriptorSetLayout(const VulkanContext& context);
 	void CreateUBOs(const VulkanContext& context);
 
+	//-----------
+	// Variables
+	//-----------
 	VkDevice m_Device;
 	VkDeviceSize m_Size;
 	VkDescriptorSetLayout m_DescriptorSetLayout;

@@ -13,9 +13,15 @@ template<typename VertexType>
 class GP2_Mesh final
 {
 public:
+	//---------------------------
+	// Constructors & Destructor
+	//---------------------------
 	GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice);
 	~GP2_Mesh() = default;
 
+	//-----------
+	// Functions
+	//-----------
 	void Initialize(VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
 	void DestroyMesh();
 	void Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer buffer);
@@ -28,8 +34,14 @@ public:
 	bool ParseOBJ(const std::string& filename, const glm::vec3 color); 
 
 private:
+	//-----------
+	// Functions
+	//-----------
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+	//-----------
+	// Variables
+	//-----------
 	VkDevice m_Device; 
 	VkPhysicalDevice m_PhysicalDevice; 
 
@@ -221,19 +233,6 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 		//read till end of line and ignore all remaining chars
 		file.ignore(1000, '\n');
 	}
-
-	//std::cout << "Parsed Vertices:" << std::endl; 
-	//for (const auto& vertex : positions) 
-	//{
-	//	std::cout << "v " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl; 
-	//}
-
-	//// Print out the parsed faces
-	//std::cout << "Parsed Faces:" << std::endl; 
-	//for (size_t i = 0; i < m_MeshIndices.size(); i += 3) 
-	//{
-	//	std::cout << "f " << m_MeshIndices[i] << " " << m_MeshIndices[i + 1] << " " << m_MeshIndices[i + 2] << std::endl; 
-	//}
 
 	file.close(); 
 	return true;

@@ -1,3 +1,6 @@
+# Copy resources folder to output directory
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
 # Source files
 set(SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaders")
 set(SHADER_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
@@ -37,16 +40,9 @@ set(SOURCES
  "GP2_Shader.h" "GP2_Shader.cpp")
 
 # Create the executable
-add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "vulkanbase/VulkanUtil.cpp" "labwork/Week03.cpp"  "GP2_CommandPool.h" "GP2_CommandPool.cpp" "GP2_CommandBuffer.h" "GP2_CommandBuffer.cpp" "GP2_Mesh.h"  "GP2_Buffer.h" "GP2_Buffer.cpp" "Vertex.h" "GP2_Camera.h" "GP2_Camera.cpp"     "GP2_UniformBufferObject.h"   "GP2_DescriptorPool.h" "GP2_2DGraphicsPipeline.h" "GP2_3DGraphicsPipeline.h"     "GP2_Shader.cpp")
+add_executable(${PROJECT_NAME} ${SOURCES} ${GLSL_SOURCE_FILES}  "vulkanbase/VulkanUtil.cpp" "labwork/Week03.cpp"  "GP2_CommandPool.h" "GP2_CommandPool.cpp" "GP2_CommandBuffer.h" "GP2_CommandBuffer.cpp" "GP2_Mesh.h"  "GP2_Buffer.h" "GP2_Buffer.cpp" "Vertex.h" "GP2_UniformBufferObject.h" "GP2_DescriptorPool.h" "GP2_2DGraphicsPipeline.h" "GP2_3DGraphicsPipeline.h" "GP2_Shader.cpp")
 add_dependencies(${PROJECT_NAME} Shaders)
 
 # Link libraries
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${Vulkan_LIBRARIES} glfw)
-
-#add_custom_target(copy_resources ALL)
-
-#add_custom_command(TARGET copy_resources POST_BUILD
-#                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-#                   ${CMAKE_SOURCE_DIR}/resources
-#                   $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources)

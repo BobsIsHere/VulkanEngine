@@ -4,9 +4,15 @@
 class GP2_CommandBuffer final
 {
 public:
+	//---------------------------
+	// Constructors & Destructor
+	//---------------------------
 	GP2_CommandBuffer();
 	~GP2_CommandBuffer() = default;
 
+	//-----------
+	// Functions
+	//-----------
 	void SetVkCommandBuffer(VkCommandBuffer buffer);
 	VkCommandBuffer GetVkCommandBuffer() const;
 
@@ -17,5 +23,8 @@ public:
 	void Sumbit(VkSubmitInfo& info) const;
 
 private:
+	//-----------
+	// Variables
+	//-----------
 	VkCommandBuffer m_CommandBuffer;
 };

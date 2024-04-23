@@ -1,7 +1,6 @@
 #pragma once
 #pragma once
 #include <string>
-#include <memory>
 #include <vulkanbase/VulkanUtil.h>
 #include <vulkanbase/VulkanBase.h>
 
@@ -14,12 +13,18 @@
 using pMesh3D = std::unique_ptr<GP2_Mesh<Vertex3D>>;
 
 template <class UBO3D>
-class GP2_3DGraphicsPipeline
+class GP2_3DGraphicsPipeline final
 {
 public:
+	//---------------------------
+	// Constructors & Destructor
+	//---------------------------
 	GP2_3DGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
 	~GP2_3DGraphicsPipeline() = default;
 
+	//-----------
+	// Functions
+	//-----------
 	void Initialize(const VulkanContext& context);
 
 	void Cleanup();
@@ -31,9 +36,15 @@ public:
 	void SetUBO(UBO3D ubo, size_t uboIndex);
 
 private:
+	//-----------
+	// Functions
+	//-----------
 	void CreateGraphicsPipeline();
 	VkPushConstantRange CreatePushConstantRange();
 
+	//-----------
+	// Variables
+	//-----------
 	VkDevice m_Device;
 	VkRenderPass m_RenderPass;
 	VkPipeline m_GraphicsPipeline;

@@ -5,7 +5,6 @@ GP2_CommandPool::GP2_CommandPool() :
 	m_CommandPool{},
 	m_VkDevice{}
 {
-
 }
 
 void GP2_CommandPool::Initialize(const VkDevice& device, const QueueFamilyIndices& queue)

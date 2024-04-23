@@ -8,9 +8,15 @@
 class GP2_Buffer final
 {
 public:
+	//---------------------------
+	// Constructors & Destructor
+	//---------------------------
 	GP2_Buffer(VkDevice device, VkPhysicalDevice physicalDevice, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size);
 	~GP2_Buffer();
 
+	//-----------
+	// Functions
+	//-----------
 	void TransferDeviceLocal(void* data);
 	void Map(void** data);
 	void CopyBuffer(GP2_Buffer srcBuffer, VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
@@ -24,8 +30,14 @@ public:
 	VkDeviceSize GetSizeInBytes() const { return m_Size; }
 	
 private:
+	//-----------
+	// Functions
+	//----------- 
 	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+	//-----------
+	// Variables
+	//-----------
 	VkDevice m_Device;
 	VkDeviceSize m_Size; 
 	VkBuffer m_VkBuffer;
