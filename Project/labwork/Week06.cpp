@@ -1,8 +1,9 @@
 #define GLM_FORCE_RADIANS
-#include "vulkanbase/VulkanBase.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
+
+#include "vulkanbase/VulkanBase.h"
 
 void VulkanBase::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) 
 {
@@ -57,22 +58,28 @@ void VulkanBase::DrawFrame()
 
 	BeginRenderPass(m_CommandBuffer, m_SwapChainFramebuffers[imageIndex], m_SwapChainExtent);
 
+	//Draw 2d graphics pipeline
 	ViewProjection vp{ glm::mat4(1.0f) ,glm::mat4(1.0f) };
-	glm::vec3 scaleFactors(1 / 1.0f, 1 / 1.0f, 1.0f);
+	glm::vec3 scaleFactors(1.0f, 1.0f, 1.0f);
 	vp.view = glm::scale(glm::mat4(1.0f), scaleFactors);
 	vp.view = glm::translate(vp.view, glm::vec3(0, 0, 0));
 
-	//Draw 2d graphics pipeline
 	m_GP2D.SetUBO(vp, 0);
 	m_GP2D.Record(m_CommandBuffer, m_SwapChainExtent, m_CurrentFrame);
 
+	//Draw 3d graphics pipeline
+	MeshData meshData{};
 	VertexUBO ubo{};
-	ubo.model = glm::mat4(1.0f);
-	ubo.view = glm::lookAt(m_CameraPosition, m_CameraForward, m_CameraUp);
+	meshData.model = glm::mat4(1.0f);  
+
+	ubo.view = UpdateCamera();
 	ubo.proj = glm::perspective(glm::radians(m_FOV), m_AspectRatio, 0.1f, 10.0f);
 
 	m_GP3D.SetUBO(ubo, 0);
 	m_GP3D.Record(m_CommandBuffer, m_SwapChainExtent, m_CurrentFrame);
+
+	m_Yaw = 0;
+	m_Pitch = 0;
 
 	EndRenderPass(m_CommandBuffer);
 

@@ -117,32 +117,12 @@ private:
 		m_GP2D.AddMesh(std::move(m_OvalMesh));
 
 		// GRAPHICS PIPELINE 3D
-		std::unique_ptr<GP2_Mesh<Vertex3D>> m_BunnyMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
-		std::unique_ptr<GP2_Mesh<Vertex3D>> m_BirdHouseMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_CubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
 
-		//Draw Bunny
-		std::vector<glm::vec3> bunnyVertices{};
-		std::vector<glm::vec3> bunnyNormals{};
-		std::vector<uint16_t> bunnyIndices{};
-
-		m_BunnyMesh->ParseOBJ("resources/bunny.obj", bunnyVertices, bunnyNormals, bunnyIndices);
-		m_BunnyMesh->AddVertices(bunnyVertices, bunnyNormals, {0.5f, 0.5f, 0.5f}); 
-		m_BunnyMesh->AddIndices(bunnyIndices);  
-
-		m_BunnyMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP3D.AddMesh(std::move(m_BunnyMesh)); 
-
-		//Draw BirdHouse
-		std::vector<glm::vec3> birdHouseVertices{};
-		std::vector<glm::vec3> birdHouseNormals{};
-		std::vector<uint16_t> birdHouseIndices{};
-
-		m_BirdHouseMesh->ParseOBJ("resources/birdhouse.obj", birdHouseVertices, birdHouseNormals, birdHouseIndices);
-		m_BirdHouseMesh->AddVertices(birdHouseVertices, birdHouseNormals, { 0.5f, 0.5f, 0.5f });
-		m_BirdHouseMesh->AddIndices(birdHouseIndices); 
-
-		m_BirdHouseMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP3D.AddMesh(std::move(m_BirdHouseMesh));
+		//Draw Cube
+		m_CubeMesh->ParseOBJ("resources/lowpoly_bunny2.obj", { 0.f, 1.f, 0.f });
+		m_CubeMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
+		m_GP3D.AddMesh(std::move(m_CubeMesh));
 		
 		CreateRenderPass(); 
 		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
@@ -219,7 +199,7 @@ private:
 	glm::vec2 m_LastMousePosition{ 0.f, 0.f };
 
 	glm::vec3 m_Target{ 0.f, 0.f, 0.f };
-	glm::vec3 m_CameraPosition{ 0.f, 0.f, 3.f };
+	glm::vec3 m_CameraPosition{ 0.f, 0.f, 5.f };
 	glm::vec3 m_CameraForward{ 0.f, 0.f, -1.f };
 	glm::vec3 m_CameraUp{ 0.f, 1.f, 0.f };
 	glm::vec3 m_CameraRight{ 1.f, 0.f, 0.f };
@@ -227,7 +207,8 @@ private:
 	const float m_FOV{ 45.f };
 	const float m_AspectRatio{ m_SwapChainExtent.width / static_cast<float>(m_SwapChainExtent.height) };
 	const float m_Radius{ 5.f };
-	float m_Rotation{ 0.f };
+	float m_Yaw{ 0.f };
+	float m_Pitch{ 0.f };
 
 	// Week 01: 
 	// Actual window
@@ -241,6 +222,7 @@ private:
 	void KeyEvent(int key, int scancode, int action, int mods);
 	void MouseMove(GLFWwindow* window, double xpos, double ypos);
 	void MouseEvent(GLFWwindow* window, int button, int action, int mods);
+	glm::mat4 UpdateCamera();
 
 	// Week 02
 	// Queue families

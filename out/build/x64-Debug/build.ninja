@@ -2192,14 +2192,6 @@ build Project\CMakeFiles\VulkanLab01.dir\GP2_CommandBuffer.cpp.obj: CXX_COMPILER
   TARGET_COMPILE_PDB = Project\CMakeFiles\VulkanLab01.dir\
   TARGET_PDB = Project\VulkanLab01.pdb
 
-build Project\CMakeFiles\VulkanLab01.dir\GP2_Mesh.cpp.obj: CXX_COMPILER__VulkanLab01_unscanned_Debug C$:\GitHubFiles\VulkanEngine\Project\GP2_Mesh.cpp || cmake_object_order_depends_target_VulkanLab01
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
-  INCLUDES = -IC:\VulkanSDK\1.3.261.1\Include -IC:\GitHubFiles\VulkanEngine\Project -IC:\GitHubFiles\VulkanEngine\out\build\x64-Debug\_deps\glfw-src\include
-  OBJECT_DIR = Project\CMakeFiles\VulkanLab01.dir
-  OBJECT_FILE_DIR = Project\CMakeFiles\VulkanLab01.dir
-  TARGET_COMPILE_PDB = Project\CMakeFiles\VulkanLab01.dir\
-  TARGET_PDB = Project\VulkanLab01.pdb
-
 build Project\CMakeFiles\VulkanLab01.dir\GP2_Buffer.cpp.obj: CXX_COMPILER__VulkanLab01_unscanned_Debug C$:\GitHubFiles\VulkanEngine\Project\GP2_Buffer.cpp || cmake_object_order_depends_target_VulkanLab01
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1 -std:c++17
   INCLUDES = -IC:\VulkanSDK\1.3.261.1\Include -IC:\GitHubFiles\VulkanEngine\Project -IC:\GitHubFiles\VulkanEngine\out\build\x64-Debug\_deps\glfw-src\include
@@ -2224,7 +2216,7 @@ build Project\CMakeFiles\VulkanLab01.dir\GP2_Camera.cpp.obj: CXX_COMPILER__Vulka
 #############################################
 # Link the executable Project\VulkanLab01.exe
 
-build Project\VulkanLab01.exe: CXX_EXECUTABLE_LINKER__VulkanLab01_Debug Project\CMakeFiles\VulkanLab01.dir\main.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week01.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week02.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week03.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week04.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week05.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week06.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_Shader.cpp.obj Project\CMakeFiles\VulkanLab01.dir\vulkanbase\VulkanUtil.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_CommandPool.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_CommandBuffer.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_Mesh.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_Buffer.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_Camera.cpp.obj | C$:\VulkanSDK\1.3.261.1\Lib\vulkan-1.lib _deps\glfw-build\src\glfw3.lib || Project\Shaders _deps\glfw-build\src\glfw3.lib
+build Project\VulkanLab01.exe: CXX_EXECUTABLE_LINKER__VulkanLab01_Debug Project\CMakeFiles\VulkanLab01.dir\main.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week01.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week02.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week03.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week04.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week05.cpp.obj Project\CMakeFiles\VulkanLab01.dir\labwork\Week06.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_Shader.cpp.obj Project\CMakeFiles\VulkanLab01.dir\vulkanbase\VulkanUtil.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_CommandPool.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_CommandBuffer.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_Buffer.cpp.obj Project\CMakeFiles\VulkanLab01.dir\GP2_Camera.cpp.obj | C$:\VulkanSDK\1.3.261.1\Lib\vulkan-1.lib _deps\glfw-build\src\glfw3.lib || Project\Shaders _deps\glfw-build\src\glfw3.lib
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = C:\VulkanSDK\1.3.261.1\Lib\vulkan-1.lib  _deps\glfw-build\src\glfw3.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
@@ -2300,7 +2292,7 @@ build Project\CMakeFiles\Shaders | ${cmake_ninja_workdir}Project\CMakeFiles\Shad
 # Custom command for Project\shaders\objshader.frag.spv
 
 build Project\shaders\objshader.frag.spv | ${cmake_ninja_workdir}Project\shaders\objshader.frag.spv: CUSTOM_COMMAND C$:\GitHubFiles\VulkanEngine\Project\shaders\objshader.frag
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\GitHubFiles\VulkanEngine\out\build\x64-Debug\Project && C:\VulkanSDK\1.3.261.1\Bin\glslc.exe C:/GitHubFiles/VulkanEngine/Project/shaders/objshader.frag -o C:/GitHubFiles/VulkanEngine/out/build/x64-Debug/Project/shaders/objshader.frag.spv"
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\GitHubFiles\VulkanEngine\out\build\x64-Debug\Project && C:\VulkanSDK\1.3.261.1\Bin\glslc.exe -g C:/GitHubFiles/VulkanEngine/Project/shaders/objshader.frag -o C:/GitHubFiles/VulkanEngine/out/build/x64-Debug/Project/shaders/objshader.frag.spv"
   DESC = Generating shaders/objshader.frag.spv
   restat = 1
 
@@ -2309,7 +2301,7 @@ build Project\shaders\objshader.frag.spv | ${cmake_ninja_workdir}Project\shaders
 # Custom command for Project\shaders\objshader.vert.spv
 
 build Project\shaders\objshader.vert.spv | ${cmake_ninja_workdir}Project\shaders\objshader.vert.spv: CUSTOM_COMMAND C$:\GitHubFiles\VulkanEngine\Project\shaders\objshader.vert
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\GitHubFiles\VulkanEngine\out\build\x64-Debug\Project && C:\VulkanSDK\1.3.261.1\Bin\glslc.exe C:/GitHubFiles/VulkanEngine/Project/shaders/objshader.vert -o C:/GitHubFiles/VulkanEngine/out/build/x64-Debug/Project/shaders/objshader.vert.spv"
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\GitHubFiles\VulkanEngine\out\build\x64-Debug\Project && C:\VulkanSDK\1.3.261.1\Bin\glslc.exe -g C:/GitHubFiles/VulkanEngine/Project/shaders/objshader.vert -o C:/GitHubFiles/VulkanEngine/out/build/x64-Debug/Project/shaders/objshader.vert.spv"
   DESC = Generating shaders/objshader.vert.spv
   restat = 1
 
@@ -2318,7 +2310,7 @@ build Project\shaders\objshader.vert.spv | ${cmake_ninja_workdir}Project\shaders
 # Custom command for Project\shaders\shader.frag.spv
 
 build Project\shaders\shader.frag.spv | ${cmake_ninja_workdir}Project\shaders\shader.frag.spv: CUSTOM_COMMAND C$:\GitHubFiles\VulkanEngine\Project\shaders\shader.frag
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\GitHubFiles\VulkanEngine\out\build\x64-Debug\Project && C:\VulkanSDK\1.3.261.1\Bin\glslc.exe C:/GitHubFiles/VulkanEngine/Project/shaders/shader.frag -o C:/GitHubFiles/VulkanEngine/out/build/x64-Debug/Project/shaders/shader.frag.spv"
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\GitHubFiles\VulkanEngine\out\build\x64-Debug\Project && C:\VulkanSDK\1.3.261.1\Bin\glslc.exe -g C:/GitHubFiles/VulkanEngine/Project/shaders/shader.frag -o C:/GitHubFiles/VulkanEngine/out/build/x64-Debug/Project/shaders/shader.frag.spv"
   DESC = Generating shaders/shader.frag.spv
   restat = 1
 
@@ -2327,7 +2319,7 @@ build Project\shaders\shader.frag.spv | ${cmake_ninja_workdir}Project\shaders\sh
 # Custom command for Project\shaders\shader.vert.spv
 
 build Project\shaders\shader.vert.spv | ${cmake_ninja_workdir}Project\shaders\shader.vert.spv: CUSTOM_COMMAND C$:\GitHubFiles\VulkanEngine\Project\shaders\shader.vert
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\GitHubFiles\VulkanEngine\out\build\x64-Debug\Project && C:\VulkanSDK\1.3.261.1\Bin\glslc.exe C:/GitHubFiles/VulkanEngine/Project/shaders/shader.vert -o C:/GitHubFiles/VulkanEngine/out/build/x64-Debug/Project/shaders/shader.vert.spv"
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D C:\GitHubFiles\VulkanEngine\out\build\x64-Debug\Project && C:\VulkanSDK\1.3.261.1\Bin\glslc.exe -g C:/GitHubFiles/VulkanEngine/Project/shaders/shader.vert -o C:/GitHubFiles/VulkanEngine/out/build/x64-Debug/Project/shaders/shader.vert.spv"
   DESC = Generating shaders/shader.vert.spv
   restat = 1
 
