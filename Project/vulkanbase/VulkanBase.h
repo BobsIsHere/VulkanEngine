@@ -136,8 +136,8 @@ private:
 		m_GP3D.AddMesh(std::move(m_pCubeMesh));
 		
 		CreateRenderPass(); 
-		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
-		m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
+		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_TextureImageView, m_TextureSampler); 
+		m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_TextureImageView, m_TextureSampler);
 		CreateFrameBuffers(); 
 
 		// week 06
