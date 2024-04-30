@@ -90,13 +90,19 @@ void GP2_Mesh<VertexType>::Initialize(VkQueue graphicsQueue, QueueFamilyIndices 
 template<typename VertexType>
 void GP2_Mesh<VertexType>::DestroyMesh()
 {
-	m_pIndexBuffer->Destroy();
-	delete m_pIndexBuffer;
-	m_pIndexBuffer = nullptr;
+	if (m_pIndexBuffer)
+	{
+		m_pIndexBuffer->Destroy();
+		delete m_pIndexBuffer;
+		m_pIndexBuffer = nullptr;
+	}
 
-	m_pVertexBuffer->Destroy();
-	delete m_pVertexBuffer;
-	m_pVertexBuffer = nullptr; 
+	if (m_pVertexBuffer)
+	{
+		m_pVertexBuffer->Destroy();
+		delete m_pVertexBuffer;
+		m_pVertexBuffer = nullptr;
+	}
 }
 
 template<typename VertexType>

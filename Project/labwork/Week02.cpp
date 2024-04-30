@@ -85,7 +85,8 @@ void VulkanBase::CreateTextureImage()
 		throw std::runtime_error("failed to load texture image!");
 	}
 
-	GP2_Buffer stagingBuffer{ m_Device, m_PhysicalDevice, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, imageSize };
+	GP2_Buffer stagingBuffer{ m_Device, m_PhysicalDevice, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+							  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, imageSize };
 
 	stagingBuffer.TransferDeviceLocal(pixels);
 
@@ -107,7 +108,7 @@ void VulkanBase::CreateTextureImage()
 
 void VulkanBase::CreateTexureImageView()
 {
-	m_TextureImageView = CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB);
+	m_TextureImageView = CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 void VulkanBase::CreateTextureSampler()
@@ -145,7 +146,7 @@ void VulkanBase::CreateTextureSampler()
 	}
 }
 
-VkImageView VulkanBase::CreateImageView(VkImage image, VkFormat format)
+VkImageView VulkanBase::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
 {
 	VkImageViewCreateInfo viewInfo{}; 
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO; 
@@ -157,6 +158,7 @@ VkImageView VulkanBase::CreateImageView(VkImage image, VkFormat format)
 	viewInfo.subresourceRange.levelCount = 1; 
 	viewInfo.subresourceRange.baseArrayLayer = 0; 
 	viewInfo.subresourceRange.layerCount = 1; 
+	viewInfo.subresourceRange.aspectMask = aspectFlags;
 
 	VkImageView imageView{};
 

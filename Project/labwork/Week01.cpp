@@ -5,7 +5,7 @@
 #include "vulkanbase/VulkanBase.h"
 #include "GP2_Mesh.h"
 
-void VulkanBase::InitWindow() 
+void VulkanBase::InitWindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

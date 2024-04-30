@@ -74,6 +74,9 @@ private:
 		m_CommandPool.Initialize(m_Device, FindQueueFamilies(m_PhysicalDevice)); 
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
+		// Depth Buffer
+		CreateDepthResources();
+
 		// Create texture image
 		CreateTextureImage();
 		CreateTexureImageView();
@@ -81,17 +84,32 @@ private:
 
 		//FirstAssignment(); 
 
-		// Square Mesh
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
+		// Square Mesh 1
+		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
 
-		m_pSquareMesh->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f });
-		m_pSquareMesh->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f });
-		m_pSquareMesh->AddVertex({ 0.5f, 0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f });
-		m_pSquareMesh->AddVertex({ -0.5f, 0.5f, 0.f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f });
-		m_pSquareMesh->AddIndices({ 0, 1, 2, 2, 3, 0 }); 
+		m_pSquareMesh1->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f });
+		m_pSquareMesh1->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f });
+		m_pSquareMesh1->AddVertex({ 0.5f, 0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f });
+		m_pSquareMesh1->AddVertex({ -0.5f, 0.5f, 0.f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f });
+		m_pSquareMesh1->AddIndices({ 0, 1, 2, 2, 3, 0 });
 
-		m_pSquareMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pSquareMesh));
+		m_pSquareMesh1->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
+		m_GP2D.AddMesh(std::move(m_pSquareMesh1));
+
+		// Square Mesh 2 (Adjusted Position)
+		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
+
+		float overlapOffset = 0.3f; // Adjust as needed
+
+		m_pSquareMesh2->AddVertex({ -0.5f + overlapOffset, -0.5f - overlapOffset, -0.5f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
+		m_pSquareMesh2->AddVertex({ 0.5f + overlapOffset, -0.5f - overlapOffset, -0.5f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
+		m_pSquareMesh2->AddVertex({ 0.5f + overlapOffset, 0.5f - overlapOffset, -0.5f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f });
+		m_pSquareMesh2->AddVertex({ -0.5f + overlapOffset, 0.5f - overlapOffset, -0.5f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f });
+		m_pSquareMesh2->AddIndices({ 0, 1, 2, 2, 3, 0 });
+
+		m_pSquareMesh2->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
+		m_GP2D.AddMesh(std::move(m_pSquareMesh2));
+
 		
 		CreateRenderPass(); 
 		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_TextureImageView, m_TextureSampler); 
@@ -245,6 +263,54 @@ private:
 		m_GP3D.AddMesh(std::move(m_pCubeMesh));
 	}
 
+	// Depth Buffer
+	VkImage m_DepthImage;
+	VkDeviceMemory m_DepthImageMemory;
+	VkImageView m_DepthImageView;
+
+	void CreateDepthResources()
+	{
+		VkFormat depthFormat = FindDepthFormat(); 
+
+		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 
+					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
+		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT); 
+	}
+
+	VkFormat FindDepthFormat() 
+	{
+		return FindSupportedFormat(
+			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+		);
+	}
+
+	VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) 
+	{
+		for (VkFormat format : candidates) 
+		{
+			VkFormatProperties props{};
+			vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, format, &props);
+
+			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) 
+			{
+				return format; 
+			}
+			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) 
+			{
+				return format; 
+			}
+		}
+
+		throw std::runtime_error("failed to find supported format!"); 
+	}
+
+	bool HasStencilComponent(VkFormat format) 
+	{
+		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT; 
+	}
+
 	// Week 01: 
 	// Actual window
 	// simple fragment + vertex shader creation functions
@@ -279,7 +345,7 @@ private:
 	void CreateTexureImageView();
 	void CreateTextureSampler();
 
-	VkImageView CreateImageView(VkImage image, VkFormat format);
+	VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
 	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, 
 					 VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
