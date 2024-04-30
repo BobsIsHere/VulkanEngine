@@ -91,13 +91,21 @@ void VulkanBase::CreateTextureImage()
 
 	stbi_image_free(pixels);
 
-	CreateImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, 
+	CreateImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,  
 			    VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
 			 m_TextureImage, m_TextureImageMemory);
+
+	// copy staging buffer to image
+	TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	CopyBufferToImage(stagingBuffer.GetVkBuffer(), m_TextureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+
+	// prepare it for shader access
+	TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void VulkanBase::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 {
+	// 1. Create Image
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -117,6 +125,23 @@ void VulkanBase::CreateImage(uint32_t width, uint32_t height, VkFormat format, V
 	{
 		throw std::runtime_error("failed to create image!");
 	}
+
+	// 2. Allocate Memory for Image
+	VkMemoryRequirements memRequirements{};
+	vkGetImageMemoryRequirements(m_Device, image, &memRequirements);
+
+	VkMemoryAllocateInfo allocInfo{}; 
+	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize = memRequirements.size; 
+	allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
+
+	if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to allocate image memory!"); 
+	}
+
+	// 3. Bind Memory to Image
+	vkBindImageMemory(m_Device, image, imageMemory, 0);
 }
 
 void VulkanBase::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) 
@@ -140,12 +165,13 @@ void VulkanBase::TransitionImageLayout(VkImage image, VkFormat format, VkImageLa
 	barrier.subresourceRange.baseArrayLayer = 0; 
 	barrier.subresourceRange.layerCount = 1;
 	barrier.srcAccessMask = 0; // TODO 
-	barrier.dstAccessMask = 0; // TODO
+	barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT; // TODO 
 
 	// pipeline stages where barrier is going to wait
 	vkCmdPipelineBarrier(  
 		commandBuffer, 
-		0 /* TODO */, 0 /* TODO */,
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0,
 		0, nullptr,
 		0, nullptr,
@@ -190,3 +216,20 @@ void VulkanBase::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t widt
 
 	EndSingleTimeCommands(commandBuffer); 
 }
+
+uint32_t VulkanBase::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+	VkPhysicalDeviceMemoryProperties memProperties;
+	vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memProperties);
+
+	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+	{
+		if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+		{
+			return i;
+		}
+	}
+
+	throw std::runtime_error("failed to find suitable memory type!");
+}
+

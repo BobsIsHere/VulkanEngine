@@ -201,8 +201,8 @@ private:
 	}
 
 	// Graphics Pipelines
-	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };   
-	GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
+	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };    
+	GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };    
 
 	// Camera
 	glm::vec2 m_LastMousePosition{ 0.f, 0.f };
@@ -252,6 +252,8 @@ private:
 
 	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 	void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	
 	// Week 03
 	// Renderpass concept
