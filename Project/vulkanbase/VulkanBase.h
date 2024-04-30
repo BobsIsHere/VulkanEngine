@@ -74,6 +74,9 @@ private:
 		m_CommandPool.Initialize(m_Device, FindQueueFamilies(m_PhysicalDevice)); 
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
+		//Create texture image
+		CreateTextureImage();
+
 		// GRAPHICS PIPELINE 2D
 		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pRectangleMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
 		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pOvalMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
@@ -236,7 +239,16 @@ private:
 	GP2_CommandPool m_CommandPool;
 	GP2_CommandBuffer m_CommandBuffer;
 
+	VkImage m_TextureImage; 
+	VkDeviceMemory m_TextureImageMemory; 
+
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+	VkCommandBuffer BeginSingleTimeCommands();
+	void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+	void CreateTextureImage();
+	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, 
+					 VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	
 	// Week 03
 	// Renderpass concept
