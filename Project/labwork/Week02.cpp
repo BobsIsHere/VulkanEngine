@@ -118,3 +118,39 @@ void VulkanBase::CreateImage(uint32_t width, uint32_t height, VkFormat format, V
 		throw std::runtime_error("failed to create image!");
 	}
 }
+
+void VulkanBase::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) 
+{
+	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+	VkImageMemoryBarrier barrier{}; 
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER; 
+	barrier.oldLayout = oldLayout; 
+	barrier.newLayout = newLayout;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED; 
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED; 
+
+	// image affected by barrier
+	barrier.image = image; 
+
+	// image's specific part affected by barrier
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; 
+	barrier.subresourceRange.baseMipLevel = 0; 
+	barrier.subresourceRange.levelCount = 1; 
+	barrier.subresourceRange.baseArrayLayer = 0; 
+	barrier.subresourceRange.layerCount = 1;
+	barrier.srcAccessMask = 0; // TODO 
+	barrier.dstAccessMask = 0; // TODO
+
+	// pipeline stages where barrier is going to wait
+	vkCmdPipelineBarrier(  
+		commandBuffer, 
+		0 /* TODO */, 0 /* TODO */,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &barrier
+	);
+
+	EndSingleTimeCommands(commandBuffer); 
+}
