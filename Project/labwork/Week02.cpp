@@ -121,7 +121,7 @@ void VulkanBase::CreateImage(uint32_t width, uint32_t height, VkFormat format, V
 
 void VulkanBase::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) 
 {
-	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+	VkCommandBuffer commandBuffer{ BeginSingleTimeCommands() };
 
 	VkImageMemoryBarrier barrier{}; 
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER; 
@@ -150,6 +150,42 @@ void VulkanBase::TransitionImageLayout(VkImage image, VkFormat format, VkImageLa
 		0, nullptr,
 		0, nullptr,
 		1, &barrier
+	);
+
+	EndSingleTimeCommands(commandBuffer); 
+}
+
+void VulkanBase::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) 
+{
+	VkCommandBuffer commandBuffer{ BeginSingleTimeCommands() };
+
+	VkBufferImageCopy region{}; 
+	// byte offset in buffer, at which pixel values start
+	region.bufferOffset = 0; 
+	// how pixels laid out in memory, here stightly packed
+	region.bufferRowLength = 0; 
+	region.bufferImageHeight = 0; 
+
+	// which part of image want to copy pixels
+	region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; 
+	region.imageSubresource.mipLevel = 0; 
+	region.imageSubresource.baseArrayLayer = 0; 
+	region.imageSubresource.layerCount = 1; 
+
+	region.imageOffset = { 0, 0, 0 }; 
+	region.imageExtent = { 
+		width, 
+		height, 
+		1
+	};
+
+	vkCmdCopyBufferToImage( 
+		commandBuffer, 
+		buffer,
+		image,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, // which layout image is going to be in
+		1,
+		&region
 	);
 
 	EndSingleTimeCommands(commandBuffer); 
