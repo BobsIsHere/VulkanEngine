@@ -27,6 +27,7 @@ public:
 	void Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer buffer);
 
 	void AddVertex(const glm::vec3 pos, const glm::vec3 color);
+	void AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec2 texCoord); 
 	void AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec3 normal); 
 	void AddVertices(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const glm::vec3 color);
 	void AddIndices(const std::vector<uint16_t> indices); 
@@ -120,6 +121,12 @@ template<typename VertexType>
 void GP2_Mesh<VertexType>::AddVertex(const glm::vec3 pos, const glm::vec3 color)
 {
 	m_MeshVertices.push_back(VertexType{ pos, color });
+}
+
+template<typename VertexType>
+void GP2_Mesh<VertexType>::AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec2 texCoord)
+{
+	m_MeshVertices.push_back(VertexType{ pos, color, texCoord });
 }
 
 template<typename VertexType>
