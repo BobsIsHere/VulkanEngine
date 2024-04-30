@@ -105,6 +105,34 @@ void VulkanBase::CreateTextureImage()
 	stagingBuffer.Destroy(); 
 }
 
+void VulkanBase::CreateTexureImageView()
+{
+	m_TextureImageView = CreateImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
+VkImageView VulkanBase::CreateImageView(VkImage image, VkFormat format)
+{
+	VkImageViewCreateInfo viewInfo{}; 
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO; 
+	viewInfo.image = image; 
+	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; 
+	viewInfo.format = format; 
+	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; 
+	viewInfo.subresourceRange.baseMipLevel = 0; 
+	viewInfo.subresourceRange.levelCount = 1; 
+	viewInfo.subresourceRange.baseArrayLayer = 0; 
+	viewInfo.subresourceRange.layerCount = 1; 
+
+	VkImageView imageView{};
+
+	if (vkCreateImageView(m_Device, &viewInfo, nullptr, &imageView) != VK_SUCCESS) 
+	{
+		throw std::runtime_error("failed to create texture image view!"); 
+	}
+
+	return imageView; 
+}
+
 void VulkanBase::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 {
 	// 1. Create Image

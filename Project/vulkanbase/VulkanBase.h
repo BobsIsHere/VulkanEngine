@@ -76,6 +76,7 @@ private:
 
 		//Create texture image
 		CreateTextureImage();
+		CreateTexureImageView();
 
 		// GRAPHICS PIPELINE 2D
 		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pRectangleMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
@@ -178,6 +179,8 @@ private:
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
 
+		vkDestroyImageView(m_Device, m_TextureImageView, nullptr);
+
 		vkDestroyImage(m_Device, m_TextureImage, nullptr);
 		vkFreeMemory(m_Device, m_TextureImageMemory, nullptr);
 
@@ -245,12 +248,16 @@ private:
 
 	VkImage m_TextureImage; 
 	VkDeviceMemory m_TextureImageMemory; 
+	VkImageView m_TextureImageView;
 
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 	VkCommandBuffer BeginSingleTimeCommands();
 	void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 	void CreateTextureImage();
+	void CreateTexureImageView();
+	VkImageView CreateImageView(VkImage image, VkFormat format);
+
 	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, 
 					 VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 
