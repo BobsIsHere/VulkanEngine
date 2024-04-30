@@ -123,12 +123,12 @@ void VulkanBase::CreateTextureSampler()
 	samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT; 
 	samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 	// Enable anisotropic filtering
-	samplerInfo.anisotropyEnable = VK_TRUE; 
+	samplerInfo.anisotropyEnable = VK_FALSE;  
 
 	VkPhysicalDeviceProperties properties{}; 
 	vkGetPhysicalDeviceProperties(m_PhysicalDevice, &properties);
 	// Set max anisotropy level to max supported by physical device
-	samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+	samplerInfo.maxAnisotropy = 1.f;
 
 	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 	samplerInfo.unnormalizedCoordinates = VK_FALSE; 
