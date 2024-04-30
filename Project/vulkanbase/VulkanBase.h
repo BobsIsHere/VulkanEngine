@@ -177,6 +177,10 @@ private:
 		}
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+
+		vkDestroyImage(m_Device, m_TextureImage, nullptr);
+		vkFreeMemory(m_Device, m_TextureImageMemory, nullptr);
+
 		vkDestroyDevice(m_Device, nullptr);
 
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
