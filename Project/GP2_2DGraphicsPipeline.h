@@ -153,6 +153,27 @@ void GP2_2DGraphicsPipeline<UBO2D>::CreateGraphicsPipeline()
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
+	VkPipelineDepthStencilStateCreateInfo depthStencil{};
+	depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+
+	// depth of new fragments is compared to depth buffer to see if it should be discarded
+	depthStencil.depthTestEnable = VK_TRUE;
+	// new depth of fragments that pass test should be written to depth buffer
+	depthStencil.depthWriteEnable = VK_TRUE;
+
+	// comparison that is performed to keep or discard fragments
+	depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+
+	// allows to only keep fragments that fall within specified range
+	depthStencil.depthBoundsTestEnable = VK_FALSE;
+	depthStencil.minDepthBounds = 0.0f;
+	depthStencil.maxDepthBounds = 1.0f;
+
+	// configure stencil buffer operations
+	depthStencil.stencilTestEnable = VK_FALSE;
+	depthStencil.front = {};
+	depthStencil.back = {};
+
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 
 #pragma region pipelineInfo 
@@ -173,6 +194,9 @@ void GP2_2DGraphicsPipeline<UBO2D>::CreateGraphicsPipeline()
 	pipelineInfo.renderPass = m_RenderPass;
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+	// depth stencil state
+	pipelineInfo.pDepthStencilState = &depthStencil;
 #pragma endregion pipelineInfo
 
 	if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1,

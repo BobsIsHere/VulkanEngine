@@ -109,7 +109,6 @@ private:
 
 		m_pSquareMesh2->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP2D.AddMesh(std::move(m_pSquareMesh2));
-
 		
 		CreateRenderPass(); 
 		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_TextureImageView, m_TextureSampler); 
