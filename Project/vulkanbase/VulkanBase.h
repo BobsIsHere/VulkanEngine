@@ -87,10 +87,10 @@ private:
 		// Square Mesh 1
 		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
 
-		m_pSquareMesh1->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f });
-		m_pSquareMesh1->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f });
-		m_pSquareMesh1->AddVertex({ 0.5f, 0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f });
-		m_pSquareMesh1->AddVertex({ -0.5f, 0.5f, 0.f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f });
+		m_pSquareMesh1->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
+		m_pSquareMesh1->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
+		m_pSquareMesh1->AddVertex({ 0.5f, 0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f });
+		m_pSquareMesh1->AddVertex({ -0.5f, 0.5f, 0.f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f });
 		m_pSquareMesh1->AddIndices({ 0, 1, 2, 2, 3, 0 });
 
 		m_pSquareMesh1->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
@@ -136,24 +136,28 @@ private:
 		vkDestroySemaphore(m_Device, m_ImageAvailableSemaphore, nullptr);
 		vkDestroyFence(m_Device, m_InFlightFence, nullptr);
 		
-		m_CommandPool.Destroy();  
+		m_CommandPool.Destroy();
 
 		for (auto framebuffer : m_SwapChainFramebuffers) 
 		{
 			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
 		}
 
-		m_GP2D.Cleanup(); 
+		m_GP2D.Cleanup();
 		m_GP3D.Cleanup();
 
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 
-		for (auto imageView : m_SwapChainImageViews) 
+		for (auto imageView : m_SwapChainImageViews)
 		{
 			vkDestroyImageView(m_Device, imageView, nullptr);
 		}
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+
+		vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
+		vkDestroyImage(m_Device, m_DepthImage, nullptr);
+		vkFreeMemory(m_Device, m_DepthImageMemory, nullptr);
 
 		vkDestroySampler(m_Device, m_TextureSampler, nullptr); 
 		vkDestroyImageView(m_Device, m_TextureImageView, nullptr);
