@@ -96,16 +96,6 @@ void GP2_Mesh<VertexType>::Initialize(VkQueue graphicsQueue, QueueFamilyIndices 
 	m_pIndexBuffer = new GP2_Buffer{ m_Device, m_PhysicalDevice, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, sizeof(m_MeshIndices[0])* m_MeshIndices.size()};
 	m_pIndexBuffer->CopyBuffer(indexStagingBuffer, graphicsQueue, queueFamilyIndices);
-
-	for (const auto& pTexture : m_pTextures)
-	{
-		pTexture->CreateTextureImage("resources/texture.jpg");
-		pTexture->CreateTextureImageView();   
-		pTexture->CreateTextureSampler();  
-	}
-
-	vertexStagingBuffer.Destroy();
-	indexStagingBuffer.Destroy();
 }
 
 template<typename VertexType>
