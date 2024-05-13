@@ -19,7 +19,8 @@
 #include <algorithm>
 #include <memory>
 
-#include "GP2_Mesh.h"
+#include "GP2_2DMesh.h"
+#include "GP2_3DMesh.h"
 #include "GP2_DepthBuffer.h"
 #include "GP2_CommandPool.h"
 #include "GP2_CommandBuffer.h"
@@ -80,7 +81,7 @@ private:
 		VulkanContext m_Context{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent };
 
 		// Square Mesh 1
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Context, m_GraphicsQueue, m_CommandPool) };
+		std::unique_ptr<GP2_2DMesh> m_pSquareMesh1{ std::make_unique<GP2_2DMesh>(m_Context, m_GraphicsQueue, m_CommandPool) };
 
 		m_pSquareMesh1->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
 		m_pSquareMesh1->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
@@ -92,7 +93,7 @@ private:
 		m_GP2D.AddMesh(std::move(m_pSquareMesh1));
 
 		// Square Mesh 2 (Adjusted Position)
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Context, m_GraphicsQueue, m_CommandPool) };
+		std::unique_ptr<GP2_2DMesh> m_pSquareMesh2{ std::make_unique<GP2_2DMesh>(m_Context, m_GraphicsQueue, m_CommandPool) };
 
 		float overlapOffset = 0.3f; // Adjust as needed
 

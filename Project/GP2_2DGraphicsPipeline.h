@@ -6,12 +6,12 @@
 #include <vulkanbase/VulkanBase.h>
 
 #include "Vertex.h"
-#include "GP2_Mesh.h"
+#include "GP2_2DMesh.h"
 #include "GP2_Shader.h"
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
 
-using pMesh2D = std::unique_ptr<GP2_Mesh<Vertex2D>>;  
+using pMesh2D = std::unique_ptr<GP2_2DMesh>;
 
 template <class UBO2D>
 class GP2_2DGraphicsPipeline final
