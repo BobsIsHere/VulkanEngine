@@ -25,7 +25,7 @@ public:
 	//-----------
 	// Functions
 	//-----------
-	void Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler);
+	void Initialize(const VulkanContext& context);
 
 	void Cleanup();
 
@@ -68,15 +68,18 @@ GP2_3DGraphicsPipeline<UBO3D>::GP2_3DGraphicsPipeline(const std::string& vertexS
 }
 
 template <class UBO3D>
-void GP2_3DGraphicsPipeline<UBO3D>::Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler)
+void GP2_3DGraphicsPipeline<UBO3D>::Initialize(const VulkanContext& context)
 {
 	m_Device = context.device;
 	m_RenderPass = context.renderPass;
 
 	m_Shader.Initialize(m_Device);
 
-	m_pDescriptorPool = new GP2_DescriptorPool<UBO3D>{ m_Device, MAX_FRAMES_IN_FLIGHT };
-	m_pDescriptorPool->Initialize(context, textureImageView, textureSampler);
+	for (pMesh3D& pMesh : m_pMeshes)
+	{
+		m_pDescriptorPool = new GP2_DescriptorPool<UBO3D>{ m_Device, MAX_FRAMES_IN_FLIGHT }; 
+		m_pDescriptorPool->Initialize(context, pMesh->GetTexture(0)->GetTextureImageView(), pMesh->GetTexture(0)->GetTextureSampler());
+	}
 
 	CreateGraphicsPipeline();
 }
@@ -182,8 +185,11 @@ void GP2_3DGraphicsPipeline<UBO3D>::CreateGraphicsPipeline()
 	pipelineInfo.stageCount = 2;
 	pipelineInfo.pStages = m_Shader.GetShaderStages().data();
 
-	pipelineInfo.pVertexInputState = &m_Shader.CreateVertexInputStateInfo();
-	pipelineInfo.pInputAssemblyState = &m_Shader.CreateInputAssemblyStateInfo();
+	VkPipelineVertexInputStateCreateInfo vertexInputStateInfo = m_Shader.CreateVertexInputStateInfo();
+	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateInfo = m_Shader.CreateInputAssemblyStateInfo();
+
+	pipelineInfo.pVertexInputState = &vertexInputStateInfo;
+	pipelineInfo.pInputAssemblyState = &inputAssemblyStateInfo;
 
 	pipelineInfo.pViewportState = &viewportState;
 	pipelineInfo.pRasterizationState = &rasterizer;

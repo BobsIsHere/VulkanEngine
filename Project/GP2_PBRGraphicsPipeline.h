@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <memory>
-#include <vector>
 #include <vulkanbase/VulkanUtil.h>
 #include <vulkanbase/VulkanBase.h>
 
@@ -11,36 +10,34 @@
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
 
-using pMesh2D = std::unique_ptr<GP2_Mesh<Vertex2D>>;  
-
-template <class UBO2D>
-class GP2_2DGraphicsPipeline final
+template <class UBOPBR> 
+class GP2_PBRGraphicsPipeline final
 {
 public:
 	//---------------------------
 	// Constructors & Destructor
 	//---------------------------
-	GP2_2DGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
-	~GP2_2DGraphicsPipeline() = default;
+	GP2_PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
+	~GP2_PBRGraphicsPipeline() = default;
 
 	//-----------
 	// Functions
 	//-----------
-	void Initialize(const VulkanContext& context);
+	void Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler);
 
 	void Cleanup();
 
 	void Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx);
 	void DrawScene(const GP2_CommandBuffer& buffer);
-	void AddMesh(pMesh2D mesh); 
-	 
-	void SetUBO(UBO2D ubo, size_t uboIndex);
+	void AddMesh(pMesh3D mesh);
+
+	void SetUBO(UBOPBR ubo, size_t uboIndex); 
 
 private:
 	//-----------
 	// Functions
 	//-----------
-	void CreateGraphicsPipeline(); 
+	void CreateGraphicsPipeline();
 	VkPushConstantRange CreatePushConstantRange();
 
 	//-----------
@@ -51,13 +48,13 @@ private:
 	VkPipeline m_GraphicsPipeline;
 	VkPipelineLayout m_PipelineLayout;
 
-	GP2_Shader<Vertex2D> m_Shader;  
-	std::vector<pMesh2D> m_pMeshes; 
-	GP2_DescriptorPool<UBO2D>* m_pDescriptorPool;
+	GP2_Shader<Vertex3D> m_Shader;
+	std::vector<pMesh3D> m_pMeshes;
+	GP2_DescriptorPool<UBOPBR>* m_pDescriptorPool; 
 };
 
-template <class UBO2D>
-GP2_2DGraphicsPipeline<UBO2D>::GP2_2DGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) :
+template<class UBOPBR>
+inline GP2_PBRGraphicsPipeline<UBOPBR>::GP2_PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) :
 	m_Device{},
 	m_RenderPass{},
 	m_GraphicsPipeline{},
@@ -68,36 +65,97 @@ GP2_2DGraphicsPipeline<UBO2D>::GP2_2DGraphicsPipeline(const std::string& vertexS
 {
 }
 
-template <class UBO2D>
-void GP2_2DGraphicsPipeline<UBO2D>::Initialize(const VulkanContext& context)
+template<class UBOPBR>
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler)
 {
-	m_Device = context.device;
-	m_RenderPass = context.renderPass;
+	m_Device = context.device; 
+	m_RenderPass = context.renderPass; 
 
-	m_Shader.Initialize(m_Device);
+	m_Shader.Initialize(m_Device); 
 
-	for (pMesh2D& pMesh : m_pMeshes)
+	for (pMesh3D& pMesh : m_pMeshes)
 	{
-		m_pDescriptorPool = new GP2_DescriptorPool<UBO2D>{ m_Device, MAX_FRAMES_IN_FLIGHT }; 
-		m_pDescriptorPool->Initialize(context, pMesh->GetTexture(0)->GetTextureImageView(), pMesh->GetTexture(0)->GetTextureSampler());
+		m_pDescriptorPool = new GP2_DescriptorPool<UBOPBR>{ m_Device, MAX_FRAMES_IN_FLIGHT }; 
+		m_pDescriptorPool->Initialize(context, pMesh->GetTexture(0).GetTextureImageView(), pMesh->GetTexture(0).GetTextureSampler());
 	}
 
-	CreateGraphicsPipeline();
+	CreateGraphicsPipeline(); 
 }
 
-template <class UBO2D>
-VkPushConstantRange GP2_2DGraphicsPipeline<UBO2D>::CreatePushConstantRange()
+template<class UBOPBR>
+inline VkPushConstantRange GP2_PBRGraphicsPipeline<UBOPBR>::CreatePushConstantRange()
 {
 	VkPushConstantRange pushConstantRange = {};
-	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from
+	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from 
 	pushConstantRange.offset = 0;
-	pushConstantRange.size = sizeof(MeshData); // Size of push constant block
+	pushConstantRange.size = sizeof(MeshData); // Size of push constant block 
 
 	return pushConstantRange;
 }
 
-template <class UBO2D>
-void GP2_2DGraphicsPipeline<UBO2D>::CreateGraphicsPipeline()
+template<class UBOPBR>
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::Cleanup()
+{
+	for (size_t idx = 0; idx < m_pMeshes.size(); ++idx)
+	{
+		m_pMeshes[idx]->DestroyMesh();
+	}
+
+	vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
+
+	delete m_pDescriptorPool;
+}
+
+template<class UBOPBR>
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx)
+{
+	vkCmdBindPipeline(buffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)extent.width;
+	viewport.height = (float)extent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(buffer.GetVkCommandBuffer(), 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = { 0, 0 };
+	scissor.extent = extent;
+	vkCmdSetScissor(buffer.GetVkCommandBuffer(), 0, 1, &scissor);
+
+	m_pDescriptorPool->BindDescriptorSet(buffer.GetVkCommandBuffer(), m_PipelineLayout, imageIdx);
+
+	DrawScene(buffer);
+}
+
+template<class UBOPBR>
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& buffer)
+{
+	m_pDescriptorPool->BindDescriptorSet(buffer.GetVkCommandBuffer(), m_PipelineLayout, 0);
+
+	for (auto& mesh : m_pMeshes)
+	{
+		mesh->Draw(m_PipelineLayout, buffer.GetVkCommandBuffer());
+	}
+}
+
+template<class UBOPBR>
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::AddMesh(pMesh3D mesh)
+{
+	m_pMeshes.push_back(std::move(mesh));
+}
+
+template<class UBOPBR>
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::SetUBO(UBOPBR ubo, size_t uboIndex)
+{
+	m_pDescriptorPool->SetUBO(ubo, uboIndex); 
+}
+
+template<class UBOPBR>
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::CreateGraphicsPipeline()
 {
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -186,11 +244,8 @@ void GP2_2DGraphicsPipeline<UBO2D>::CreateGraphicsPipeline()
 	pipelineInfo.stageCount = 2;
 	pipelineInfo.pStages = m_Shader.GetShaderStages().data();
 
-	VkPipelineVertexInputStateCreateInfo vertexInputStateInfo = m_Shader.CreateVertexInputStateInfo(); 
-	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateInfo = m_Shader.CreateInputAssemblyStateInfo();
-
-	pipelineInfo.pVertexInputState = &vertexInputStateInfo; 
-	pipelineInfo.pInputAssemblyState = &inputAssemblyStateInfo; 
+	pipelineInfo.pVertexInputState = &m_Shader.CreateVertexInputStateInfo();
+	pipelineInfo.pInputAssemblyState = &m_Shader.CreateInputAssemblyStateInfo();
 
 	pipelineInfo.pViewportState = &viewportState;
 	pipelineInfo.pRasterizationState = &rasterizer;
@@ -213,65 +268,4 @@ void GP2_2DGraphicsPipeline<UBO2D>::CreateGraphicsPipeline()
 	}
 
 	m_Shader.DestroyShaderModule(m_Device);
-}
-
-template <class UBO2D>
-void GP2_2DGraphicsPipeline<UBO2D>::Cleanup()
-{
-	for (size_t idx = 0; idx < m_pMeshes.size(); ++idx)
-	{
-		m_pMeshes[idx]->DestroyMesh();
-	}
-
-	vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
-
-	delete m_pDescriptorPool;
-}
-
-template <class UBO2D>
-void GP2_2DGraphicsPipeline<UBO2D>::Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx)
-{
-	vkCmdBindPipeline(buffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
-
-	VkViewport viewport{};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = (float)extent.width;
-	viewport.height = (float)extent.height;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(buffer.GetVkCommandBuffer(), 0, 1, &viewport);
-
-	VkRect2D scissor{};
-	scissor.offset = { 0, 0 };
-	scissor.extent = extent;
-	vkCmdSetScissor(buffer.GetVkCommandBuffer(), 0, 1, &scissor);
-
-	m_pDescriptorPool->BindDescriptorSet(buffer.GetVkCommandBuffer(), m_PipelineLayout, imageIdx);
-
-	DrawScene(buffer);
-}
-
-template <class UBO2D>
-void GP2_2DGraphicsPipeline<UBO2D>::DrawScene(const GP2_CommandBuffer& buffer)
-{
-	m_pDescriptorPool->BindDescriptorSet(buffer.GetVkCommandBuffer(), m_PipelineLayout, 0); 
-
-	for (auto& mesh : m_pMeshes)
-	{
-		mesh->Draw(m_PipelineLayout, buffer.GetVkCommandBuffer());
-	}
-}
-
-template <class UBO2D>
-void GP2_2DGraphicsPipeline<UBO2D>::AddMesh(pMesh2D mesh)  
-{
-	m_pMeshes.push_back(std::move(mesh));
-}
-
-template <class UBO2D>
-void GP2_2DGraphicsPipeline<UBO2D>::SetUBO(UBO2D ubo, size_t uboIndex)
-{
-	m_pDescriptorPool->SetUBO(ubo, uboIndex);
 }

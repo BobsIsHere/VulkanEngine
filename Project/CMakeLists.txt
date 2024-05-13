@@ -31,6 +31,7 @@ set(SOURCES
     "main.cpp"
     "vulkanbase/VulkanBase.h" 
     "vulkanbase/VulkanUtil.h"
+    "vulkanbase/VulkanUtil.cpp"
     # Add other source files here, but remove redundant and unnecessary entries
     "labwork/Week01.cpp"
     "labwork/Week02.cpp" 
@@ -38,12 +39,30 @@ set(SOURCES
     "labwork/Week04.cpp" 
     "labwork/Week05.cpp"
     "labwork/Week06.cpp"
-    "GP2_Shader.h" 
-    "GP2_Shader.cpp"
+    "GP2_Shader.h"
+    "GP2_Shader.cpp" 
+    "GP2_CommandPool.h"
+    "GP2_CommandPool.cpp"
+    "GP2_CommandBuffer.h" 
+    "GP2_CommandBuffer.cpp" 
+    "GP2_Mesh.h"  
+    "GP2_Mesh.cpp"
+    "GP2_Buffer.h" 
+    "GP2_Buffer.cpp" 
+    "Vertex.h" 
+    "GP2_UniformBufferObject.h" 
+    "GP2_DescriptorPool.h" 
+    "GP2_2DGraphicsPipeline.h" 
+    "GP2_3DGraphicsPipeline.h" 
+    "GP2_PBRGraphicsPipeline.h"  
+    "GP2_Texture.h" 
+    "GP2_Texture.cpp" 
+    "GP2_DepthBuffer.h" 
+    "GP2_DepthBuffer.cpp"
     "${STB_DIR}/stb_image.h")
 
 # Create the executable
-add_executable(${PROJECT_NAME} ${SOURCES} "vulkanbase/VulkanUtil.cpp" "GP2_CommandPool.h" "GP2_CommandPool.cpp" "GP2_CommandBuffer.h" "GP2_CommandBuffer.cpp" "GP2_Mesh.h"  "GP2_Buffer.h" "GP2_Buffer.cpp" "Vertex.h" "GP2_UniformBufferObject.h" "GP2_DescriptorPool.h" "GP2_2DGraphicsPipeline.h" "GP2_3DGraphicsPipeline.h" "GP2_Shader.cpp")
+add_executable(${PROJECT_NAME} ${SOURCES})
 add_dependencies(${PROJECT_NAME} Shaders)
 
 # Include directories

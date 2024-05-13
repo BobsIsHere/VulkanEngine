@@ -20,13 +20,12 @@
 #include <memory>
 
 #include "GP2_Mesh.h"
+#include "GP2_DepthBuffer.h"
 #include "GP2_CommandPool.h"
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
 #include "GP2_2DGraphicsPipeline.h"
 #include "GP2_3DGraphicsPipeline.h"
-
-constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
@@ -75,17 +74,13 @@ private:
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
 		// Depth Buffer
-		CreateDepthResources();
+		m_DepthBuffer.CreateDepthResources(); 
 
-		// Create texture image
-		CreateTextureImage();
-		CreateTexureImageView();
-		CreateTextureSampler();
-
-		//FirstAssignment(); 
+		//Create Vulkan Context
+		VulkanContext m_Context{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent };
 
 		// Square Mesh 1
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Context, m_GraphicsQueue, m_CommandPool) };
 
 		m_pSquareMesh1->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
 		m_pSquareMesh1->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
@@ -97,7 +92,7 @@ private:
 		m_GP2D.AddMesh(std::move(m_pSquareMesh1));
 
 		// Square Mesh 2 (Adjusted Position)
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Context, m_GraphicsQueue, m_CommandPool) };
 
 		float overlapOffset = 0.3f; // Adjust as needed
 
@@ -111,8 +106,8 @@ private:
 		m_GP2D.AddMesh(std::move(m_pSquareMesh2));
 		
 		CreateRenderPass(); 
-		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_TextureImageView, m_TextureSampler); 
-		m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_TextureImageView, m_TextureSampler);
+		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
+		m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent });
 		CreateFrameBuffers(); 
 
 		// week 06
@@ -155,16 +150,6 @@ private:
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
 
-		vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
-		vkDestroyImage(m_Device, m_DepthImage, nullptr);
-		vkFreeMemory(m_Device, m_DepthImageMemory, nullptr);
-
-		vkDestroySampler(m_Device, m_TextureSampler, nullptr); 
-		vkDestroyImageView(m_Device, m_TextureImageView, nullptr);
-
-		vkDestroyImage(m_Device, m_TextureImage, nullptr);
-		vkFreeMemory(m_Device, m_TextureImageMemory, nullptr);
-
 		vkDestroyDevice(m_Device, nullptr);
 
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
@@ -190,7 +175,10 @@ private:
 
 	// Graphics Pipelines
 	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };    
-	GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };    
+	GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
+
+	// Depth Buffer
+	GP2_DepthBuffer m_DepthBuffer{ VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_GraphicsQueue, m_CommandPool };
 
 	// Camera
 	glm::vec2 m_LastMousePosition{ 0.f, 0.f };
@@ -205,116 +193,6 @@ private:
 	const float m_Radius{ 5.f };
 	float m_Yaw{ 0.f };
 	float m_Pitch{ 0.f };
-
-	//1st Assignment
-	void FirstAssignment()
-	{
-		// GRAPHICS PIPELINE 2D
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pRectangleMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pOvalMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
-
-		//Draw Rectangle
-		m_pRectangleMesh->AddVertex({ 0.25f, -0.25f, 0.f }, { 0.25f, 0.75f, 0.25f }); // 0
-		m_pRectangleMesh->AddVertex({ 0.75f, -0.25f, 0.f }, { 0.25f, 0.75f, 0.25f }); // 1
-		m_pRectangleMesh->AddVertex({ 0.25f, -0.75f, 0.f }, { 0.75f, 0.25f, 0.75f }); // 2
-		m_pRectangleMesh->AddVertex({ 0.75f, -0.75f, 0.f }, { 0.75f, 0.25f, 0.75f }); // 3
-
-		const std::vector<uint16_t> rectIndices{ 2, 1, 0, 3, 1, 2 };
-		m_pRectangleMesh->AddIndices(rectIndices);
-
-		m_pRectangleMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pRectangleMesh));
-
-		//Draw Oval
-		m_pOvalMesh->AddVertex({ 0.71f / 4 - 0.5f, 0.71f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 0.f }); // 0
-		m_pOvalMesh->AddVertex({ 0.f - 0.5f, 1.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 1
-		m_pOvalMesh->AddVertex({ -0.71f / 4 - 0.5f, 0.71f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 1.f }); // 2
-		m_pOvalMesh->AddVertex({ -1.f / 4 - 0.5f, 0.f - 0.5f, 0.f }, { 0.f, 0.f, 1.f }); // 3
-		m_pOvalMesh->AddVertex({ -0.71f / 4 - 0.5f, -0.71f / 4 - 0.5f, 0.f }, { 1.f, 0.f, 1.f }); // 4
-		m_pOvalMesh->AddVertex({ 0.f / 4 - 0.5f, -1.f / 4 - 0.5f, 0.f }, { 1.f,0.f,0.f }); // 5
-		m_pOvalMesh->AddVertex({ 0.71f / 4 - 0.5f, -0.71f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 0.f }); // 6
-		m_pOvalMesh->AddVertex({ 1.f / 4 - 0.5f, 0.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 7
-		m_pOvalMesh->AddVertex({ 0.f - 0.5f, 0.f - 0.5f, 0.f }, { 1.f, 1.f, 1.f }); // center, 8
-
-		const std::vector<uint16_t> ovalIndices{
-			0, 8, 1,
-			1, 8, 2,
-			2, 8, 3,
-			3, 8, 4,
-			4, 8, 5,
-			5, 8, 6,
-			6, 8, 7,
-			7, 8, 0
-		};
-		m_pOvalMesh->AddIndices(ovalIndices);
-
-		m_pOvalMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pOvalMesh));
-
-		// GRAPHICS PIPELINE 3D
-		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pBunnyMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
-		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
-
-		//Draw Cube
-		m_pBunnyMesh->ParseOBJ("resources/lowpoly_bunny2.obj", { 1.f, 0.5f, 0.5f });
-		m_pBunnyMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP3D.AddMesh(std::move(m_pBunnyMesh));
-
-		//Draw Simple Object
-		m_pCubeMesh->ParseOBJ("resources/simple_cube.obj", { 0.5f, 1.f, 0.5f });
-		m_pCubeMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP3D.AddMesh(std::move(m_pCubeMesh));
-	}
-
-	// Depth Buffer
-	VkImage m_DepthImage;
-	VkDeviceMemory m_DepthImageMemory;
-	VkImageView m_DepthImageView;
-
-	void CreateDepthResources()
-	{
-		VkFormat depthFormat = FindDepthFormat(); 
-
-		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
-		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT); 
-
-		TransitionImageLayout(m_DepthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL); 
-	}
-
-	VkFormat FindDepthFormat() 
-	{
-		return FindSupportedFormat(
-			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-		);
-	}
-
-	VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) 
-	{
-		for (VkFormat format : candidates) 
-		{
-			VkFormatProperties props{};
-			vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, format, &props);
-
-			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) 
-			{
-				return format; 
-			}
-			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) 
-			{
-				return format; 
-			}
-		}
-
-		throw std::runtime_error("failed to find supported format!"); 
-	}
-
-	bool HasStencilComponent(VkFormat format) 
-	{
-		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT; 
-	}
 
 	// Week 01: 
 	// Actual window
@@ -337,28 +215,7 @@ private:
 	GP2_CommandPool m_CommandPool;
 	GP2_CommandBuffer m_CommandBuffer;
 
-	VkImage m_TextureImage; 
-	VkDeviceMemory m_TextureImageMemory; 
-	VkImageView m_TextureImageView;
-	VkSampler m_TextureSampler;
-
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
-	VkCommandBuffer BeginSingleTimeCommands();
-	void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
-
-	void CreateTextureImage();
-	void CreateTexureImageView();
-	void CreateTextureSampler();
-
-	VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-
-	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, 
-					 VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-
-	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-	void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-
-	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	
 	// Week 03
 	// Renderpass concept

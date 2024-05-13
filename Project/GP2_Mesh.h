@@ -1,12 +1,15 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <memory>
 #include <iostream>
 #include <glm/glm.hpp>
 
 #include "Vertex.h"
 #include "GP2_Shader.h"
 #include "GP2_Buffer.h"
+#include "GP2_Texture.h"
+#include "GP2_CommandPool.h"
 #include "vulkanbase/VulkanUtil.h"
 
 template<typename VertexType> 
@@ -16,7 +19,7 @@ public:
 	//---------------------------
 	// Constructors & Destructor
 	//---------------------------
-	GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice);
+	GP2_Mesh(VulkanContext context, VkQueue graphicsQueue, GP2_CommandPool commandPool); 
 	~GP2_Mesh() = default;
 
 	//-----------
@@ -31,6 +34,8 @@ public:
 	void AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec3 normal); 
 	void AddVertices(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const glm::vec3 color);
 	void AddIndices(const std::vector<uint16_t> indices); 
+
+	GP2_Texture* GetTexture(const int index) const { return m_pTextures[index]; }
 
 	bool ParseOBJ(const std::string& filename, const glm::vec3 color); 
 
@@ -51,18 +56,24 @@ private:
 	
 	std::vector<VertexType> m_MeshVertices;  
 	std::vector<uint16_t> m_MeshIndices;
+	std::vector<GP2_Texture*> m_pTextures; 
 
 	MeshData m_VertexConstant; 
 };
 
 template<typename VertexType>
-GP2_Mesh<VertexType>::GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice) :
-	m_Device{ device },
-	m_PhysicalDevice{ physicalDevice },
+GP2_Mesh<VertexType>::GP2_Mesh(VulkanContext context, VkQueue graphicsQueue, GP2_CommandPool commandPool) :
+	m_Device{ context.device },
+	m_PhysicalDevice{ context.physicalDevice },
 	m_VertexConstant{ glm::mat4(1.f) },
 	m_pVertexBuffer{},
-	m_pIndexBuffer{}
+	m_pIndexBuffer{},
+	m_pTextures( 5 )
 {
+	for (auto& pTexture : m_pTextures) 
+	{
+		pTexture = { context, graphicsQueue, commandPool };
+	}
 }
 
 template<typename VertexType>
@@ -85,6 +96,13 @@ void GP2_Mesh<VertexType>::Initialize(VkQueue graphicsQueue, QueueFamilyIndices 
 	m_pIndexBuffer = new GP2_Buffer{ m_Device, m_PhysicalDevice, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, sizeof(m_MeshIndices[0])* m_MeshIndices.size()};
 	m_pIndexBuffer->CopyBuffer(indexStagingBuffer, graphicsQueue, queueFamilyIndices);
+
+	for (const auto& pTexture : m_pTextures)
+	{
+		pTexture->CreateTextureImage("resources/texture.jpg");
+		pTexture->CreateTextureImageView();   
+		pTexture->CreateTextureSampler();  
+	}
 
 	vertexStagingBuffer.Destroy();
 	indexStagingBuffer.Destroy();
@@ -159,7 +177,7 @@ void GP2_Mesh<VertexType>::AddIndices(const std::vector<uint16_t> indices)
 	m_MeshIndices = indices;
 }
 
-template<typename VertexType>
+template<typename VertexType>  
 bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3 color)
 {
 	std::ifstream file(filename);
@@ -207,7 +225,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 			//add the material index as attibute to the attribute array
 
 			// Faces or triangles
-			Vertex3D vertex{}; 
+			Vertex3D vertex{};   
 			size_t iPosition, iNormal; 
 
 			uint32_t tempIndices[3];
