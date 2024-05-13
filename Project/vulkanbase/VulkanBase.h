@@ -151,15 +151,12 @@ private:
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
 
-<<<<<<< HEAD
-=======
 		vkDestroySampler(m_Device, m_TextureSampler, nullptr); 
 		vkDestroyImageView(m_Device, m_TextureImageView, nullptr);
 
 		vkDestroyImage(m_Device, m_TextureImage, nullptr);
 		vkFreeMemory(m_Device, m_TextureImageMemory, nullptr);
 
->>>>>>> parent of 89343d7 (Fixed variables not being deleted issue)
 		vkDestroyDevice(m_Device, nullptr);
 
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
