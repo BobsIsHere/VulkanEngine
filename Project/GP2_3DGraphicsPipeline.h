@@ -5,12 +5,12 @@
 #include <vulkanbase/VulkanBase.h>
 
 #include "Vertex.h"
-#include "GP2_Mesh.h"
+#include "GP2_3DMesh.h"
 #include "GP2_Shader.h"
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
 
-using pMesh3D = std::unique_ptr<GP2_Mesh<Vertex3D>>;
+using pMesh3D = std::unique_ptr<GP2_3DMesh>;
 
 template <class UBO3D>
 class GP2_3DGraphicsPipeline final
