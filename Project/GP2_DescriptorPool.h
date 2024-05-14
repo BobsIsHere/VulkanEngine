@@ -20,7 +20,7 @@ public:
 	//-----------
 	// Functions
 	//-----------
-	void Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler);
+	void Initialize(const VulkanContext& context, const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers);
 
 	void SetUBO(UBO data, size_t index);
 
@@ -29,7 +29,7 @@ public:
 		return m_DescriptorSetLayout;
 	}
 
-	void CreateDescriptorSets(VkImageView textureImageView, VkSampler textureSampler);
+	void CreateDescriptorSets(const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers);
 
 	void BindDescriptorSet(VkCommandBuffer buffer, VkPipelineLayout layout, size_t index);
 
@@ -95,15 +95,15 @@ GP2_DescriptorPool<UBO>::~GP2_DescriptorPool()
 }
 
 template<class UBO>
-inline void GP2_DescriptorPool<UBO>::Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler)
+inline void GP2_DescriptorPool<UBO>::Initialize(const VulkanContext& context, const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers)
 {
 	CreateDescriptorSetLayout(context);
 	CreateUBOs(context);
-	CreateDescriptorSets(textureImageView, textureSampler);
+	CreateDescriptorSets(textureImageViewsSamplers);
 }
 
 template<class UBO>
-void GP2_DescriptorPool<UBO>::CreateDescriptorSets(VkImageView textureImageView, VkSampler textureSampler) 
+void GP2_DescriptorPool<UBO>::CreateDescriptorSets(const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers)
 {
 	std::vector<VkDescriptorSetLayout> layouts(m_Count, m_DescriptorSetLayout);
 
@@ -126,28 +126,33 @@ void GP2_DescriptorPool<UBO>::CreateDescriptorSets(VkImageView textureImageView,
 		bufferInfo.offset = 0;
 		bufferInfo.range = m_Size;
 
-		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo.imageView = textureImageView;  
-		imageInfo.sampler = textureSampler; 
+		std::vector<VkWriteDescriptorSet> descriptorWrites{};
 
-		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+		descriptorWrites.push_back({});
+		descriptorWrites.back().sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET; 
+		descriptorWrites.back().dstSet = m_DescriptorSets[idx]; 
+		descriptorWrites.back().dstBinding = 0; 
+		descriptorWrites.back().dstArrayElement = 0; 
+		descriptorWrites.back().descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; 
+		descriptorWrites.back().descriptorCount = 1; 
+		descriptorWrites.back().pBufferInfo = &bufferInfo; 
 
-		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET; 
-		descriptorWrites[0].dstSet = m_DescriptorSets[idx];  
-		descriptorWrites[0].dstBinding = 0; 
-		descriptorWrites[0].dstArrayElement = 0; 
-		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; 
-		descriptorWrites[0].descriptorCount = 1; 
-		descriptorWrites[0].pBufferInfo = &bufferInfo; 
+		for (size_t texIdx = 0; texIdx < textureImageViewsSamplers.size(); ++texIdx) 
+		{
+			VkDescriptorImageInfo imageInfo{}; 
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; 
+			imageInfo.imageView = textureImageViewsSamplers[texIdx].first; 
+			imageInfo.sampler = textureImageViewsSamplers[texIdx].second; 
 
-		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET; 
-		descriptorWrites[1].dstSet = m_DescriptorSets[idx];
-		descriptorWrites[1].dstBinding = 1; 
-		descriptorWrites[1].dstArrayElement = 0; 
-		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; 
-		descriptorWrites[1].descriptorCount = 1; 
-		descriptorWrites[1].pImageInfo = &imageInfo; 
+			descriptorWrites.push_back({});
+			descriptorWrites.back().sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET; 
+			descriptorWrites.back().dstSet = m_DescriptorSets[idx]; 
+			descriptorWrites.back().dstBinding = 1 + static_cast<uint32_t>(texIdx);  
+			descriptorWrites.back().dstArrayElement = 0; 
+			descriptorWrites.back().descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; 
+			descriptorWrites.back().descriptorCount = 1; 
+			descriptorWrites.back().pImageInfo = &imageInfo; 
+		}
 
 		vkUpdateDescriptorSets(m_Device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr); 
 	}

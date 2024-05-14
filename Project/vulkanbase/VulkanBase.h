@@ -77,6 +77,7 @@ private:
 
 		// Depth Buffer
 		m_DepthBuffer.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_GraphicsQueue, m_CommandPool);
+		m_DepthBuffer.CreateDepthResources();
 
 		// Create texture image
 		//CreateTextureImage();
@@ -155,6 +156,8 @@ private:
 		}
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+
+		m_DepthBuffer.Cleanup();
 
 		/*vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
 		vkDestroyImage(m_Device, m_DepthImage, nullptr);

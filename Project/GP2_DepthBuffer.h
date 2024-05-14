@@ -35,6 +35,8 @@ public:
 	// Functions
 	//-----------
 	void Initialize(VulkanContext context, VkQueue graphicsQueue, GP2_CommandPool commandPool); 
+	void Cleanup();
+
 	void CreateDepthResources();
 	VkImageView GetDepthImageView() const { return m_DepthImageView; }
 	VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
@@ -58,8 +60,8 @@ private:
 	//-----------
 	VulkanContext m_VulkanContext;
 	GP2_CommandPool m_CommandPool;
-
 	VkQueue m_GraphicsQueue;
+
 	VkImage m_DepthImage;
 	VkDeviceMemory m_DepthImageMemory;
 	VkImageView m_DepthImageView;

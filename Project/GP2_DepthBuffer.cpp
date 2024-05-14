@@ -12,9 +12,6 @@ GP2_DepthBuffer::GP2_DepthBuffer() :
 
 GP2_DepthBuffer::~GP2_DepthBuffer()
 {
-	vkDestroyImageView(m_VulkanContext.device, m_DepthImageView, nullptr);
-	vkDestroyImage(m_VulkanContext.device, m_DepthImage, nullptr);
-	vkFreeMemory(m_VulkanContext.device, m_DepthImageMemory, nullptr);
 }
 
 void GP2_DepthBuffer::Initialize(VulkanContext context, VkQueue graphicsQueue, GP2_CommandPool commandPool)
@@ -22,8 +19,13 @@ void GP2_DepthBuffer::Initialize(VulkanContext context, VkQueue graphicsQueue, G
 	m_VulkanContext = context;
 	m_CommandPool = commandPool;
 	m_GraphicsQueue = graphicsQueue;
+}
 
-	CreateDepthResources();
+void GP2_DepthBuffer::Cleanup()
+{
+	vkDestroyImageView(m_VulkanContext.device, m_DepthImageView, nullptr);
+	vkDestroyImage(m_VulkanContext.device, m_DepthImage, nullptr);
+	vkFreeMemory(m_VulkanContext.device, m_DepthImageMemory, nullptr);
 }
 
 void GP2_DepthBuffer::CreateDepthResources()
@@ -81,7 +83,7 @@ VkImageView GP2_DepthBuffer::CreateImageView(VkImage image, VkFormat format, VkI
 	viewInfo.image = image;
 	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	viewInfo.format = format;
-	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 	viewInfo.subresourceRange.baseMipLevel = 0;
 	viewInfo.subresourceRange.levelCount = 1;
 	viewInfo.subresourceRange.baseArrayLayer = 0;

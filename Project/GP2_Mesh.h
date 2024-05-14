@@ -39,6 +39,7 @@ public:
 	void AddIndices(const std::vector<uint16_t> indices); 
 
 	GP2_Texture* GetTexture(const int idx) const;
+	size_t GetTextureCount() const { return m_pTextures.size(); }
 
 	bool ParseOBJ(const std::string& filename, const glm::vec3 color); 
 

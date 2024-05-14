@@ -52,7 +52,7 @@ private:
 
 	GP2_Shader<Vertex2D> m_Shader;  
 	std::vector<pMesh2D> m_pMeshes; 
-	GP2_DescriptorPool<UBO2D>* m_pDescriptorPool;
+	GP2_DescriptorPool<UBO2D>* m_pDescriptorPool; 
 };
 
 template <class UBO2D>
@@ -75,8 +75,18 @@ void GP2_2DGraphicsPipeline<UBO2D>::Initialize(const VulkanContext& context)
 
 	m_Shader.Initialize(m_Device);
 
-	m_pDescriptorPool = new GP2_DescriptorPool<UBO2D>{ m_Device, MAX_FRAMES_IN_FLIGHT };
-	m_pDescriptorPool->Initialize(context, textureImageView, textureSampler); 
+	std::vector<std::pair<VkImageView, VkSampler>> textureImageViewsSamplers; 
+
+	for (auto& mesh : m_pMeshes)
+	{
+		for (int i = 0; i < mesh->GetTextureCount(); ++i)
+		{
+			textureImageViewsSamplers.push_back({ mesh->GetTexture(i)->GetTextureImageView(), mesh->GetTexture(i)->GetTextureSampler() });
+		}
+	}
+
+	m_pDescriptorPool = new GP2_DescriptorPool<UBO2D>{ m_Device, MAX_FRAMES_IN_FLIGHT }; 
+	m_pDescriptorPool->Initialize(context, textureImageViewsSamplers); 
 
 	CreateGraphicsPipeline();
 }

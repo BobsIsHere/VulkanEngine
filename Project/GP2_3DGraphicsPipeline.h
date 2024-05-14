@@ -25,7 +25,7 @@ public:
 	//-----------
 	// Functions
 	//-----------
-	void Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler);
+	void Initialize(const VulkanContext& context);
 
 	void Cleanup();
 
@@ -68,15 +68,25 @@ GP2_3DGraphicsPipeline<UBO3D>::GP2_3DGraphicsPipeline(const std::string& vertexS
 }
 
 template <class UBO3D>
-void GP2_3DGraphicsPipeline<UBO3D>::Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler)
+void GP2_3DGraphicsPipeline<UBO3D>::Initialize(const VulkanContext& context)
 {
 	m_Device = context.device;
 	m_RenderPass = context.renderPass;
 
 	m_Shader.Initialize(m_Device);
 
+	std::vector<std::pair<VkImageView, VkSampler>> textureImageViewsSamplers;
+
+	for (auto& mesh : m_pMeshes)
+	{
+		for (int i = 0; i < mesh->GetTextureCount(); ++i)
+		{
+			textureImageViewsSamplers.push_back({ mesh->GetTexture(i)->GetTextureImageView(), mesh->GetTexture(i)->GetTextureSampler() });
+		}
+	}
+
 	m_pDescriptorPool = new GP2_DescriptorPool<UBO3D>{ m_Device, MAX_FRAMES_IN_FLIGHT };
-	m_pDescriptorPool->Initialize(context, textureImageView, textureSampler);
+	m_pDescriptorPool->Initialize(context, textureImageViewsSamplers); 
 
 	CreateGraphicsPipeline();
 }
