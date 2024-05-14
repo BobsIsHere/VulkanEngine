@@ -20,7 +20,7 @@ public:
 	//-----------
 	// Functions
 	//-----------
-	void Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler); 
+	void Initialize(const VulkanContext& context, VkImageView textureImageView, VkSampler textureSampler);
 
 	void SetUBO(UBO data, size_t index);
 
@@ -103,7 +103,7 @@ inline void GP2_DescriptorPool<UBO>::Initialize(const VulkanContext& context, Vk
 }
 
 template<class UBO>
-void GP2_DescriptorPool<UBO>::CreateDescriptorSets(VkImageView textureImageView, VkSampler textureSampler)
+void GP2_DescriptorPool<UBO>::CreateDescriptorSets(VkImageView textureImageView, VkSampler textureSampler) 
 {
 	std::vector<VkDescriptorSetLayout> layouts(m_Count, m_DescriptorSetLayout);
 
@@ -128,7 +128,7 @@ void GP2_DescriptorPool<UBO>::CreateDescriptorSets(VkImageView textureImageView,
 
 		VkDescriptorImageInfo imageInfo{};
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo.imageView = textureImageView; 
+		imageInfo.imageView = textureImageView;  
 		imageInfo.sampler = textureSampler; 
 
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};

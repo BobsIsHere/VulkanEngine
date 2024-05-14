@@ -1,4 +1,5 @@
 #include "vulkanbase/VulkanBase.h"
+#include <GP2_DepthBuffer.h>
 
 void VulkanBase::CreateFrameBuffers()
 {
@@ -8,7 +9,7 @@ void VulkanBase::CreateFrameBuffers()
 	{
 		std::array<VkImageView, 2> attachments = {
 			m_SwapChainImageViews[i],
-			m_DepthImageView
+			m_DepthBuffer.GetDepthImageView()
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{};
@@ -44,7 +45,10 @@ void VulkanBase::CreateRenderPass()
 	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 	VkAttachmentDescription depthAttachment{};
-	depthAttachment.format = FindDepthFormat();
+	depthAttachment.format = FindSupportedFormat(m_PhysicalDevice,{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+		VK_IMAGE_TILING_OPTIMAL,
+VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
 	depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;

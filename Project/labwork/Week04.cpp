@@ -1,4 +1,5 @@
 #include "vulkanbase/VulkanBase.h"
+#include "GP2_Texture.h"
 
 SwapChainSupportDetails VulkanBase::QuerySwapChainSupport(VkPhysicalDevice device) 
 {
@@ -141,6 +142,6 @@ void VulkanBase::CreateImageViews()
 
 	for (uint32_t i = 0; i < m_SwapChainImages.size(); ++i) 
 	{
-		m_SwapChainImageViews[i] = CreateImageView(m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+		m_SwapChainImageViews[i] = GP2_Texture::CreateImageView(m_Device, m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 }

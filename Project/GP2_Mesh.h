@@ -7,7 +7,13 @@
 #include "Vertex.h"
 #include "GP2_Shader.h"
 #include "GP2_Buffer.h"
+#include "GP2_Texture.h"
 #include "vulkanbase/VulkanUtil.h"
+
+// Forward declaration of GP2_Texture because otherwise the compiler doesn't know it's a valid class
+// I do not understand why this is necessary, Pieter-Jan does not know why this is needed either
+// But I shall simply accept it
+class GP2_Texture;
 
 template<typename VertexType> 
 class GP2_Mesh final
@@ -32,6 +38,8 @@ public:
 	void AddVertices(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const glm::vec3 color);
 	void AddIndices(const std::vector<uint16_t> indices); 
 
+	GP2_Texture* GetTexture(const int idx) const;
+
 	bool ParseOBJ(const std::string& filename, const glm::vec3 color); 
 
 private:
@@ -43,6 +51,8 @@ private:
 	//-----------
 	// Variables
 	//-----------
+	std::vector<GP2_Texture*> m_pTextures;
+
 	VkDevice m_Device; 
 	VkPhysicalDevice m_PhysicalDevice; 
 
@@ -158,6 +168,12 @@ void GP2_Mesh<VertexType>::AddIndices(const std::vector<uint16_t> indices)
 {
 	m_MeshIndices = indices;
 }
+
+template<typename VertexType>
+inline GP2_Texture* GP2_Mesh<VertexType>::GetTexture(const int idx) const
+{
+	return m_pTextures[idx]; 
+} 
 
 template<typename VertexType>
 bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3 color)

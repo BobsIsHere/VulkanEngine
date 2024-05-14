@@ -25,6 +25,7 @@
 #include "GP2_DescriptorPool.h"
 #include "GP2_2DGraphicsPipeline.h"
 #include "GP2_3DGraphicsPipeline.h"
+#include "GP2_DepthBuffer.h"
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -75,12 +76,12 @@ private:
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
 		// Depth Buffer
-		CreateDepthResources();
+		m_DepthBuffer.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_GraphicsQueue, m_CommandPool);
 
 		// Create texture image
-		CreateTextureImage();
-		CreateTexureImageView();
-		CreateTextureSampler();
+		//CreateTextureImage();
+		//CreateTexureImageView();
+		//CreateTextureSampler();
 
 		//FirstAssignment(); 
 
@@ -111,8 +112,8 @@ private:
 		m_GP2D.AddMesh(std::move(m_pSquareMesh2));
 		
 		CreateRenderPass(); 
-		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_TextureImageView, m_TextureSampler); 
-		m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_TextureImageView, m_TextureSampler);
+		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
+		m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent });
 		CreateFrameBuffers(); 
 
 		// week 06
@@ -155,7 +156,7 @@ private:
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
 
-		vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
+		/*vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
 		vkDestroyImage(m_Device, m_DepthImage, nullptr);
 		vkFreeMemory(m_Device, m_DepthImageMemory, nullptr);
 
@@ -163,7 +164,7 @@ private:
 		vkDestroyImageView(m_Device, m_TextureImageView, nullptr);
 
 		vkDestroyImage(m_Device, m_TextureImage, nullptr);
-		vkFreeMemory(m_Device, m_TextureImageMemory, nullptr);
+		vkFreeMemory(m_Device, m_TextureImageMemory, nullptr);*/
 
 		vkDestroyDevice(m_Device, nullptr);
 
@@ -190,7 +191,10 @@ private:
 
 	// Graphics Pipelines
 	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };    
-	GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };    
+	GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
+
+	//Depth Buffer
+	GP2_DepthBuffer m_DepthBuffer{};
 
 	// Camera
 	glm::vec2 m_LastMousePosition{ 0.f, 0.f };
@@ -266,56 +270,6 @@ private:
 		m_GP3D.AddMesh(std::move(m_pCubeMesh));
 	}
 
-	// Depth Buffer
-	VkImage m_DepthImage;
-	VkDeviceMemory m_DepthImageMemory;
-	VkImageView m_DepthImageView;
-
-	void CreateDepthResources()
-	{
-		VkFormat depthFormat = FindDepthFormat(); 
-
-		CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
-		m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT); 
-
-		TransitionImageLayout(m_DepthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL); 
-	}
-
-	VkFormat FindDepthFormat() 
-	{
-		return FindSupportedFormat(
-			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-		);
-	}
-
-	VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) 
-	{
-		for (VkFormat format : candidates) 
-		{
-			VkFormatProperties props{};
-			vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, format, &props);
-
-			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) 
-			{
-				return format; 
-			}
-			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) 
-			{
-				return format; 
-			}
-		}
-
-		throw std::runtime_error("failed to find supported format!"); 
-	}
-
-	bool HasStencilComponent(VkFormat format) 
-	{
-		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT; 
-	}
-
 	// Week 01: 
 	// Actual window
 	// simple fragment + vertex shader creation functions
@@ -337,28 +291,7 @@ private:
 	GP2_CommandPool m_CommandPool;
 	GP2_CommandBuffer m_CommandBuffer;
 
-	VkImage m_TextureImage; 
-	VkDeviceMemory m_TextureImageMemory; 
-	VkImageView m_TextureImageView;
-	VkSampler m_TextureSampler;
-
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
-	VkCommandBuffer BeginSingleTimeCommands();
-	void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
-
-	void CreateTextureImage();
-	void CreateTexureImageView();
-	void CreateTextureSampler();
-
-	VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-
-	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, 
-					 VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-
-	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-	void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-
-	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	
 	// Week 03
 	// Renderpass concept
