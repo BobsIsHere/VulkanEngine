@@ -16,6 +16,9 @@ public:
 	//-----------
 	// Functions
 	//-----------
+	void Initialize(const char* filePath);
+	void CleanUp();
+
 	void CreateTextureImage(const char* filePath);
 	void CreateTextureImageView();
 	void CreateTextureSampler();

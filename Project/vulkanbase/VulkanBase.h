@@ -84,30 +84,33 @@ private:
 		//CreateTexureImageView();
 		//CreateTextureSampler();
 
-		//FirstAssignment(); 
+		// Make Context
+		VulkanContext context{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent };
 
 		// Square Mesh 1
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(context, m_GraphicsQueue, m_CommandPool) };
 
 		m_pSquareMesh1->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
 		m_pSquareMesh1->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
 		m_pSquareMesh1->AddVertex({ 0.5f, 0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f });
 		m_pSquareMesh1->AddVertex({ -0.5f, 0.5f, 0.f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f });
 		m_pSquareMesh1->AddIndices({ 0, 1, 2, 2, 3, 0 });
+		m_pSquareMesh1->AddTexture("resources/texture.jpg");
 
 		m_pSquareMesh1->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP2D.AddMesh(std::move(m_pSquareMesh1));
 
 		// Square Mesh 2 (Adjusted Position)
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
+		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(context, m_GraphicsQueue, m_CommandPool) }; 
 
-		float overlapOffset = 0.3f; // Adjust as needed
+		float overlapOffset = 0.3f;
 
 		m_pSquareMesh2->AddVertex({ -0.5f + overlapOffset, -0.5f - overlapOffset, -0.5f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
 		m_pSquareMesh2->AddVertex({ 0.5f + overlapOffset, -0.5f - overlapOffset, -0.5f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
 		m_pSquareMesh2->AddVertex({ 0.5f + overlapOffset, 0.5f - overlapOffset, -0.5f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f });
 		m_pSquareMesh2->AddVertex({ -0.5f + overlapOffset, 0.5f - overlapOffset, -0.5f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f });
 		m_pSquareMesh2->AddIndices({ 0, 1, 2, 2, 3, 0 });
+		m_pSquareMesh2->AddTexture("resources/texture.jpg"); 
 
 		m_pSquareMesh2->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP2D.AddMesh(std::move(m_pSquareMesh2));
@@ -212,66 +215,6 @@ private:
 	const float m_Radius{ 5.f };
 	float m_Yaw{ 0.f };
 	float m_Pitch{ 0.f };
-
-	//1st Assignment
-	void FirstAssignment()
-	{
-		// GRAPHICS PIPELINE 2D
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pRectangleMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pOvalMesh{ std::make_unique<GP2_Mesh<Vertex2D>>(m_Device, m_PhysicalDevice) };
-
-		//Draw Rectangle
-		m_pRectangleMesh->AddVertex({ 0.25f, -0.25f, 0.f }, { 0.25f, 0.75f, 0.25f }); // 0
-		m_pRectangleMesh->AddVertex({ 0.75f, -0.25f, 0.f }, { 0.25f, 0.75f, 0.25f }); // 1
-		m_pRectangleMesh->AddVertex({ 0.25f, -0.75f, 0.f }, { 0.75f, 0.25f, 0.75f }); // 2
-		m_pRectangleMesh->AddVertex({ 0.75f, -0.75f, 0.f }, { 0.75f, 0.25f, 0.75f }); // 3
-
-		const std::vector<uint16_t> rectIndices{ 2, 1, 0, 3, 1, 2 };
-		m_pRectangleMesh->AddIndices(rectIndices);
-
-		m_pRectangleMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pRectangleMesh));
-
-		//Draw Oval
-		m_pOvalMesh->AddVertex({ 0.71f / 4 - 0.5f, 0.71f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 0.f }); // 0
-		m_pOvalMesh->AddVertex({ 0.f - 0.5f, 1.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 1
-		m_pOvalMesh->AddVertex({ -0.71f / 4 - 0.5f, 0.71f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 1.f }); // 2
-		m_pOvalMesh->AddVertex({ -1.f / 4 - 0.5f, 0.f - 0.5f, 0.f }, { 0.f, 0.f, 1.f }); // 3
-		m_pOvalMesh->AddVertex({ -0.71f / 4 - 0.5f, -0.71f / 4 - 0.5f, 0.f }, { 1.f, 0.f, 1.f }); // 4
-		m_pOvalMesh->AddVertex({ 0.f / 4 - 0.5f, -1.f / 4 - 0.5f, 0.f }, { 1.f,0.f,0.f }); // 5
-		m_pOvalMesh->AddVertex({ 0.71f / 4 - 0.5f, -0.71f / 4 - 0.5f, 0.f }, { 1.f, 1.f, 0.f }); // 6
-		m_pOvalMesh->AddVertex({ 1.f / 4 - 0.5f, 0.f / 4 - 0.5f, 0.f }, { 0.f, 1.f, 0.f }); // 7
-		m_pOvalMesh->AddVertex({ 0.f - 0.5f, 0.f - 0.5f, 0.f }, { 1.f, 1.f, 1.f }); // center, 8
-
-		const std::vector<uint16_t> ovalIndices{
-			0, 8, 1,
-			1, 8, 2,
-			2, 8, 3,
-			3, 8, 4,
-			4, 8, 5,
-			5, 8, 6,
-			6, 8, 7,
-			7, 8, 0
-		};
-		m_pOvalMesh->AddIndices(ovalIndices);
-
-		m_pOvalMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pOvalMesh));
-
-		// GRAPHICS PIPELINE 3D
-		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pBunnyMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
-		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(m_Device, m_PhysicalDevice) };
-
-		//Draw Cube
-		m_pBunnyMesh->ParseOBJ("resources/lowpoly_bunny2.obj", { 1.f, 0.5f, 0.5f });
-		m_pBunnyMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP3D.AddMesh(std::move(m_pBunnyMesh));
-
-		//Draw Simple Object
-		m_pCubeMesh->ParseOBJ("resources/simple_cube.obj", { 0.5f, 1.f, 0.5f });
-		m_pCubeMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP3D.AddMesh(std::move(m_pCubeMesh));
-	}
 
 	// Week 01: 
 	// Actual window

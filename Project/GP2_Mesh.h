@@ -22,7 +22,7 @@ public:
 	//---------------------------
 	// Constructors & Destructor
 	//---------------------------
-	GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice);
+	GP2_Mesh(VulkanContext context, VkQueue graphicsQueue, GP2_CommandPool commandPool);
 	~GP2_Mesh() = default;
 
 	//-----------
@@ -37,8 +37,10 @@ public:
 	void AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec3 normal); 
 	void AddVertices(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const glm::vec3 color);
 	void AddIndices(const std::vector<uint16_t> indices); 
+	void AddTexture(const char* filePath);
 
 	GP2_Texture* GetTexture(const int idx) const;
+	std::vector<GP2_Texture*> GetTextures() const;
 	size_t GetTextureCount() const { return m_pTextures.size(); }
 
 	bool ParseOBJ(const std::string& filename, const glm::vec3 color); 
@@ -56,6 +58,10 @@ private:
 
 	VkDevice m_Device; 
 	VkPhysicalDevice m_PhysicalDevice; 
+	VkQueue m_GraphicsQueue;
+
+	VulkanContext m_Context;
+	GP2_CommandPool m_CommandPool;
 
 	GP2_Buffer* m_pVertexBuffer;
 	GP2_Buffer* m_pIndexBuffer;
@@ -67,9 +73,12 @@ private:
 };
 
 template<typename VertexType>
-GP2_Mesh<VertexType>::GP2_Mesh(VkDevice device, VkPhysicalDevice physicalDevice) :
-	m_Device{ device },
-	m_PhysicalDevice{ physicalDevice },
+GP2_Mesh<VertexType>::GP2_Mesh(VulkanContext context, VkQueue graphicsQueue, GP2_CommandPool commandPool) :
+	m_Context{ context },
+	m_Device{ context.device },
+	m_PhysicalDevice{ context.physicalDevice },
+	m_GraphicsQueue{ graphicsQueue },
+	m_CommandPool{ commandPool },
 	m_VertexConstant{ glm::mat4(1.f) },
 	m_pVertexBuffer{},
 	m_pIndexBuffer{}
@@ -116,6 +125,14 @@ void GP2_Mesh<VertexType>::DestroyMesh()
 		m_pVertexBuffer->Destroy();
 		delete m_pVertexBuffer;
 		m_pVertexBuffer = nullptr;
+	}
+
+	for (auto& texture : m_pTextures)
+	{
+		texture->CleanUp();
+
+		delete texture;
+		texture = nullptr;
 	}
 }
 
@@ -171,10 +188,23 @@ void GP2_Mesh<VertexType>::AddIndices(const std::vector<uint16_t> indices)
 }
 
 template<typename VertexType>
+inline void GP2_Mesh<VertexType>::AddTexture(const char* filePath)
+{
+	GP2_Texture* texture = new GP2_Texture{ m_Context, m_GraphicsQueue, m_CommandPool };
+	texture->Initialize(filePath);
+	m_pTextures.push_back(texture);
+}
+
+template<typename VertexType>
 inline GP2_Texture* GP2_Mesh<VertexType>::GetTexture(const int idx) const
 {
 	return m_pTextures[idx]; 
-} 
+}
+template<typename VertexType>
+inline std::vector<GP2_Texture*> GP2_Mesh<VertexType>::GetTextures() const
+{
+	return m_pTextures;
+}
 
 template<typename VertexType>
 bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3 color)

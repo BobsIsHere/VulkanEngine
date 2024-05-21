@@ -15,6 +15,17 @@ GP2_Texture::GP2_Texture(VulkanContext context, VkQueue graphicsQueue, GP2_Comma
 
 GP2_Texture::~GP2_Texture()
 {
+}
+
+void GP2_Texture::Initialize(const char* filePath)
+{
+	CreateTextureImage(filePath);
+	CreateTextureImageView();
+	CreateTextureSampler();
+}
+
+void GP2_Texture::CleanUp()
+{
 	vkDestroySampler(m_VulkanContext.device, m_TextureSampler, nullptr);
 	vkDestroyImageView(m_VulkanContext.device, m_TextureImageView, nullptr);
 
