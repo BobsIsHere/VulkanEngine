@@ -73,7 +73,7 @@ void VulkanBase::DrawFrame()
 	meshData.model = glm::mat4(1.0f);  
 
 	ubo.view = UpdateCamera();
-	ubo.proj = glm::perspective(glm::radians(m_FOV), m_AspectRatio, 0.1f, 10.0f);
+	ubo.proj = glm::perspective(glm::radians(m_FOV), m_AspectRatio, 0.1f, 100.0f);
 
 	m_GP3D.SetUBO(ubo, 0);
 	m_GP3D.Record(m_CommandBuffer, m_SwapChainExtent, m_CurrentFrame);

@@ -79,16 +79,11 @@ private:
 		m_DepthBuffer.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_GraphicsQueue, m_CommandPool);
 		m_DepthBuffer.CreateDepthResources();
 
-		// Create texture image
-		//CreateTextureImage();
-		//CreateTexureImageView();
-		//CreateTextureSampler();
-
 		// Make Context
 		VulkanContext context{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent };
 
 		// Square Mesh 1
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(context, m_GraphicsQueue, m_CommandPool) };
+		/*std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(context, m_GraphicsQueue, m_CommandPool) };
 
 		m_pSquareMesh1->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
 		m_pSquareMesh1->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
@@ -98,10 +93,10 @@ private:
 		m_pSquareMesh1->AddTexture("resources/texture.jpg");
 
 		m_pSquareMesh1->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pSquareMesh1));
+		m_GP2D.AddMesh(std::move(m_pSquareMesh1));*/
 
-		// Square Mesh 2 (Adjusted Position)
-		std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(context, m_GraphicsQueue, m_CommandPool) }; 
+		// Square Mesh 2
+		/*std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(context, m_GraphicsQueue, m_CommandPool) }; 
 
 		float overlapOffset = 0.3f;
 
@@ -113,7 +108,16 @@ private:
 		m_pSquareMesh2->AddTexture("resources/texture.jpg"); 
 
 		m_pSquareMesh2->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pSquareMesh2));
+		m_GP2D.AddMesh(std::move(m_pSquareMesh2));*/
+
+		// Cube Mesh
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
+
+		m_pCubeMesh->ParseOBJ("resources/vehicle.obj", { 1.0f, 1.0f, 1.0f });
+		m_pCubeMesh->AddTexture("resources/TCom_Scifi_Panel_1K_albedo.tif");
+
+		m_pCubeMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
+		m_GP3D.AddMesh(std::move(m_pCubeMesh));
 		
 		CreateRenderPass(); 
 		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
@@ -162,16 +166,6 @@ private:
 
 		m_DepthBuffer.Cleanup();
 
-		/*vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
-		vkDestroyImage(m_Device, m_DepthImage, nullptr);
-		vkFreeMemory(m_Device, m_DepthImageMemory, nullptr);
-
-		vkDestroySampler(m_Device, m_TextureSampler, nullptr); 
-		vkDestroyImageView(m_Device, m_TextureImageView, nullptr);
-
-		vkDestroyImage(m_Device, m_TextureImage, nullptr);
-		vkFreeMemory(m_Device, m_TextureImageMemory, nullptr);*/
-
 		vkDestroyDevice(m_Device, nullptr);
 
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
@@ -205,7 +199,7 @@ private:
 	// Camera
 	glm::vec2 m_LastMousePosition{ 0.f, 0.f };
 	
-	glm::vec3 m_CameraPosition{ 0.f, 0.f, 5.f };
+	glm::vec3 m_CameraPosition{ 0.f, 0.f, 30.f };
 	glm::vec3 m_CameraForward{ 0.f, 0.f, -1.f };
 	glm::vec3 m_CameraUp{ 0.f, 1.f, 0.f };
 	glm::vec3 m_CameraRight{ 1.f, 0.f, 0.f };

@@ -163,7 +163,7 @@ void GP2_Mesh<VertexType>::AddVertex(const glm::vec3 pos, const glm::vec3 color)
 template<typename VertexType>
 void GP2_Mesh<VertexType>::AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec2 texCoord)
 {
-	m_MeshVertices.push_back(VertexType{ pos, color, texCoord });
+	m_MeshVertices.push_back(VertexType{ pos, color, texCoord }); 
 }
 
 template<typename VertexType>
@@ -240,11 +240,11 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 		}
 		else if (sCommand == "vn")
 		{
-			// Vertex Normal
-			float x, y, z;
-			file >> x >> y >> z;
+			//// Vertex Normal
+			//float x, y, z;
+			//file >> x >> y >> z;
 
-			normals.emplace_back(x, y, z);
+			//normals.emplace_back(x, y, z);
 		}
 		else if (sCommand == "f")
 		{
@@ -255,7 +255,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 
 			// Faces or triangles
 			Vertex3D vertex{}; 
-			size_t iPosition, iNormal; 
+			size_t iPosition, iNormal, iTexCoord;  
 
 			uint32_t tempIndices[3];
 			for (size_t iFace = 0; iFace < 3; ++iFace)
@@ -272,8 +272,8 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 					if ('/' != file.peek()) 
 					{
 						// Optional texture coordinate
-						/*file >> iTexCoord;
-						vertex.uv = UVs[iTexCoord - 1];*/
+						file >> iTexCoord; 
+						//vertex.texCoord = UVs[iTexCoord - 1];  
 					}
 
 					if ('/' == file.peek())
@@ -282,7 +282,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 
 						// Optional vertex normal
 						file >> iNormal;
-						vertex.normal = glm::vec3(normals[iNormal - 1].x, -normals[iNormal - 1].y, -normals[iNormal - 1].z); 
+						//vertex.normal = glm::vec3(normals[iNormal - 1].x, -normals[iNormal - 1].y, -normals[iNormal - 1].z); 
 					}
 				}
 
