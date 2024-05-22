@@ -2,9 +2,12 @@
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 fragColor;
-layout(location = 2) in vec3 fragNormal;
+layout(location = 2) in vec2 fragTexCoord;
+layout(location = 3) in vec3 fragNormal;
 
 layout(location = 0) out vec4 outColor;
+
+layout(binding = 1) uniform sampler2D diffuseSampler;
 
 vec3 lightPosition = vec3(1.2, 1.0, 2.0);
 vec3 lightColor = vec3(0.7, 0.7, 1.0);
@@ -78,7 +81,7 @@ void main()
 
     // Calculate specular
     vec3 DFG = d * f * g;
-    float denominator = 4 * max(dot(viewDirection, fragNormal), 0.0) * max(dot(lightDirection, fragNormal), 0.0);
+    float denominator = 4 * dot(fragNormal, viewDirection) * dot(fragNormal, lightDirection);
     vec3 specular = DFG / denominator;
 
     if (metalness <= 0.0)
@@ -90,7 +93,10 @@ void main()
     vec3 diffuse = vec3(1.0) - f;
     diffuse *= max(dot(fragNormal, lightDirection), 0.0);
 
+    // Sample the texture using texture coordinates
+    vec4 textureColor = texture(diffuseSampler, fragTexCoord);
+
     // Combine the terms and output the color
     vec3 result = (diffuse + specular) * lightColor * albedo;
-    outColor = vec4(result, 1.0);
+    outColor = textureColor * vec4(result, 1.0);
 }
