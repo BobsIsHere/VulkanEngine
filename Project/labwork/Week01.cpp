@@ -35,21 +35,23 @@ void VulkanBase::InitWindow()
 
 void VulkanBase::KeyEvent(int key, int scancode, int action, int mods)
 {
+	const float mouseSpeed{ 40.f };
+	
 	if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
-		m_CameraPosition += m_CameraForward * 20.f; 
+		m_CameraPosition += m_CameraForward * mouseSpeed; 
 	}
 	if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_PRESS))  
 	{ 
-		m_CameraPosition -= m_CameraForward * 20.f;   
+		m_CameraPosition -= m_CameraForward * mouseSpeed; 
 	} 
 	if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_PRESS))  
 	{  
-		m_CameraPosition -= m_CameraRight * 20.f;  
+		m_CameraPosition -= m_CameraRight * mouseSpeed; 
 	} 
 	if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_PRESS))  
 	{ 
-		m_CameraPosition += m_CameraRight * 20.f; 
+		m_CameraPosition += m_CameraRight * mouseSpeed;
 	}
 }
 void VulkanBase::MouseMove(GLFWwindow * window, double xpos, double ypos)

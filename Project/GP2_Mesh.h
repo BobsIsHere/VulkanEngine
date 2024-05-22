@@ -31,11 +31,8 @@ public:
 	void Initialize(VkQueue graphicsQueue, QueueFamilyIndices queueFamilyIndices);
 	void DestroyMesh();
 	void Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer buffer);
-
-	void AddVertex(const glm::vec3 pos, const glm::vec3 color);
-	void AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec2 texCoord); 
-	void AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec3 normal); 
-	void AddVertices(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const glm::vec3 color);
+	
+	void AddVertices(std::vector<VertexType> vertices);
 	void AddIndices(const std::vector<uint16_t> indices); 
 	void AddTexture(const char* filePath);
 
@@ -155,36 +152,15 @@ void GP2_Mesh<VertexType>::Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer
 }
 
 template<typename VertexType>
-void GP2_Mesh<VertexType>::AddVertex(const glm::vec3 pos, const glm::vec3 color)
+inline void GP2_Mesh<VertexType>::AddVertices(std::vector<VertexType> vertices) 
 {
-	m_MeshVertices.push_back(VertexType{ pos, color });
-}
-
-template<typename VertexType>
-void GP2_Mesh<VertexType>::AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec2 texCoord)
-{
-	m_MeshVertices.push_back(VertexType{ pos, color, texCoord }); 
-}
-
-template<typename VertexType>
-void GP2_Mesh<VertexType>::AddVertex(const glm::vec3 pos, const glm::vec3 color, const glm::vec3 normal)
-{
-	m_MeshVertices.push_back(VertexType{ pos, color, normal });  
-}
-
-template<typename VertexType>
-void GP2_Mesh<VertexType>::AddVertices(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const glm::vec3 color)
-{
-	for (uint64_t index = 0; index < vertices.size(); ++index)
-	{
-		m_MeshVertices.push_back(VertexType{ vertices[index], color, normals[index] }); 
-	}
+	m_MeshVertices.insert(m_MeshVertices.end(), vertices.begin(), vertices.end());
 }
 
 template<typename VertexType>
 void GP2_Mesh<VertexType>::AddIndices(const std::vector<uint16_t> indices)
 {
-	m_MeshIndices = indices;
+	m_MeshIndices.insert(m_MeshIndices.end(), indices.begin(), indices.end());
 }
 
 template<typename VertexType>
@@ -200,6 +176,7 @@ inline GP2_Texture* GP2_Mesh<VertexType>::GetTexture(const int idx) const
 {
 	return m_pTextures[idx]; 
 }
+
 template<typename VertexType>
 inline std::vector<GP2_Texture*> GP2_Mesh<VertexType>::GetTextures() const
 {
@@ -218,6 +195,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 
 	std::vector<glm::vec3> positions; 
 	std::vector<glm::vec3> normals; 
+	std::vector<glm::vec2> texCoordinates;
 
 	std::string sCommand;
 	// start a while iteration ending when the end of file is reached (ios::eof)
@@ -240,11 +218,19 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 		}
 		else if (sCommand == "vn")
 		{
-			//// Vertex Normal
-			//float x, y, z;
-			//file >> x >> y >> z;
+			// Vertex Normal
+			float x, y, z;
+			file >> x >> y >> z;
 
-			//normals.emplace_back(x, y, z);
+			normals.emplace_back(x, y, z);
+		}
+		else if (sCommand == "vt")
+		{
+			// Vertex Texture Coordinate
+			float u, v; 
+			file >> u >> v; 
+
+			texCoordinates.emplace_back(u, v);
 		}
 		else if (sCommand == "f")
 		{
@@ -273,7 +259,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 					{
 						// Optional texture coordinate
 						file >> iTexCoord; 
-						//vertex.texCoord = UVs[iTexCoord - 1];  
+						vertex.texCoord = texCoordinates[iTexCoord - 1]; 
 					}
 
 					if ('/' == file.peek())
@@ -282,19 +268,19 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 
 						// Optional vertex normal
 						file >> iNormal;
-						//vertex.normal = glm::vec3(normals[iNormal - 1].x, -normals[iNormal - 1].y, -normals[iNormal - 1].z); 
+						vertex.normal = glm::vec3(normals[iNormal - 1].x, -normals[iNormal - 1].y, -normals[iNormal - 1].z); 
 					}
 				}
 
 				m_MeshVertices.push_back(vertex);
 				tempIndices[iFace] = uint32_t(m_MeshVertices.size()) - 1;  
-				//indices.push_back(uint32_t(vertices.size()) - 1);
 			}
 
 			m_MeshIndices.push_back(tempIndices[0]);
 			m_MeshIndices.push_back(tempIndices[1]);
 			m_MeshIndices.push_back(tempIndices[2]);
 		}
+
 		//read till end of line and ignore all remaining chars
 		file.ignore(1000, '\n');
 	}

@@ -82,39 +82,11 @@ private:
 		// Make Context
 		VulkanContext context{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent };
 
-		// Square Mesh 1
-		/*std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh1{ std::make_unique<GP2_Mesh<Vertex2D>>(context, m_GraphicsQueue, m_CommandPool) };
-
-		m_pSquareMesh1->AddVertex({ -0.5f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
-		m_pSquareMesh1->AddVertex({ 0.5f, -0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
-		m_pSquareMesh1->AddVertex({ 0.5f, 0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f });
-		m_pSquareMesh1->AddVertex({ -0.5f, 0.5f, 0.f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f });
-		m_pSquareMesh1->AddIndices({ 0, 1, 2, 2, 3, 0 });
-		m_pSquareMesh1->AddTexture("resources/texture.jpg");
-
-		m_pSquareMesh1->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pSquareMesh1));*/
-
-		// Square Mesh 2
-		/*std::unique_ptr<GP2_Mesh<Vertex2D>> m_pSquareMesh2{ std::make_unique<GP2_Mesh<Vertex2D>>(context, m_GraphicsQueue, m_CommandPool) }; 
-
-		float overlapOffset = 0.3f;
-
-		m_pSquareMesh2->AddVertex({ -0.5f + overlapOffset, -0.5f - overlapOffset, -0.5f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
-		m_pSquareMesh2->AddVertex({ 0.5f + overlapOffset, -0.5f - overlapOffset, -0.5f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f });
-		m_pSquareMesh2->AddVertex({ 0.5f + overlapOffset, 0.5f - overlapOffset, -0.5f }, { 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f });
-		m_pSquareMesh2->AddVertex({ -0.5f + overlapOffset, 0.5f - overlapOffset, -0.5f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f });
-		m_pSquareMesh2->AddIndices({ 0, 1, 2, 2, 3, 0 });
-		m_pSquareMesh2->AddTexture("resources/texture.jpg"); 
-
-		m_pSquareMesh2->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP2D.AddMesh(std::move(m_pSquareMesh2));*/
-
 		// Cube Mesh
 		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
-
+		
 		m_pCubeMesh->ParseOBJ("resources/vehicle.obj", { 1.0f, 1.0f, 1.0f });
-		m_pCubeMesh->AddTexture("resources/TCom_Scifi_Panel_1K_albedo.tif");
+		m_pCubeMesh->AddTexture("resources/vehicle_diffuse.png");
 
 		m_pCubeMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP3D.AddMesh(std::move(m_pCubeMesh));
