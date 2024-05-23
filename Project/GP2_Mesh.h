@@ -259,7 +259,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 					{
 						// Optional texture coordinate
 						file >> iTexCoord; 
-						vertex.texCoord = texCoordinates[iTexCoord - 1]; 
+						vertex.texCoord = glm::vec2(texCoordinates[iTexCoord - 1].x, -texCoordinates[iTexCoord - 1].y);
 					}
 
 					if ('/' == file.peek())

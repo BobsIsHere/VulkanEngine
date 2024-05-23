@@ -56,7 +56,7 @@ float Geometry_Smith(vec3 n, vec3 v, vec3 l, float roughness)
 
 void main() 
 {
-    if(length(fragNormal) == 0.0)
+    if (length(fragNormal) == 0.0)
     {
         outColor = vec4(fragColor, 1.0);
         return;
@@ -73,16 +73,16 @@ void main()
 
     // Calculate fresnel
     vec3 f0 = vec3(0.0);
-    vec3 f = FresnelFunction_Schlick(halfVector, viewDirection, f0);
 
     // Specular variables
+    vec3 f = FresnelFunction_Schlick(halfVector, viewDirection, f0);
     float d = NormalDistribution_GGX(fragNormal, halfVector, roughnessSquared);
     float g = Geometry_Smith(fragNormal, viewDirection, lightDirection, roughnessSquared);
 
     // Calculate specular
     vec3 DFG = d * f * g;
-    float denominator = 4 * dot(fragNormal, viewDirection) * dot(fragNormal, lightDirection);
-    vec3 specular = DFG / denominator;
+    float denominator = 4 * dot(viewDirection, fragNormal) * dot(lightDirection, fragNormal);
+    vec3 specular = DFG / max(denominator, 0.001);
 
     if (metalness <= 0.0)
     {
