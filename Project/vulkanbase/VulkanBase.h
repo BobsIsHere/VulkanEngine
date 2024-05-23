@@ -87,9 +87,8 @@ private:
 		
 		m_pCubeMesh->ParseOBJ("resources/vehicle.obj", { 1.0f, 1.0f, 1.0f });
 		m_pCubeMesh->AddTexture("resources/vehicle_diffuse.png");
-		/*m_pCubeMesh->AddTexture("resources/vehicle_gloss.png");
+		m_pCubeMesh->AddTexture("resources/vehicle_gloss.png"); 
 		m_pCubeMesh->AddTexture("resources/vehicle_normal.png");
-		m_pCubeMesh->AddTexture("resources/vehicle_specular.png");*/
 
 		m_pCubeMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP3D.AddMesh(std::move(m_pCubeMesh));

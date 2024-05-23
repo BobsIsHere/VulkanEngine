@@ -3,7 +3,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "vulkanbase/VulkanBase.h"
-#include "GP2_Mesh.h"
+
+const float MOUSE_SPEED = 40.f;
+const float SENSITIVITY = 0.001f;
+const float MAX_PITCH = glm::radians(89.0f);
 
 void VulkanBase::InitWindow()
 {
@@ -35,23 +38,21 @@ void VulkanBase::InitWindow()
 
 void VulkanBase::KeyEvent(int key, int scancode, int action, int mods)
 {
-	const float mouseSpeed{ 40.f };
-	
 	if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_PRESS))
 	{
-		m_CameraPosition += m_CameraForward * mouseSpeed; 
+		m_CameraPosition += m_CameraForward * MOUSE_SPEED;
 	}
 	if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_PRESS))  
 	{ 
-		m_CameraPosition -= m_CameraForward * mouseSpeed; 
+		m_CameraPosition -= m_CameraForward * MOUSE_SPEED;
 	} 
 	if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_PRESS))  
 	{  
-		m_CameraPosition -= m_CameraRight * mouseSpeed; 
+		m_CameraPosition -= m_CameraRight * MOUSE_SPEED;
 	} 
 	if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_PRESS))  
 	{ 
-		m_CameraPosition += m_CameraRight * mouseSpeed;
+		m_CameraPosition += m_CameraRight * MOUSE_SPEED;
 	}
 }
 void VulkanBase::MouseMove(GLFWwindow * window, double xpos, double ypos)
@@ -64,14 +65,12 @@ void VulkanBase::MouseMove(GLFWwindow * window, double xpos, double ypos)
 	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
 	if (state == GLFW_PRESS)
 	{
-		const float sensitivity{ 0.001f };
+		m_Yaw += mouseDelta.x * SENSITIVITY;
+		m_Pitch += mouseDelta.y * SENSITIVITY;
 
-		m_Yaw += mouseDelta.x * sensitivity;  
-		m_Pitch += mouseDelta.y * sensitivity; 
-
-		if (m_Pitch > glm::radians(89.0f))
+		if (m_Pitch > MAX_PITCH)
 		{
-			m_Pitch = glm::radians(89.0f);
+			m_Pitch = MAX_PITCH;
 		}
 	}
 }
@@ -79,7 +78,6 @@ void VulkanBase::MouseEvent(GLFWwindow * window, int button, int action, int mod
 {
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 	{
-		std::cout << "right mouse button pressed\n";
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 		m_LastMousePosition.x = static_cast<float>(xpos);

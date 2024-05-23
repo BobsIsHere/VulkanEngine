@@ -186,7 +186,7 @@ inline std::vector<GP2_Texture*> GP2_Mesh<VertexType>::GetTextures() const
 template<typename VertexType>
 bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3 color)
 {
-	std::ifstream file(filename);
+	std::ifstream file{ filename };
 	if (!file.is_open()) 
 	{
 		std::cerr << "Error: Failed to open file " << filename << std::endl;

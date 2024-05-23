@@ -8,11 +8,12 @@ layout(location = 3) in vec3 fragNormal;
 layout(location = 0) out vec4 outColor;
 
 layout(binding = 1) uniform sampler2D diffuseSampler;
+layout(binding = 2) uniform sampler2D normalSampler;
+layout(binding = 3) uniform sampler2D roughnessSampler;
 
 vec3 lightPosition = vec3(1.2, 1.0, 2.0);
 vec3 lightColor = vec3(0.7, 0.7, 1.0);
 
-float roughness = 0.1;
 float metalness = 0.0;
 vec3 albedo = vec3(0.8, 0.6, 0.4);
 
@@ -64,9 +65,13 @@ void main()
 
     vec3 lightDirection = normalize(vec3(0.0, -1.0, -1.0));
     vec3 viewDirection = normalize(-inPosition);
+
+    vec3 diffuseTexture = texture(diffuseSampler, fragTexCoord).rgb;
+    vec3 normalTexture = texture(normalSampler, fragTexCoord).rgb * 2.0 - 1.0;
+    float roughnessTexture = texture(roughnessSampler, fragTexCoord).r;
     
     // Roughness squared
-    const float roughnessSquared = roughness * roughness;
+    const float roughnessSquared = roughnessTexture * roughnessTexture;
 
     // Calculate half vector
     vec3 halfVector = normalize(lightDirection + viewDirection);
@@ -76,27 +81,20 @@ void main()
 
     // Specular variables
     vec3 f = FresnelFunction_Schlick(halfVector, viewDirection, f0);
-    float d = NormalDistribution_GGX(fragNormal, halfVector, roughnessSquared);
-    float g = Geometry_Smith(fragNormal, viewDirection, lightDirection, roughnessSquared);
+    float d = NormalDistribution_GGX(normalTexture, halfVector, roughnessSquared);
+    float g = Geometry_Smith(normalTexture, viewDirection, lightDirection, roughnessSquared);
 
     // Calculate specular
     vec3 DFG = d * f * g;
-    float denominator = 4 * dot(viewDirection, fragNormal) * dot(lightDirection, fragNormal);
-    vec3 specular = DFG / max(denominator, 0.001);
+    float denominator = 4 * dot(viewDirection, normalTexture) * dot(lightDirection, normalTexture);
+    vec3 specular = DFG / denominator;
 
     if (metalness <= 0.0)
     {
         specular += Lambert(vec3(1.0, 1.0, 1.0) - f, albedo);
 	}
 
-    // Calculate the diffuse term
-    vec3 diffuse = vec3(1.0) - f;
-    diffuse *= max(dot(fragNormal, lightDirection), 0.0);
-
-    // Sample the texture using texture coordinates
-    vec4 textureColor = texture(diffuseSampler, fragTexCoord);
-
     // Combine the terms and output the color
-    vec3 result = (diffuse + specular) * lightColor * albedo;
-    outColor = textureColor * vec4(result, 1.0);
+    vec3 result = (diffuseTexture + specular) * lightColor * albedo;
+    outColor = vec4(diffuseTexture, 1.0);
 }
