@@ -257,6 +257,42 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 		file.ignore(1000, '\n');
 	}
 
+	//Cheap Tangent Calculations
+	for (uint32_t i = 0; i < m_MeshIndices.size(); i += 3) 
+	{
+		uint32_t index0 = m_MeshIndices[i]; 
+		uint32_t index1 = m_MeshIndices[size_t(i) + 1];
+		uint32_t index2 = m_MeshIndices[size_t(i) + 2]; 
+
+		const glm::vec3& p0 = m_MeshVertices[index0].position;
+		const glm::vec3& p1 = m_MeshVertices[index1].position; 
+		const glm::vec3& p2 = m_MeshVertices[index2].position;
+		const glm::vec2& uv0 = m_MeshVertices[index0].texCoord;
+		const glm::vec2& uv1 = m_MeshVertices[index1].texCoord;
+		const glm::vec2& uv2 = m_MeshVertices[index2].texCoord;
+
+		const glm::vec3 edge0 = p1 - p0;
+		const glm::vec3 edge1 = p2 - p0;
+		const glm::vec2 diffX = glm::vec2(uv1.x - uv0.x, uv2.x - uv0.x);
+		const glm::vec2 diffY = glm::vec2(uv1.y - uv0.y, uv2.y - uv0.y);
+		float r = 1.0f / (diffX.x * diffY.y - diffX.y * diffY.x); 
+
+		glm::vec3 tangent = (edge0 * diffY.y - edge1 * diffY.x) * r;
+		m_MeshVertices[index0].tangent += tangent;
+		m_MeshVertices[index1].tangent += tangent;
+		m_MeshVertices[index2].tangent += tangent;
+	}
+
+	//Fix the tangents per vertex now because we accumulated
+	for (auto& v : m_MeshVertices)
+	{
+		v.tangent = glm::normalize(v.tangent - v.normal * glm::dot(v.tangent, v.normal)); 
+		 
+		v.position.z *= -1.f; 
+		v.normal.z *= -1.f; 
+		v.tangent.z *= -1.f; 
+	}
+
 	file.close(); 
 	return true;
 }

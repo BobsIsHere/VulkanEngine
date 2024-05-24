@@ -64,14 +64,6 @@ void main()
     vec3 diffuseTexture = texture(diffuseSampler, fragTexCoord).rgb;
     vec3 normalTexture = texture(normalSampler, fragTexCoord).rgb * 2.0 - 1.0;
     float roughnessTexture = texture(roughnessSampler, fragTexCoord).x;
-
-    vec3 binormal = cross(fragNormal, fragTangent);
-    mat4 tangentSpaceAxis = mat4(vec4(fragTangent, 0.0), vec4(binormal, 0.0), vec4(fragNormal, 0.0), vec4(0.0, 0.0, 0.0, 1.0));
-
-    vec3 sampledNormal = vec3(normalTexture.x, normalTexture.y, normalTexture.z);
-
-    sampledNormal = 2.0 * sampledNormal - vec3(1.0, 1.0, 1.0);
-    sampledNormal = normalize(tangentSpaceAxis * vec4(sampledNormal, 1.0)).xyz;
     
     // Roughness squared
     const float roughnessSquared = roughnessTexture * roughnessTexture;
@@ -80,7 +72,7 @@ void main()
     vec3 halfVector = normalize(lightDirection + viewDirection);
 
     // Calculate fresnel
-    vec3 f0 = vec3(0.0);
+    vec3 f0 = diffuseTexture;
 
     // Specular variables
     vec3 f = FresnelFunction_Schlick(halfVector, viewDirection, f0);
@@ -98,6 +90,6 @@ void main()
 	}
 
     // Combine the terms and output the color
-    vec3 result = (diffuseTexture + specular) * lightColor * albedo;
+    vec3 result = (specular);
     outColor = vec4(result, 1.0);
 }
