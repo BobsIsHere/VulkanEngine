@@ -20,7 +20,7 @@ public:
 	//-----------
 	// Functions
 	//-----------
-	void Initialize(const VulkanContext& context, const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers);
+	void Initialize(const VulkanContext& context, const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers = {});
 
 	void SetUBO(UBO data, size_t index);
 
@@ -29,7 +29,7 @@ public:
 		return m_DescriptorSetLayout;
 	}
 
-	void CreateDescriptorSets(const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers);
+	void CreateDescriptorSets(const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers = {});
 
 	void BindDescriptorSet(VkCommandBuffer buffer, VkPipelineLayout layout, size_t index);
 
@@ -37,7 +37,7 @@ private:
 	//-----------
 	// Functions
 	//-----------
-	void CreateDescriptorSetLayout(const VulkanContext& context, size_t imageCount); 
+	void CreateDescriptorSetLayout(const VulkanContext& context, size_t imageCount = 0); 
 	void CreateUBOs(const VulkanContext& context);
 
 	//-----------

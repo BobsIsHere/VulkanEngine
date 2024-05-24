@@ -4,6 +4,7 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 fragColor;
 layout(location = 2) in vec2 fragTexCoord;
 layout(location = 3) in vec3 fragNormal;
+layout(location = 4) in vec3 fragTangent;
 
 layout(location = 0) out vec4 outColor;
 
@@ -57,18 +58,20 @@ float Geometry_Smith(vec3 n, vec3 v, vec3 l, float roughness)
 
 void main() 
 {
-    if (length(fragNormal) == 0.0)
-    {
-        outColor = vec4(fragColor, 1.0);
-        return;
-    }
-
     vec3 lightDirection = normalize(vec3(0.0, -1.0, -1.0));
     vec3 viewDirection = normalize(-inPosition);
 
     vec3 diffuseTexture = texture(diffuseSampler, fragTexCoord).rgb;
     vec3 normalTexture = texture(normalSampler, fragTexCoord).rgb * 2.0 - 1.0;
-    float roughnessTexture = texture(roughnessSampler, fragTexCoord).r;
+    float roughnessTexture = texture(roughnessSampler, fragTexCoord).x;
+
+    vec3 binormal = cross(fragNormal, fragTangent);
+    mat4 tangentSpaceAxis = mat4(vec4(fragTangent, 0.0), vec4(binormal, 0.0), vec4(fragNormal, 0.0), vec4(0.0, 0.0, 0.0, 1.0));
+
+    vec3 sampledNormal = vec3(normalTexture.x, normalTexture.y, normalTexture.z);
+
+    sampledNormal = 2.0 * sampledNormal - vec3(1.0, 1.0, 1.0);
+    sampledNormal = normalize(tangentSpaceAxis * vec4(sampledNormal, 1.0)).xyz;
     
     // Roughness squared
     const float roughnessSquared = roughnessTexture * roughnessTexture;
@@ -96,5 +99,5 @@ void main()
 
     // Combine the terms and output the color
     vec3 result = (diffuseTexture + specular) * lightColor * albedo;
-    outColor = vec4(diffuseTexture, 1.0);
+    outColor = vec4(result, 1.0);
 }

@@ -10,11 +10,6 @@
 #include "GP2_Texture.h"
 #include "vulkanbase/VulkanUtil.h"
 
-// Forward declaration of GP2_Texture because otherwise the compiler doesn't know it's a valid class
-// I do not understand why this is necessary, Pieter-Jan does not know why this is needed either
-// But I shall simply accept it
-class GP2_Texture;
-
 template<typename VertexType> 
 class GP2_Mesh final
 {
@@ -36,9 +31,7 @@ public:
 	void AddIndices(const std::vector<uint16_t> indices); 
 	void AddTexture(const char* filePath);
 
-	GP2_Texture* GetTexture(const int idx) const;
-	std::vector<GP2_Texture*> GetTextures() const;
-	size_t GetTextureCount() const { return m_pTextures.size(); }
+	const char* GetTexture(size_t index) const { return m_pTextures[index]; }
 
 	bool ParseOBJ(const std::string& filename, const glm::vec3 color); 
 
@@ -51,7 +44,7 @@ private:
 	//-----------
 	// Variables
 	//-----------
-	std::vector<GP2_Texture*> m_pTextures;
+	std::vector<const char*> m_pTextures;
 
 	VkDevice m_Device; 
 	VkPhysicalDevice m_PhysicalDevice; 
@@ -123,14 +116,6 @@ void GP2_Mesh<VertexType>::DestroyMesh()
 		delete m_pVertexBuffer;
 		m_pVertexBuffer = nullptr;
 	}
-
-	for (auto& texture : m_pTextures)
-	{
-		texture->CleanUp();
-
-		delete texture;
-		texture = nullptr;
-	}
 }
 
 template<typename VertexType>
@@ -166,21 +151,7 @@ void GP2_Mesh<VertexType>::AddIndices(const std::vector<uint16_t> indices)
 template<typename VertexType>
 inline void GP2_Mesh<VertexType>::AddTexture(const char* filePath)
 {
-	GP2_Texture* texture = new GP2_Texture{ m_Context, m_GraphicsQueue, m_CommandPool };
-	texture->Initialize(filePath);
-	m_pTextures.push_back(texture);
-}
-
-template<typename VertexType>
-inline GP2_Texture* GP2_Mesh<VertexType>::GetTexture(const int idx) const
-{
-	return m_pTextures[idx]; 
-}
-
-template<typename VertexType>
-inline std::vector<GP2_Texture*> GP2_Mesh<VertexType>::GetTextures() const
-{
-	return m_pTextures;
+	m_pTextures.push_back(filePath); 
 }
 
 template<typename VertexType>
@@ -196,6 +167,8 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 	std::vector<glm::vec3> positions; 
 	std::vector<glm::vec3> normals; 
 	std::vector<glm::vec2> texCoordinates;
+
+	Vertex3D vertex{};
 
 	std::string sCommand;
 	// start a while iteration ending when the end of file is reached (ios::eof)
@@ -240,7 +213,6 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 			//add the material index as attibute to the attribute array
 
 			// Faces or triangles
-			Vertex3D vertex{}; 
 			size_t iPosition, iNormal, iTexCoord;  
 
 			uint32_t tempIndices[3];

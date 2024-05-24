@@ -50,6 +50,7 @@ struct Vertex3D
 	glm::vec3 color;
 	glm::vec2 texCoord;
 	glm::vec3 normal; 
+	glm::vec3 tangent;
 
 	static VkVertexInputBindingDescription GetBindingDescription() 
 	{
@@ -61,9 +62,9 @@ struct Vertex3D
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 4> GetAttributeDescriptions()
+	static std::array<VkVertexInputAttributeDescription, 5> GetAttributeDescriptions()
 	{
-		std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+		std::array<VkVertexInputAttributeDescription, 5> attributeDescriptions{};
 		//POSITION
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
@@ -87,6 +88,12 @@ struct Vertex3D
 		attributeDescriptions[3].location = 3;
 		attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
 		attributeDescriptions[3].offset = offsetof(Vertex3D, normal);
+
+		//TANGENT
+		attributeDescriptions[4].binding = 0;
+		attributeDescriptions[4].location = 4;
+		attributeDescriptions[4].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[4].offset = offsetof(Vertex3D, tangent);
 
 		return attributeDescriptions;
 	}

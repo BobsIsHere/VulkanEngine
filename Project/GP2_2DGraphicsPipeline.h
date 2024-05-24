@@ -75,18 +75,8 @@ void GP2_2DGraphicsPipeline<UBO2D>::Initialize(const VulkanContext& context)
 
 	m_Shader.Initialize(m_Device);
 
-	std::vector<std::pair<VkImageView, VkSampler>> textureImageViewsSamplers; 
-
-	for (auto& mesh : m_pMeshes)
-	{
-		for (int i = 0; i < mesh->GetTextureCount(); ++i)
-		{
-			textureImageViewsSamplers.push_back({ mesh->GetTexture(i)->GetTextureImageView(), mesh->GetTexture(i)->GetTextureSampler() });
-		}
-	}
-
 	m_pDescriptorPool = new GP2_DescriptorPool<UBO2D>{ m_Device, MAX_FRAMES_IN_FLIGHT }; 
-	m_pDescriptorPool->Initialize(context, textureImageViewsSamplers); 
+	m_pDescriptorPool->Initialize(context); 
 
 	CreateGraphicsPipeline();
 }

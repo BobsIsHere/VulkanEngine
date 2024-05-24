@@ -7,10 +7,16 @@
 #include "Vertex.h"
 #include "GP2_Mesh.h"
 #include "GP2_Shader.h"
+#include "GP2_Texture.h"	
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
 
 using pMesh3D = std::unique_ptr<GP2_Mesh<Vertex3D>>;
+
+// Forward declaration of GP2_Texture because otherwise the compiler doesn't know it's a valid class
+// I do not understand why this is necessary, Pieter-Jan does not know why this is needed either
+// But I shall simply accept it
+class GP2_Texture; 
 
 template <class UBO3D>
 class GP2_3DGraphicsPipeline final
@@ -28,6 +34,8 @@ public:
 	void Initialize(const VulkanContext& context);
 
 	void Cleanup();
+
+	void SetTextures(const VulkanContext& context, VkQueue graphicsQueue, GP2_CommandPool commandPool);
 
 	void Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx);
 	void DrawScene(const GP2_CommandBuffer& buffer);
@@ -49,6 +57,10 @@ private:
 	VkRenderPass m_RenderPass;
 	VkPipeline m_GraphicsPipeline;
 	VkPipelineLayout m_PipelineLayout;
+
+	GP2_Texture* m_DiffuseTexture;
+	GP2_Texture* m_NormalTexture;
+	GP2_Texture* m_GlossTexture;
 
 	GP2_Shader<Vertex3D> m_Shader;
 	std::vector<pMesh3D> m_pMeshes;
@@ -77,13 +89,9 @@ void GP2_3DGraphicsPipeline<UBO3D>::Initialize(const VulkanContext& context)
 
 	std::vector<std::pair<VkImageView, VkSampler>> textureImageViewsSamplers;
 
-	for (auto& mesh : m_pMeshes)
-	{
-		for (int i = 0; i < mesh->GetTextureCount(); ++i)
-		{
-			textureImageViewsSamplers.push_back({ mesh->GetTexture(i)->GetTextureImageView(), mesh->GetTexture(i)->GetTextureSampler() });
-		}
-	}
+	textureImageViewsSamplers.push_back({ m_DiffuseTexture->GetTextureImageView(), m_DiffuseTexture->GetTextureSampler() });
+	textureImageViewsSamplers.push_back({ m_NormalTexture->GetTextureImageView(), m_NormalTexture->GetTextureSampler() });
+	textureImageViewsSamplers.push_back({ m_GlossTexture->GetTextureImageView(), m_GlossTexture->GetTextureSampler() });
 
 	m_pDescriptorPool = new GP2_DescriptorPool<UBO3D>{ m_Device, MAX_FRAMES_IN_FLIGHT };
 	m_pDescriptorPool->Initialize(context, textureImageViewsSamplers); 
@@ -231,6 +239,27 @@ void GP2_3DGraphicsPipeline<UBO3D>::Cleanup()
 	vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
 
 	delete m_pDescriptorPool;
+
+	m_DiffuseTexture->CleanUp();
+	m_NormalTexture->CleanUp();
+	m_GlossTexture->CleanUp();
+
+	delete m_DiffuseTexture;
+	delete m_NormalTexture;
+	delete m_GlossTexture;
+}
+
+template<class UBO3D>
+inline void GP2_3DGraphicsPipeline<UBO3D>::SetTextures(const VulkanContext& context, VkQueue graphicsQueue, GP2_CommandPool commandPool)
+{
+	m_DiffuseTexture = new GP2_Texture{ context,  graphicsQueue, commandPool };
+	m_DiffuseTexture->Initialize(m_pMeshes[0]->GetTexture(0));
+
+	m_NormalTexture = new GP2_Texture{ context,  graphicsQueue, commandPool };
+	m_NormalTexture->Initialize(m_pMeshes[0]->GetTexture(1));
+
+	m_GlossTexture = new GP2_Texture{ context,  graphicsQueue, commandPool };
+	m_GlossTexture->Initialize(m_pMeshes[0]->GetTexture(2));
 }
 
 template <class UBO3D>
