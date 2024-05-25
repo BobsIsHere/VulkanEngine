@@ -184,7 +184,7 @@ inline void GP2_DescriptorPool<UBO>::CreateDescriptorSetLayout(const VulkanConte
 	layoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT; 
 	layoutBindings[0].pImmutableSamplers = nullptr; 
 
-	for (int idx = 1; idx < layoutBindings.size(); ++idx)
+	for (int idx = 1; idx < layoutBindings.size() ; ++idx)
 	{
 		layoutBindings[idx].binding = idx; 
 		layoutBindings[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; 

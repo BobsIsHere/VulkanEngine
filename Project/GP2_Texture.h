@@ -23,9 +23,10 @@ public:
 	void CreateTextureImageView();
 	void CreateTextureSampler();
 
+	void LoadImageData(const std::string& filePath);
+
 	static VkImageView CreateImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
-		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	void CreateImage(VkFormat format);
 	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	VkImageView GetTextureImageView() const { return m_TextureImageView; }
@@ -50,6 +51,12 @@ private:
 	VulkanContext m_VulkanContext;
 	GP2_CommandPool m_CommandPool;
 	VkQueue m_GraphicsQueue;
+
+	int m_TextureWidth; 
+	int m_TextureHeight;
+	int m_TextureChannels;
+
+	GP2_Buffer* m_StagingBuffer;
 
 	VkImage m_TextureImage;
 	VkDeviceMemory m_TextureImageMemory;

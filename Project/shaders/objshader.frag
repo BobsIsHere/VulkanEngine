@@ -1,5 +1,7 @@
 #version 450
 
+// -------------------- VARIABLES --------------------
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 fragColor;
 layout(location = 2) in vec2 fragTexCoord;
@@ -10,13 +12,10 @@ layout(location = 0) out vec4 outColor;
 
 layout(binding = 1) uniform sampler2D diffuseSampler;
 layout(binding = 2) uniform sampler2D normalSampler;
-layout(binding = 3) uniform sampler2D roughnessSampler;
+layout(binding = 3) uniform sampler2D glossSampler;
+layout(binding = 4) uniform sampler2D specularSampler;
 
-vec3 lightPosition = vec3(1.2, 1.0, 2.0);
-vec3 lightColor = vec3(0.7, 0.7, 1.0);
-
-float metalness = 0.0;
-vec3 albedo = vec3(0.8, 0.6, 0.4);
+// -------------------- HELPERS --------------------
 
 vec3 Lambert(vec3 kd, vec3 cd)
 {
@@ -24,72 +23,51 @@ vec3 Lambert(vec3 kd, vec3 cd)
     return rho / 3.14159265359;
 }
 
-vec3 FresnelFunction_Schlick(vec3 h, vec3 v, vec3 f0)
+vec3 Phong(vec3 lightDir, float reflection, float exponent, vec3 v, vec3 n)
 {
-    const float schlick = 1.0 - dot(h, v);
+    float dp = dot(n, lightDir);
+    vec3 reflect = lightDir - (2.0 * dp * n);
 
-	return f0 + (vec3(1.0, 1.0, 1.0) - f0) * (schlick * schlick * schlick * schlick * schlick);
+    float cosAlpha = max(dot(reflect, v), 0.f);
+    float specular = reflection * pow(cosAlpha, exponent);
+
+    return vec3(specular, specular, specular);
 }
 
-float NormalDistribution_GGX(vec3 n, vec3 h, float roughness)
-{
-    const float a = roughness * roughness;
-    const float dpSquared = dot(n, h) * dot(n, h);
-    const float denominator = 3.14159265359 * ((dpSquared * (a - 1.0) + 1.0) * (dpSquared * (a - 1.0) + 1.0));
-
-    return a / denominator;
-}
-
-float Geometry_SchlickGGX(vec3 n, vec3 v, float roughness)
-{
-    const float dp = dot(n, v);
-    const float k = ((roughness + 1.0) * (roughness + 1.0)) / 8.0;
-
-    return dp / (dp * (1.0 - k) + k);
-}
-
-float Geometry_Smith(vec3 n, vec3 v, vec3 l, float roughness)
-{
-    const float smith1 = Geometry_SchlickGGX(n, v, roughness);
-    const float smith2 = Geometry_SchlickGGX(n, l, roughness);
-
-    return smith1 * smith2;
-}
+// -------------------- MAIN --------------------
 
 void main() 
 {
-    vec3 lightDirection = normalize(vec3(0.0, -1.0, -1.0));
+    vec3 lightDirection = vec3(0.577, 0.577, 0.577);
     vec3 viewDirection = normalize(-inPosition);
+    vec3 radiance = vec3(7.0, 7.0, 7.0);
+    vec3 ambient = vec3(0.03, 0.03, 0.03);
+    float shininess = 25.0;
+    float lightIntensity = 2.0;
 
     vec3 diffuseTexture = texture(diffuseSampler, fragTexCoord).rgb;
-    vec3 normalTexture = texture(normalSampler, fragTexCoord).rgb * 2.0 - 1.0;
-    float roughnessTexture = texture(roughnessSampler, fragTexCoord).x;
+    vec3 normalTexture = texture(normalSampler, fragTexCoord).rgb;
+    float glossTexture = texture(glossSampler, fragTexCoord).r;
+    float specularTexture = texture(specularSampler, fragTexCoord).r;
     
-    // Roughness squared
-    const float roughnessSquared = roughnessTexture * roughnessTexture;
+    vec3 binormal = cross(fragNormal, fragTangent);
+    mat3 tangentSpaceAxis = mat3(fragTangent, binormal, fragNormal);
 
-    // Calculate half vector
-    vec3 halfVector = normalize(lightDirection + viewDirection);
+    vec3 sampledNormal = 2.f * normalTexture - 1.f;
+    sampledNormal = normalize(tangentSpaceAxis * sampledNormal);
 
-    // Calculate fresnel
-    vec3 f0 = diffuseTexture;
-
-    // Specular variables
-    vec3 f = FresnelFunction_Schlick(halfVector, viewDirection, f0);
-    float d = NormalDistribution_GGX(normalTexture, halfVector, roughnessSquared);
-    float g = Geometry_Smith(normalTexture, viewDirection, lightDirection, roughnessSquared);
-
-    // Calculate specular
-    vec3 DFG = d * f * g;
-    float denominator = 4 * dot(viewDirection, normalTexture) * dot(lightDirection, normalTexture);
-    vec3 specular = DFG / denominator;
-
-    if (metalness <= 0.0)
-    {
-        specular += Lambert(vec3(1.0, 1.0, 1.0) - f, albedo);
+    float observedArea = dot(sampledNormal, -lightDirection);
+    if (observedArea <= 0.0)
+	{
+		outColor = vec4(0.0, 0.0, 0.0, 1.0);
+        return;
 	}
 
-    // Combine the terms and output the color
-    vec3 result = (diffuseTexture);
-    outColor = vec4(result, 1.0);
+    vec3 exponent = vec3(glossTexture * shininess);
+
+    vec3 lambert = Lambert(radiance, diffuseTexture);
+    vec3 phong = Phong(lightDirection, specularTexture, glossTexture * 25.0, -viewDirection, sampledNormal);
+
+    outColor = vec4(lambert, 1.0);
+    //outColor = vec4(((lambert * lightIntensity) + phong + ambient) * observedArea, 1.0);
 }

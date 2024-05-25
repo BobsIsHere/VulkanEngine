@@ -9,18 +9,42 @@ GP2_Texture::GP2_Texture(VulkanContext context, VkQueue graphicsQueue, GP2_Comma
 	m_TextureImage{},
 	m_TextureImageMemory{},
 	m_TextureImageView{},
-	m_TextureSampler{}
+	m_TextureSampler{},
+	m_TextureWidth{},
+	m_TextureHeight{},
+	m_TextureChannels{},
+	m_StagingBuffer{}
 {
 }
 
-GP2_Texture::~GP2_Texture()
+GP2_Texture::~GP2_Texture() 
 {
 }
 
 void GP2_Texture::Initialize(const char* filePath)
 {
-	CreateTextureImage(filePath);
-	CreateTextureImageView();
+	LoadImageData(filePath);
+
+	// Add error checking here
+	if (m_TextureWidth == 0 || m_TextureHeight == 0) 
+	{
+		throw std::runtime_error("Texture dimensions are zero!"); 
+	}
+
+	CreateImage(VK_FORMAT_R8G8B8A8_SRGB);
+
+	// copy staging buffer to image
+	TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	CopyBufferToImage(m_StagingBuffer->GetVkBuffer(), m_TextureImage, static_cast<uint32_t>(m_TextureWidth), static_cast<uint32_t>(m_TextureHeight));
+
+	// prepare it for shader access
+	TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	m_StagingBuffer->Destroy(); 
+	delete m_StagingBuffer;
+	m_StagingBuffer = nullptr;
+
+	m_TextureImageView = CreateImageView(m_VulkanContext.device, m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 	CreateTextureSampler();
 }
 
@@ -35,34 +59,6 @@ void GP2_Texture::CleanUp()
 
 void GP2_Texture::CreateTextureImage(const char* filePath)
 {
-	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load(filePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-	VkDeviceSize imageSize = texWidth * texHeight * 4;
-
-	if (!pixels)
-	{
-		throw std::runtime_error("failed to load texture image!");
-	}
-
-	GP2_Buffer stagingBuffer{ m_VulkanContext.device, m_VulkanContext.physicalDevice, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-							  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, imageSize };
-
-	stagingBuffer.TransferDeviceLocal(pixels);
-
-	stbi_image_free(pixels);
-
-	CreateImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		m_TextureImage, m_TextureImageMemory);
-
-	// copy staging buffer to image
-	TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	CopyBufferToImage(stagingBuffer.GetVkBuffer(), m_TextureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-
-	// prepare it for shader access
-	TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	stagingBuffer.Destroy();
 }
 
 void GP2_Texture::CreateTextureImageView()
@@ -103,6 +99,24 @@ void GP2_Texture::CreateTextureSampler()
 	{
 		throw std::runtime_error("failed to create texture sampler!");
 	}
+}
+
+void GP2_Texture::LoadImageData(const std::string& filePath)
+{
+	stbi_uc* pixels = stbi_load(filePath.c_str(), &m_TextureWidth, &m_TextureHeight, &m_TextureChannels, STBI_rgb_alpha);
+	VkDeviceSize imageSize = m_TextureWidth * m_TextureWidth * 4;
+
+	if (!pixels)
+	{
+		throw std::runtime_error("failed to load texture image!");
+	}
+
+	m_StagingBuffer = new GP2_Buffer{ m_VulkanContext.device, m_VulkanContext.physicalDevice, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+							  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, imageSize };
+
+	m_StagingBuffer->TransferDeviceLocal(pixels);
+
+	stbi_image_free(pixels);
 }
 
 VkCommandBuffer GP2_Texture::BeginSingleTimeCommands()
@@ -163,45 +177,46 @@ VkImageView GP2_Texture::CreateImageView(VkDevice device, VkImage image, VkForma
 	return imageView;
 }
 
-void GP2_Texture::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+void GP2_Texture::CreateImage(VkFormat format)
 {
 	// 1. Create Image
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
-	imageInfo.extent.width = width;
-	imageInfo.extent.height = height;
+	imageInfo.extent.width = static_cast<uint32_t>(m_TextureWidth);
+	imageInfo.extent.height = static_cast<uint32_t>(m_TextureHeight);
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = 1;
 	imageInfo.arrayLayers = 1;
 	imageInfo.format = format;
-	imageInfo.tiling = tiling;
+	imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	imageInfo.usage = usage;
+	imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	imageInfo.flags = 0;
 
-	if (vkCreateImage(m_VulkanContext.device, &imageInfo, nullptr, &image) != VK_SUCCESS)
+	if (vkCreateImage(m_VulkanContext.device, &imageInfo, nullptr, &m_TextureImage) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create image!");
 	}
 
 	// 2. Allocate Memory for Image
 	VkMemoryRequirements memRequirements{};
-	vkGetImageMemoryRequirements(m_VulkanContext.device, image, &memRequirements);
+	vkGetImageMemoryRequirements(m_VulkanContext.device, m_TextureImage, &memRequirements);
 
 	VkMemoryAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
+	allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	if (vkAllocateMemory(m_VulkanContext.device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
+	if (vkAllocateMemory(m_VulkanContext.device, &allocInfo, nullptr, &m_TextureImageMemory) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to allocate image memory!");
 	}
 
 	// 3. Bind Memory to Image
-	vkBindImageMemory(m_VulkanContext.device, image, imageMemory, 0);
+	vkBindImageMemory(m_VulkanContext.device, m_TextureImage, m_TextureImageMemory, 0);
 }
 
 void GP2_Texture::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)

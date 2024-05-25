@@ -30,9 +30,9 @@ void main()
 
     outColor = inColor;
 
-    outNormal = mat3(transpose(inverse(push.model))) * inNormal;
+    outNormal = mat3(push.model) * normalize(inNormal);
 
     outTexCoord = inTexCoord;
 
-    outTangent = inTangent;
+    outTangent = mat3(push.model) * normalize(inTangent);
 }
