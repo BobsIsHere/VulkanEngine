@@ -93,7 +93,7 @@ void GP2_3DGraphicsPipeline<UBO3D>::Initialize(const VulkanContext& context)
 	textureImageViewsSamplers.push_back({ m_NormalTexture->GetTextureImageView(), m_NormalTexture->GetTextureSampler() });
 	textureImageViewsSamplers.push_back({ m_GlossTexture->GetTextureImageView(), m_GlossTexture->GetTextureSampler() });
 
-	m_pDescriptorPool = new GP2_DescriptorPool<UBO3D>{ m_Device, MAX_FRAMES_IN_FLIGHT };
+	m_pDescriptorPool = new GP2_DescriptorPool<UBO3D>{ m_Device, MAX_FRAMES_IN_FLIGHT, textureImageViewsSamplers.size() };
 	m_pDescriptorPool->Initialize(context, textureImageViewsSamplers); 
 
 	CreateGraphicsPipeline();

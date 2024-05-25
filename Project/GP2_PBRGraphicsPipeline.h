@@ -14,14 +14,14 @@
 using pMesh3D = std::unique_ptr<GP2_Mesh<Vertex3D>>;
 
 template<class UBOPBR>
-class PBRGraphicsPipeline final
+class GP2_PBRGraphicsPipeline final
 {
 public:
 	//---------------------------
 	// Constructors & Destructor
 	//---------------------------
-	PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
-	~PBRGraphicsPipeline() = default;
+	GP2_PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
+	~GP2_PBRGraphicsPipeline() = default;
 
 	//-----------
 	// Functions
@@ -57,47 +57,47 @@ private:
 };
 
 template<class UBOPBR>
-inline PBRGraphicsPipeline<UBOPBR>::PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile)
+inline GP2_PBRGraphicsPipeline<UBOPBR>::GP2_PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile)
 {
 }
 
 template<class UBOPBR>
-inline void PBRGraphicsPipeline<UBOPBR>::Initialize(const VulkanContext& context)
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::Initialize(const VulkanContext& context)
 {
 }
 
 template<class UBOPBR>
-inline void PBRGraphicsPipeline<UBOPBR>::Cleanup()
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::Cleanup()
 {
 }
 
 template<class UBOPBR>
-inline void PBRGraphicsPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx)
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx)
 {
 }
 
 template<class UBOPBR>
-inline void PBRGraphicsPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& buffer)
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& buffer)
 {
 }
 
 template<class UBOPBR>
-inline void PBRGraphicsPipeline<UBOPBR>::AddMesh(pMesh3D mesh)
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::AddMesh(pMesh3D mesh)
 {
 }
 
 template<class UBOPBR>
-inline void PBRGraphicsPipeline<UBOPBR>::SetUBO(UBOPBR ubo, size_t uboIndex)
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::SetUBO(UBOPBR ubo, size_t uboIndex)
 {
 }
 
 template<class UBOPBR>
-inline void PBRGraphicsPipeline<UBOPBR>::CreateGraphicsPipeline()
+inline void GP2_PBRGraphicsPipeline<UBOPBR>::CreateGraphicsPipeline()
 {
 }
 
 template<class UBOPBR>
-inline VkPushConstantRange PBRGraphicsPipeline<UBOPBR>::CreatePushConstantRange()
+inline VkPushConstantRange GP2_PBRGraphicsPipeline<UBOPBR>::CreatePushConstantRange()
 {
 	return VkPushConstantRange();
 }

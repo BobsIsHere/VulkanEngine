@@ -14,7 +14,7 @@ public:
 	//---------------------------
 	// Constructors & Destructor
 	//---------------------------
-	GP2_DescriptorPool(VkDevice device, size_t count);
+	GP2_DescriptorPool(VkDevice device, size_t count, size_t imageCount = 0);
 	~GP2_DescriptorPool();
 
 	//-----------
@@ -57,24 +57,22 @@ private:
 };
 
 template<class UBO>
-GP2_DescriptorPool<UBO>::GP2_DescriptorPool(VkDevice device, size_t count) :
+GP2_DescriptorPool<UBO>::GP2_DescriptorPool(VkDevice device, size_t count, size_t imageCount) :
 	m_Device{ device },
 	m_Size{ sizeof(VertexUBO) },
 	m_Count(count),
 	m_DescriptorPool{ nullptr },
 	m_DescriptorSetLayout{ nullptr }
 {
-	// TODO : If you add more textures, you need to change this
-	// Up the Pool Size
-	std::array<VkDescriptorPoolSize, 4> poolSizes{};
+	std::vector<VkDescriptorPoolSize> poolSizes(imageCount + 1);  
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	poolSizes[0].descriptorCount = static_cast<uint32_t>(m_Count);
-	poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[1].descriptorCount = static_cast<uint32_t>(m_Count);
-	poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[2].descriptorCount = static_cast<uint32_t>(m_Count);
-	poolSizes[3].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[3].descriptorCount = static_cast<uint32_t>(m_Count);
+	
+	for (size_t idx = 1; idx < imageCount + 1; ++idx)
+	{
+		poolSizes[idx].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; 
+		poolSizes[idx].descriptorCount = static_cast<uint32_t>(m_Count);
+	}
 
 	VkDescriptorPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;

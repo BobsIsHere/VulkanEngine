@@ -90,6 +90,6 @@ void main()
 	}
 
     // Combine the terms and output the color
-    vec3 result = (specular);
+    vec3 result = (diffuseTexture);
     outColor = vec4(result, 1.0);
 }

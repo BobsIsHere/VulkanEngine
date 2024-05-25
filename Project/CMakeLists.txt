@@ -57,7 +57,7 @@ set(SOURCES
     "GP2_Texture.h" 
     "GP2_Texture.cpp" 
     "GP2_DepthBuffer.h" 
-    "GP2_DepthBuffer.cpp" "PBRGraphicsPipeline.h" )
+    "GP2_DepthBuffer.cpp" "GP2_PBRGraphicsPipeline.h" )
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES})

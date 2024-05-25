@@ -83,15 +83,15 @@ private:
 		VulkanContext context{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent };
 
 		// Cube Mesh
-		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pVehicleMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
 		
-		m_pCubeMesh->ParseOBJ("resources/vehicle.obj", { 1.0f, 1.0f, 1.0f });
-		m_pCubeMesh->AddTexture("resources/vehicle_diffuse.png");
-		m_pCubeMesh->AddTexture("resources/vehicle_normal.png");
-		m_pCubeMesh->AddTexture("resources/vehicle_gloss.png"); 
+		m_pVehicleMesh->ParseOBJ("resources/vehicle.obj", { 1.0f, 1.0f, 1.0f });
+		m_pVehicleMesh->AddTexture("resources/vehicle_diffuse.png");
+		m_pVehicleMesh->AddTexture("resources/vehicle_normal.png");
+		m_pVehicleMesh->AddTexture("resources/vehicle_gloss.png"); 
 
-		m_pCubeMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
-		m_GP3D.AddMesh(std::move(m_pCubeMesh));
+		m_pVehicleMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
+		m_GP3D.AddMesh(std::move(m_pVehicleMesh));
 		
 		CreateRenderPass(); 
 		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
