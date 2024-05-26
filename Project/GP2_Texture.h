@@ -16,10 +16,9 @@ public:
 	//-----------
 	// Functions
 	//-----------
-	void Initialize(const char* filePath);
+	void Initialize(const char* filePath, QueueFamilyIndices queueFamInd);
 	void CleanUp();
 
-	void CreateTextureImage(const char* filePath);
 	void CreateTextureImageView();
 	void CreateTextureSampler();
 
@@ -27,7 +26,7 @@ public:
 
 	static VkImageView CreateImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 	void CreateImage(VkFormat format);
-	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void TransitionImageLayout(QueueFamilyIndices queueFamInd, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	VkImageView GetTextureImageView() const { return m_TextureImageView; }
 	VkSampler GetTextureSampler() const { return m_TextureSampler; }
@@ -36,10 +35,7 @@ private:
 	//-----------
 	// Functions
 	//-----------
-	VkCommandBuffer BeginSingleTimeCommands();
-	void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
-
-	void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	void CopyBufferToImage(QueueFamilyIndices queueFamInd, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
 	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 

@@ -29,7 +29,7 @@ public:
 	void Initialize(const VulkanContext& context);
 
 	void SetTextures(const VulkanContext& context, const std::string& diffuse, const std::string& normal, const std::string& gloss, const std::string& specular,
-					VkQueue graphicsQueue, GP2_CommandPool commandPool);
+					VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd);
 
 	void Cleanup();
 
@@ -99,19 +99,19 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::Initialize(const VulkanContext& con
 
 template<class UBOPBR>
 inline void GP2_PBRGraphicsPipeline<UBOPBR>::SetTextures(const VulkanContext& context, const std::string& diffuse, const std::string& normal, const std::string& gloss, 
-														 const std::string& specular, VkQueue graphicsQueue, GP2_CommandPool commandPool)
+														 const std::string& specular, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd)
 {
 	m_DiffuseTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_DiffuseTexture->Initialize(diffuse.c_str());
+	m_DiffuseTexture->Initialize(diffuse.c_str(), queueFamilyInd);
 
 	m_NormalTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_NormalTexture->Initialize(normal.c_str());
+	m_NormalTexture->Initialize(normal.c_str(), queueFamilyInd);
 
 	m_GlossTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_GlossTexture->Initialize(gloss.c_str());
+	m_GlossTexture->Initialize(gloss.c_str(), queueFamilyInd);
 
 	m_SpecularTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_SpecularTexture->Initialize(specular.c_str());
+	m_SpecularTexture->Initialize(specular.c_str(), queueFamilyInd);
 }
 
 template<class UBOPBR>

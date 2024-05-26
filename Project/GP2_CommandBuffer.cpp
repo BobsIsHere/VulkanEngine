@@ -44,6 +44,7 @@ void GP2_CommandBuffer::EndRecording() const
 
 void GP2_CommandBuffer::Sumbit(VkSubmitInfo& info) const
 {
+	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	info.commandBufferCount = 1;
 	info.pCommandBuffers = &m_CommandBuffer;
 }

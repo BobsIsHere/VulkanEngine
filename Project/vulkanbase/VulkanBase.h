@@ -76,6 +76,8 @@ private:
 		m_CommandPool.Initialize(m_Device, FindQueueFamilies(m_PhysicalDevice)); 
 		m_CommandBuffer = m_CommandPool.CreateCommandBuffer(); 
 
+		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies(m_PhysicalDevice);
+
 		// Depth Buffer
 		m_DepthBuffer.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_GraphicsQueue, m_CommandPool);
 		m_DepthBuffer.CreateDepthResources();
@@ -97,7 +99,7 @@ private:
 		//m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent });
 
 		m_GP3DPBR.SetTextures(context, "resources/vehicle_diffuse.png", "resources/vehicle_normal.png", "resources/vehicle_gloss.png", "resources/vehicle_specular.png", 
-							  m_GraphicsQueue, m_CommandPool);
+							  m_GraphicsQueue, m_CommandPool, queueFamilyIndices);
 		m_GP3DPBR.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent });
 		CreateFrameBuffers(); 
 
@@ -170,7 +172,7 @@ private:
 	// Graphics Pipelines
 	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };    
 	//GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
-	GP2_PBRGraphicsPipeline<VertexUBO> m_GP3DPBR{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };
+	GP2_PBRGraphicsPipeline<VertexUBO> m_GP3DPBR{ "shaders/pbrshader.vert.spv", "shaders/pbrshader.frag.spv" };
 
 	//Depth Buffer
 	GP2_DepthBuffer m_DepthBuffer{};

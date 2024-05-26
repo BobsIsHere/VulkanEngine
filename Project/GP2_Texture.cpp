@@ -21,7 +21,7 @@ GP2_Texture::~GP2_Texture()
 {
 }
 
-void GP2_Texture::Initialize(const char* filePath)
+void GP2_Texture::Initialize(const char* filePath, QueueFamilyIndices queueFamInd)
 {
 	LoadImageData(filePath);
 
@@ -34,11 +34,11 @@ void GP2_Texture::Initialize(const char* filePath)
 	CreateImage(VK_FORMAT_R8G8B8A8_SRGB);
 
 	// copy staging buffer to image
-	TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	CopyBufferToImage(m_StagingBuffer->GetVkBuffer(), m_TextureImage, static_cast<uint32_t>(m_TextureWidth), static_cast<uint32_t>(m_TextureHeight));
+	TransitionImageLayout(queueFamInd, m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	CopyBufferToImage(queueFamInd, m_StagingBuffer->GetVkBuffer(), m_TextureImage, static_cast<uint32_t>(m_TextureWidth), static_cast<uint32_t>(m_TextureHeight));
 
 	// prepare it for shader access
-	TransitionImageLayout(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	TransitionImageLayout(queueFamInd, m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	m_StagingBuffer->Destroy(); 
 	delete m_StagingBuffer;
@@ -55,10 +55,6 @@ void GP2_Texture::CleanUp()
 
 	vkDestroyImage(m_VulkanContext.device, m_TextureImage, nullptr);
 	vkFreeMemory(m_VulkanContext.device, m_TextureImageMemory, nullptr);
-}
-
-void GP2_Texture::CreateTextureImage(const char* filePath)
-{
 }
 
 void GP2_Texture::CreateTextureImageView()
@@ -117,41 +113,6 @@ void GP2_Texture::LoadImageData(const std::string& filePath)
 	m_StagingBuffer->TransferDeviceLocal(pixels);
 
 	stbi_image_free(pixels);
-}
-
-VkCommandBuffer GP2_Texture::BeginSingleTimeCommands()
-{
-	VkCommandBufferAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandPool = m_CommandPool.GetVkCommandPool();
-	allocInfo.commandBufferCount = 1;
-
-	VkCommandBuffer commandBuffer;
-	vkAllocateCommandBuffers(m_VulkanContext.device, &allocInfo, &commandBuffer);
-
-	VkCommandBufferBeginInfo beginInfo{};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-	vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-	return commandBuffer;
-}
-
-void GP2_Texture::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
-{
-	vkEndCommandBuffer(commandBuffer);
-
-	VkSubmitInfo submitInfo{};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffer;
-
-	vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-	vkQueueWaitIdle(m_GraphicsQueue);
-
-	vkFreeCommandBuffers(m_VulkanContext.device, m_CommandPool.GetVkCommandPool(), 1, &commandBuffer);
 }
 
 VkImageView GP2_Texture::CreateImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
@@ -219,9 +180,13 @@ void GP2_Texture::CreateImage(VkFormat format)
 	vkBindImageMemory(m_VulkanContext.device, m_TextureImage, m_TextureImageMemory, 0);
 }
 
-void GP2_Texture::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+void GP2_Texture::TransitionImageLayout(QueueFamilyIndices queueFamInd, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-	VkCommandBuffer commandBuffer{ BeginSingleTimeCommands() };
+	GP2_CommandPool commandPool{};
+	commandPool.Initialize(m_VulkanContext.device, queueFamInd); 
+
+	GP2_CommandBuffer commandBuffer{ commandPool.CreateCommandBuffer() };
+	commandBuffer.BeginRecording(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -259,20 +224,20 @@ void GP2_Texture::TransitionImageLayout(VkImage image, VkFormat format, VkImageL
 		sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 	}
-	else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+	/*else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
 	{
 		barrier.srcAccessMask = 0;
 		barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 		sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 		destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	}
+	}*/
 	else
 	{
 		throw std::invalid_argument("unsupported layout transition!");
 	}
 
-	if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+	/*if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
 	{
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
@@ -284,11 +249,11 @@ void GP2_Texture::TransitionImageLayout(VkImage image, VkFormat format, VkImageL
 	else
 	{
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	}
+	}*/
 
 	// pipeline stages where barrier is going to wait
 	vkCmdPipelineBarrier(
-		commandBuffer,
+		commandBuffer.GetVkCommandBuffer(),
 		sourceStage, destinationStage,
 		0,
 		0, nullptr,
@@ -296,12 +261,26 @@ void GP2_Texture::TransitionImageLayout(VkImage image, VkFormat format, VkImageL
 		1, &barrier
 	);
 
-	EndSingleTimeCommands(commandBuffer);
+	commandBuffer.EndRecording();
+
+	VkSubmitInfo submitInfo{};
+
+	commandBuffer.Sumbit(submitInfo);
+	vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+	vkQueueWaitIdle(m_GraphicsQueue);
+
+	VkCommandBuffer vkCommandBuffer{ commandBuffer.GetVkCommandBuffer() }; 
+	vkFreeCommandBuffers(m_VulkanContext.device, commandPool.GetVkCommandPool(), 1, &vkCommandBuffer);
+	commandPool.Destroy();
 }
 
-void GP2_Texture::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+void GP2_Texture::CopyBufferToImage(QueueFamilyIndices queueFamInd, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 {
-	VkCommandBuffer commandBuffer{ BeginSingleTimeCommands() };
+	GP2_CommandPool commandPool{};
+	commandPool.Initialize(m_VulkanContext.device, queueFamInd);
+
+	GP2_CommandBuffer commandBuffer{ commandPool.CreateCommandBuffer() };
+	commandBuffer.BeginRecording(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 	VkBufferImageCopy region{};
 	// byte offset in buffer, at which pixel values start
@@ -324,7 +303,7 @@ void GP2_Texture::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t wid
 	};
 
 	vkCmdCopyBufferToImage(
-		commandBuffer,
+		commandBuffer.GetVkCommandBuffer(),
 		buffer,
 		image,
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, // which layout image is going to be in
@@ -332,7 +311,17 @@ void GP2_Texture::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t wid
 		&region
 	);
 
-	EndSingleTimeCommands(commandBuffer);
+	commandBuffer.EndRecording();
+
+	VkSubmitInfo submitInfo{};
+
+	commandBuffer.Sumbit(submitInfo);
+	vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+	vkQueueWaitIdle(m_GraphicsQueue);
+
+	VkCommandBuffer vkCommandBuffer{ commandBuffer.GetVkCommandBuffer() };
+	vkFreeCommandBuffers(m_VulkanContext.device, commandPool.GetVkCommandPool(), 1, &vkCommandBuffer);
+	commandPool.Destroy();
 }
 
 uint32_t GP2_Texture::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
