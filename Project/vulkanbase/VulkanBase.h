@@ -88,7 +88,7 @@ private:
 		// Cube Mesh
 		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pVehicleMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
 		
-		m_pVehicleMesh->ParseOBJ("resources/vehicle.obj", { 1.0f, 1.0f, 1.0f });
+		m_pVehicleMesh->ParseOBJ("resources/vehicle.obj", false);
 
 		m_pVehicleMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
 		m_GP3DPBR.AddMesh(std::move(m_pVehicleMesh));

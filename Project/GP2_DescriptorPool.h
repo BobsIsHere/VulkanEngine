@@ -123,46 +123,47 @@ void GP2_DescriptorPool<UBO>::CreateDescriptorSets(const std::vector<std::pair<V
 	{
 		throw std::runtime_error("failed to allocate descriptor sets!");
 	}
-	
-	for (size_t idx = 0; idx < m_Count; ++idx) 
+
+	std::vector<VkDescriptorImageInfo> imageInfos(textureImageViewsSamplers.size());
+	for (size_t texIdx = 0; texIdx < textureImageViewsSamplers.size(); ++texIdx)
+	{
+		imageInfos[texIdx].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfos[texIdx].imageView = textureImageViewsSamplers[texIdx].first;
+		imageInfos[texIdx].sampler = textureImageViewsSamplers[texIdx].second;
+	}
+
+	for (size_t idx = 0; idx < m_Count; ++idx)
 	{
 		VkDescriptorBufferInfo bufferInfo{};
 		bufferInfo.buffer = m_UBOs[idx]->GetVkBuffer();
 		bufferInfo.offset = 0;
 		bufferInfo.range = m_Size;
 
-		VkWriteDescriptorSet descriptorWrites{}; 
+		std::vector<VkWriteDescriptorSet> descriptorWrites(textureImageViewsSamplers.size() + 1);
 
-		descriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;  
-		descriptorWrites.dstSet = m_DescriptorSets[idx]; 
-		descriptorWrites.dstBinding = 0;   
-		descriptorWrites.dstArrayElement = 0;   
-		descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;  
-		descriptorWrites.descriptorCount = 1;  
-		descriptorWrites.pBufferInfo = &bufferInfo;  
+		// First write struct is for UBO
+		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[0].dstSet = m_DescriptorSets[idx];
+		descriptorWrites[0].dstBinding = 0;
+		descriptorWrites[0].dstArrayElement = 0;
+		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrites[0].descriptorCount = 1;
+		descriptorWrites[0].pBufferInfo = &bufferInfo;
 
-		vkUpdateDescriptorSets(m_Device, 1, &descriptorWrites, 0, nullptr);
-
-		std::vector<VkWriteDescriptorSet> imageDescriptorWrites(textureImageViewsSamplers.size());
-
-		for (size_t texIdx = 0; texIdx < textureImageViewsSamplers.size(); ++texIdx) 
+		for (size_t texIdx = 0; texIdx < textureImageViewsSamplers.size(); ++texIdx)
 		{
-			VkDescriptorImageInfo imageInfo{}; 
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; 
-			imageInfo.imageView = textureImageViewsSamplers[texIdx].first; 
-			imageInfo.sampler = textureImageViewsSamplers[texIdx].second; 
-
-			imageDescriptorWrites[texIdx].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			imageDescriptorWrites[texIdx].dstSet = m_DescriptorSets[idx];
-			imageDescriptorWrites[texIdx].dstBinding = 1 + static_cast<uint32_t>(texIdx); 
-			imageDescriptorWrites[texIdx].dstArrayElement = 0; 
-			imageDescriptorWrites[texIdx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; 
-			imageDescriptorWrites[texIdx].descriptorCount = 1; 
-			imageDescriptorWrites[texIdx].pImageInfo = &imageInfo; 
+			// Remaining write structs are for texture image view & sampler pairs
+			descriptorWrites[1 + texIdx].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[1 + texIdx].dstSet = m_DescriptorSets[idx];
+			descriptorWrites[1 + texIdx].dstBinding = 1 + static_cast<uint32_t>(texIdx);
+			descriptorWrites[1 + texIdx].dstArrayElement = 0;
+			descriptorWrites[1 + texIdx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrites[1 + texIdx].descriptorCount = 1;
+			descriptorWrites[1 + texIdx].pImageInfo = &imageInfos[texIdx];
 		}
 
-		vkUpdateDescriptorSets(m_Device, static_cast<uint32_t>(imageDescriptorWrites.size()), 
-																 imageDescriptorWrites.data(), 0, nullptr); 
+		vkUpdateDescriptorSets(m_Device, static_cast<uint32_t>(descriptorWrites.size()),
+			descriptorWrites.data(), 0, nullptr);
 	}
 }
 
@@ -223,3 +224,11 @@ inline void GP2_DescriptorPool<UBO>::SetUBO(UBO src, size_t index)
 {
 	memcpy(m_UBOsMapped[index], &src, m_Size); 
 }
+
+// The issue with your code is that you're creating a separate VkWriteDescriptorSet struct for each texture image view and sampler pair, 
+// & calling vkUpdateDescriptorSets once for each pair. 
+// This means that each texture image view and sampler pair is being written to a separate descriptor set, rather than being combined into a single descriptor set.
+
+// In contrast, the working solution creates a single VkWriteDescriptorSet struct for all the texture image view and sampler pairs, 
+// & calls vkUpdateDescriptorSets once for each descriptor set.
+// This means that all the texture image view and sampler pairs are being combined into a single descriptor set, allowing the shader to access all the textures.

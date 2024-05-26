@@ -33,13 +33,9 @@ public:
 
 	const char* GetTexture(size_t index) const { return m_pTextures[index]; }
 
-	bool ParseOBJ(const std::string& filename, const glm::vec3 color); 
+	bool ParseOBJ(const std::string& filename, bool flipAxisAndWinding = true);
 
 private:
-	//-----------
-	// Functions
-	//-----------
-	uint32_t FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 	//-----------
 	// Variables
@@ -155,7 +151,7 @@ inline void GP2_Mesh<VertexType>::AddTexture(const char* filePath)
 }
 
 template<typename VertexType>
-bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3 color)
+bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, bool flipAxisAndWinding) 
 {
 	std::ifstream file{ filename };
 	if (!file.is_open()) 
@@ -168,7 +164,8 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 	std::vector<glm::vec3> normals; 
 	std::vector<glm::vec2> texCoordinates;
 
-	Vertex3D vertex{};
+	m_MeshIndices.clear();
+	m_MeshVertices.clear();
 
 	std::string sCommand;
 	// start a while iteration ending when the end of file is reached (ios::eof)
@@ -189,6 +186,14 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 
 			positions.emplace_back(x, y, z);
 		}
+		else if (sCommand == "vt") 
+		{
+			// Vertex Texture Coordinate
+			float x, y;  
+			file >> x >> y;  
+
+			texCoordinates.emplace_back(x,  1 - y);
+		}
 		else if (sCommand == "vn")
 		{
 			// Vertex Normal
@@ -196,14 +201,6 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 			file >> x >> y >> z;
 
 			normals.emplace_back(x, y, z);
-		}
-		else if (sCommand == "vt")
-		{
-			// Vertex Texture Coordinate
-			float u, v; 
-			file >> u >> v; 
-
-			texCoordinates.emplace_back(u, v);
 		}
 		else if (sCommand == "f")
 		{
@@ -213,6 +210,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 			//add the material index as attibute to the attribute array
 
 			// Faces or triangles
+			Vertex3D vertex{}; 
 			size_t iPosition, iNormal, iTexCoord;  
 
 			uint32_t tempIndices[3];
@@ -220,8 +218,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 			{	
 				// OBJ format uses 1-based arrays
 				file >> iPosition;
-				vertex.position = glm::vec3(positions[iPosition - 1].x, -positions[iPosition - 1].y, -positions[iPosition - 1].z); 
-				vertex.color = color;
+				vertex.position = positions[iPosition - 1]; 
 
 				if ('/' == file.peek())//is next in buffer ==  '/' ?
 				{
@@ -231,7 +228,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 					{
 						// Optional texture coordinate
 						file >> iTexCoord; 
-						vertex.texCoord = glm::vec2(texCoordinates[iTexCoord - 1].x, -texCoordinates[iTexCoord - 1].y);
+						vertex.texCoord = texCoordinates[iTexCoord - 1];
 					}
 
 					if ('/' == file.peek())
@@ -240,17 +237,25 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 
 						// Optional vertex normal
 						file >> iNormal;
-						vertex.normal = glm::vec3(normals[iNormal - 1].x, -normals[iNormal - 1].y, -normals[iNormal - 1].z); 
+						vertex.normal = normals[iNormal - 1];
 					}
 				}
 
-				m_MeshVertices.push_back(vertex);
+				m_MeshVertices.push_back(vertex); 
 				tempIndices[iFace] = uint32_t(m_MeshVertices.size()) - 1;  
 			}
 
 			m_MeshIndices.push_back(tempIndices[0]);
-			m_MeshIndices.push_back(tempIndices[1]);
-			m_MeshIndices.push_back(tempIndices[2]);
+			if (flipAxisAndWinding)
+			{
+				m_MeshIndices.push_back(tempIndices[2]);
+				m_MeshIndices.push_back(tempIndices[1]);
+			}
+			else
+			{
+				m_MeshIndices.push_back(tempIndices[1]);
+				m_MeshIndices.push_back(tempIndices[2]);
+			}
 		}
 
 		//read till end of line and ignore all remaining chars
@@ -275,7 +280,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 		const glm::vec3 edge1 = p2 - p0;
 		const glm::vec2 diffX = glm::vec2(uv1.x - uv0.x, uv2.x - uv0.x);
 		const glm::vec2 diffY = glm::vec2(uv1.y - uv0.y, uv2.y - uv0.y);
-		float r = 1.0f / (diffX.x * diffY.y - diffX.y * diffY.x); 
+		float r = 1.0f / glm::cross(glm::vec3(diffX, 0), glm::vec3(diffY, 0)).z;  
 
 		glm::vec3 tangent = (edge0 * diffY.y - edge1 * diffY.x) * r;
 		m_MeshVertices[index0].tangent += tangent;
@@ -284,32 +289,17 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, const glm::vec3
 	}
 
 	//Fix the tangents per vertex now because we accumulated
-	for (auto& v : m_MeshVertices)
+	for (auto& vertex : m_MeshVertices)
 	{
-		v.tangent = glm::normalize(v.tangent - v.normal * glm::dot(v.tangent, v.normal)); 
-		 
-		v.position.z *= -1.f; 
-		v.normal.z *= -1.f; 
-		v.tangent.z *= -1.f; 
-	}
-
-	file.close(); 
-	return true;
-}
-
-template<typename VertexType>
-uint32_t GP2_Mesh<VertexType>::FindMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties)
-{
-	VkPhysicalDeviceMemoryProperties memProperties{};
-	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
-
-	for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
-	{
-		if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+		vertex.tangent = glm::normalize(-glm::reflect(vertex.tangent, vertex.normal));    
+		
+		if (flipAxisAndWinding)
 		{
-			return i;
+			vertex.position.z *= -1.f; 
+			vertex.normal.z *= -1.f; 
+			vertex.tangent.z *= -1.f; 
 		}
 	}
 
-	throw std::runtime_error("failed to find suitable memory type!");
+	return true;
 }

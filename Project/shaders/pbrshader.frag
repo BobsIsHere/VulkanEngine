@@ -23,18 +23,14 @@ vec3 Lambert(vec3 kd, vec3 cd)
     return rho / 3.14159265359;
 }
 
-vec3 Phong(vec3 lightDir, float reflection, float exponent, vec3 v, vec3 n)
+vec3 Phong(vec3 lightDir, vec3 viewDir, vec3 halfVector, float reflection, float exponent)
 {
-    float dp = dot(n, lightDir);
-    vec3 reflect = lightDir - (2.0 * dp * n);
-
-    float cosAlpha = max(dot(reflect, v), 0.f);
-    float specular = reflection * pow(cosAlpha, exponent);
+    vec3 reflectDir = reflect(-lightDir, viewDir);
+    float cosTheta = clamp(dot(halfVector, reflectDir), 0.0, 1.0);
+    float specular = pow(cosTheta, exponent) * reflection;
 
     return vec3(specular, specular, specular);
 }
-
-// -------------------- MAIN --------------------
 
 void main() 
 {
@@ -56,7 +52,7 @@ void main()
     vec3 sampledNormal = 2.f * normalTexture - 1.f;
     sampledNormal = normalize(tangentSpaceAxis * sampledNormal);
 
-    float observedArea = dot(sampledNormal, -lightDirection);
+    float observedArea = dot(sampledNormal, lightDirection);
     if (observedArea <= 0.0)
 	{
 		outColor = vec4(0.0, 0.0, 0.0, 1.0);
@@ -64,10 +60,11 @@ void main()
 	}
 
     vec3 exponent = vec3(glossTexture * shininess);
+    vec3 halfVector = normalize(lightDirection + viewDirection);
 
     vec3 lambert = Lambert(radiance, diffuseTexture);
-    vec3 phong = Phong(lightDirection, specularTexture, glossTexture * 25.0, -viewDirection, sampledNormal);
+    vec3 phong = Phong(lightDirection, viewDirection, halfVector, specularTexture, shininess);
 
-    outColor = vec4(lambert, 1.0);
-    //outColor = vec4(((lambert * lightIntensity) + phong + ambient) * observedArea, 1.0);
+    outColor = vec4(((lambert * lightIntensity) + phong + ambient) * observedArea, 1.0);
+    //outColor = vec4(diffuseTexture, 1.f);
 }
