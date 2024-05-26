@@ -47,7 +47,6 @@ struct Vertex2D
 struct Vertex3D
 {
 	glm::vec3 position;
-	glm::vec3 color;
 	glm::vec2 texCoord;
 	glm::vec3 normal; 
 	glm::vec3 tangent;
@@ -62,38 +61,32 @@ struct Vertex3D
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 5> GetAttributeDescriptions()
+	static std::array<VkVertexInputAttributeDescription, 4> GetAttributeDescriptions()
 	{
-		std::array<VkVertexInputAttributeDescription, 5> attributeDescriptions{};
+		std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
 		//POSITION
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
 		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescriptions[0].offset = offsetof(Vertex3D, position); 
 
-		//COLOR
+		//TEXCOORD
 		attributeDescriptions[1].binding = 0;
 		attributeDescriptions[1].location = 1;
 		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(Vertex3D, color); 
-
-		//TEXCOORD
-		attributeDescriptions[2].binding = 0;
-		attributeDescriptions[2].location = 2;
-		attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[2].offset = offsetof(Vertex3D, texCoord); 
+		attributeDescriptions[1].offset = offsetof(Vertex3D, texCoord); 
 
 		//NORMAL
+		attributeDescriptions[2].binding = 0;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[2].offset = offsetof(Vertex3D, normal);
+
+		//TANGENT
 		attributeDescriptions[3].binding = 0;
 		attributeDescriptions[3].location = 3;
 		attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[3].offset = offsetof(Vertex3D, normal);
-
-		//TANGENT
-		attributeDescriptions[4].binding = 0;
-		attributeDescriptions[4].location = 4;
-		attributeDescriptions[4].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[4].offset = offsetof(Vertex3D, tangent);
+		attributeDescriptions[3].offset = offsetof(Vertex3D, tangent);
 
 		return attributeDescriptions;
 	}
@@ -101,7 +94,6 @@ struct Vertex3D
 
 struct VertexUBO 
 {
-	//glm::mat4 model;
 	glm::mat4 proj; 
 	glm::mat4 view;
 };

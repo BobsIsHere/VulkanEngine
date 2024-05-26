@@ -280,7 +280,7 @@ bool GP2_Mesh<VertexType>::ParseOBJ(const std::string& filename, bool flipAxisAn
 		const glm::vec3 edge1 = p2 - p0;
 		const glm::vec2 diffX = glm::vec2(uv1.x - uv0.x, uv2.x - uv0.x);
 		const glm::vec2 diffY = glm::vec2(uv1.y - uv0.y, uv2.y - uv0.y);
-		float r = 1.0f / glm::cross(glm::vec3(diffX, 0), glm::vec3(diffY, 0)).z;  
+		float r = 1.f / glm::cross(glm::vec3(diffX, 0), glm::vec3(diffY, 0)).z;  
 
 		glm::vec3 tangent = (edge0 * diffY.y - edge1 * diffY.x) * r;
 		m_MeshVertices[index0].tangent += tangent;

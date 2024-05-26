@@ -1,12 +1,13 @@
 #version 450
 
-// -------------------- VARIABLES --------------------
+//--------------------------------------------
+//   Variables
+//--------------------------------------------
 
 layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 fragColor;
-layout(location = 2) in vec2 fragTexCoord;
-layout(location = 3) in vec3 fragNormal;
-layout(location = 4) in vec3 fragTangent;
+layout(location = 1) in vec2 fragTexCoord;
+layout(location = 2) in vec3 fragNormal;
+layout(location = 3) in vec3 fragTangent;
 
 layout(location = 0) out vec4 outColor;
 
@@ -15,56 +16,61 @@ layout(binding = 2) uniform sampler2D normalSampler;
 layout(binding = 3) uniform sampler2D glossSampler;
 layout(binding = 4) uniform sampler2D specularSampler;
 
-// -------------------- FUNCTIONS --------------------
-
-vec3 Lambert(vec3 kd, vec3 cd)
+//--------------------------------------------
+//   Lambert Shader
+//--------------------------------------------
+vec3 LambertShading(const float kd, const vec3 cd)
 {
-	const vec3 rho = cd * kd;
-    return rho / 3.14159265359;
+    vec3 lambertDiffuse = (cd * kd) / 3.14159265359;
+    return lambertDiffuse;
 }
 
-vec3 Phong(vec3 lightDir, vec3 viewDir, vec3 halfVector, float reflection, float exponent)
-{
-    vec3 reflectDir = reflect(-lightDir, viewDir);
-    float cosTheta = clamp(dot(halfVector, reflectDir), 0.0, 1.0);
-    float specular = pow(cosTheta, exponent) * reflection;
+//--------------------------------------------
+//   Phong Reflection
+//--------------------------------------------
+vec3 PhongReflection(float ks, float exponent, vec3 lightVector, vec3 viewVector, vec3 normal)
+{    
+    const vec3 reflection = reflect(lightVector, normal);
+    const float angle = clamp(dot(reflection, viewVector), 0.0, 1.0);
+    const float phong = ks * pow(angle, exponent);
 
-    return vec3(specular, specular, specular);
+    return vec3(phong, phong, phong);
 }
+
+//--------------------------------------------
+//   Main Function
+//--------------------------------------------
 
 void main() 
 {
-    vec3 lightDirection = vec3(0.577, 0.577, 0.577);
-    vec3 viewDirection = normalize(-inPosition);
-    vec3 radiance = vec3(7.0, 7.0, 7.0);
-    vec3 ambient = vec3(0.03, 0.03, 0.03);
-    float shininess = 25.0;
-    float lightIntensity = 2.0;
+    const vec3 lightDirection = vec3(0.577f, 0.577f, 0.577f);
+    const vec3 viewDirection = normalize(-inPosition);
+    const float lightIntensity = 7.f;
+    const float shininess = 25.f;
 
     vec3 diffuseTexture = texture(diffuseSampler, fragTexCoord).rgb;
     vec3 normalTexture = texture(normalSampler, fragTexCoord).rgb;
-    float glossTexture = texture(glossSampler, fragTexCoord).r;
-    float specularTexture = texture(specularSampler, fragTexCoord).r;
+    vec3 glossTexture = texture(glossSampler, fragTexCoord).rgb;
+    vec3 specularTexture = texture(specularSampler, fragTexCoord).rgb;
     
-    vec3 binormal = cross(fragNormal, fragTangent);
-    mat3 tangentSpaceAxis = mat3(fragTangent, binormal, fragNormal);
+    const vec3 binormal = cross(fragNormal, fragTangent);
+    const mat3 tangentSpaceAxis = mat3(fragTangent, binormal, fragNormal);
 
+    //sample from normal map and multiply it with matrix
+    //change range [0, 1] to [-1, 1]
     vec3 sampledNormal = 2.f * normalTexture - 1.f;
     sampledNormal = normalize(tangentSpaceAxis * sampledNormal);
 
-    float observedArea = dot(sampledNormal, lightDirection);
-    if (observedArea <= 0.0)
+    const float observedArea = dot(sampledNormal, lightDirection);
+    if (observedArea <= 0.f)
 	{
-		outColor = vec4(0.0, 0.0, 0.0, 1.0);
+		outColor = vec4(0.f, 0.f, 0.f, 0.f);
         return;
 	}
 
-    vec3 exponent = vec3(glossTexture * shininess);
-    vec3 halfVector = normalize(lightDirection + viewDirection);
+    vec3 diffuseTerm = lightIntensity * diffuseTexture.rgb * observedArea;
+    vec3 phong = PhongReflection(specularTexture.r, glossTexture.r * shininess, lightDirection, viewDirection, sampledNormal);
+    vec3 result = (diffuseTerm + phong) * observedArea;
 
-    vec3 lambert = Lambert(radiance, diffuseTexture);
-    vec3 phong = Phong(lightDirection, viewDirection, halfVector, specularTexture, shininess);
-
-    outColor = vec4(((lambert * lightIntensity) + phong + ambient) * observedArea, 1.0);
-    //outColor = vec4(diffuseTexture, 1.f);
+    outColor = vec4(result, 1.0);
 }
