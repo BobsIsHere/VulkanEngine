@@ -25,7 +25,7 @@ endforeach(GLSL)
 add_custom_target(
     Shaders 
     DEPENDS ${SPIRV_BINARY_FILES}
-)  
+)   
 
 set(SOURCES
     "main.cpp"
@@ -58,7 +58,8 @@ set(SOURCES
     "GP2_Texture.cpp" 
     "GP2_DepthBuffer.h" 
     "GP2_DepthBuffer.cpp" 
-    "GP2_PBRGraphicsPipeline.h" )
+    "GP2_PBRGraphicsPipeline.h"  
+    "GP2_PBRMetallicPipeline.h" ) 
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES})

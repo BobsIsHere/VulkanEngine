@@ -24,9 +24,8 @@
 #include "GP2_CommandPool.h"
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
-#include "GP2_2DGraphicsPipeline.h"
-#include "GP2_3DGraphicsPipeline.h"
 #include "GP2_PBRGraphicsPipeline.h"
+#include "GP2_PBRMetallicPipeline.h"
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -71,6 +70,7 @@ private:
 		// week 04 
 		CreateSwapChain();
 		CreateImageViews();
+		CreateRenderPass(); 
 
 		// week 02
 		m_CommandPool.Initialize(m_Device, FindQueueFamilies(m_PhysicalDevice)); 
@@ -78,29 +78,36 @@ private:
 
 		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies(m_PhysicalDevice);
 
-		// Depth Buffer
-		m_DepthBuffer.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }, m_GraphicsQueue, m_CommandPool);
-		m_DepthBuffer.CreateDepthResources();
-
 		// Make Context
 		VulkanContext context{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent };
 
-		// Cube Mesh
+		// Depth Buffer
+		m_DepthBuffer.Initialize(context, m_GraphicsQueue, m_CommandPool); 
+		m_DepthBuffer.CreateDepthResources();
+
+		// PBR SPECULAR PIPELINE
 		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pVehicleMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
 		
 		m_pVehicleMesh->ParseOBJ("resources/vehicle.obj", false);
-
-		m_pVehicleMesh->Initialize(m_GraphicsQueue, FindQueueFamilies(m_PhysicalDevice));
+		m_pVehicleMesh->Initialize(m_GraphicsQueue, queueFamilyIndices); 
 		m_GP3DPBR.AddMesh(std::move(m_pVehicleMesh));
-		
-		CreateRenderPass(); 
-		m_GP2D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent }); 
-		
-		//m_GP3D.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent });
 
-		m_GP3DPBR.SetTextures(context, "resources/vehicle_diffuse.png", "resources/vehicle_normal.png", "resources/vehicle_gloss.png", "resources/vehicle_specular.png", 
-							  m_GraphicsQueue, m_CommandPool, queueFamilyIndices);
-		m_GP3DPBR.Initialize(VulkanContext{ m_Device, m_PhysicalDevice, m_RenderPass, m_SwapChainExtent });
+		// PBR ROUGHNESS PIPELINE
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
+
+		m_pCubeMesh->ParseOBJ("resources/cube.obj", true);
+		m_pCubeMesh->Initialize(m_GraphicsQueue, queueFamilyIndices);
+		m_GPMetallicPBR.AddMesh(std::move(m_pCubeMesh));
+
+		m_GP3DPBR.SetTexturesSpecularPBR(context, "resources/vehicle_diffuse.png", "resources/vehicle_normal.png", "resources/vehicle_gloss.png", "resources/vehicle_specular.png", 
+			m_GraphicsQueue, m_CommandPool, queueFamilyIndices); 
+		m_GPMetallicPBR.SetTexturesSpecularPBR(context, "resources/TCom_SolarCells_1K_albedo.png", "resources/TCom_SolarCells_1K_normal.png",
+			"resources/TCom_SolarCells_1K_roughness.png", "resources/TCom_SolarCells_1K_metallic.png",
+			m_GraphicsQueue, m_CommandPool, queueFamilyIndices); 
+
+		m_GP3DPBR.Initialize(context);  
+		m_GPMetallicPBR.Initialize(context);
+
 		CreateFrameBuffers(); 
 
 		// week 06
@@ -131,9 +138,8 @@ private:
 			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
 		}
 
-		m_GP2D.Cleanup();
-		//m_GP3D.Cleanup();
 		m_GP3DPBR.Cleanup();
+		m_GPMetallicPBR.Cleanup();
 
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 
@@ -169,10 +175,9 @@ private:
 		}
 	}
 
-	// Graphics Pipelines
-	GP2_2DGraphicsPipeline<ViewProjection> m_GP2D{ "shaders/shader.vert.spv", "shaders/shader.frag.spv" };    
-	//GP2_3DGraphicsPipeline<VertexUBO> m_GP3D{ "shaders/objshader.vert.spv", "shaders/objshader.frag.spv" };   
+	// Graphics Pipelines  
 	GP2_PBRGraphicsPipeline<VertexUBO> m_GP3DPBR{ "shaders/pbrshader.vert.spv", "shaders/pbrshader.frag.spv" };
+	GP2_PBRMetallicPipeline<VertexUBO> m_GPMetallicPBR{ "shaders/pbrmetallicshader.vert.spv", "shaders/pbrmetallicshader.frag.spv" };
 
 	//Depth Buffer
 	GP2_DepthBuffer m_DepthBuffer{};
@@ -180,7 +185,7 @@ private:
 	// Camera
 	glm::vec2 m_LastMousePosition{ 0.f, 0.f };
 	
-	glm::vec3 m_CameraPosition{ 0.f, 0.f, 30.f };
+	glm::vec3 m_CameraPosition{ 0.f, 0.f, 50.f };
 	glm::vec3 m_CameraForward{ 0.f, 0.f, -1.f };
 	glm::vec3 m_CameraUp{ 0.f, 1.f, 0.f };
 	glm::vec3 m_CameraRight{ 1.f, 0.f, 0.f };

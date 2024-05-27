@@ -19,22 +19,22 @@ using pMesh3D = std::unique_ptr<GP2_Mesh<Vertex3D>>;
 class GP2_Texture;
 
 template<class UBOPBR>
-class GP2_PBRGraphicsPipeline final
+class GP2_PBRMetallicPipeline
 {
 public:
 	//---------------------------
 	// Constructors & Destructor
 	//---------------------------
-	GP2_PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
-	~GP2_PBRGraphicsPipeline() = default;
+	GP2_PBRMetallicPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
+	~GP2_PBRMetallicPipeline() = default; 
 
 	//-----------
 	// Functions
 	//-----------
 	void Initialize(const VulkanContext& context);
 
-	void SetTexturesSpecularPBR(const VulkanContext& context, const std::string& diffuse, const std::string& normal, const std::string& gloss, const std::string& specular,
-								VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd);
+	void SetTexturesSpecularPBR(const VulkanContext& context, const std::string& diffuse, const std::string& normal, const std::string& roughness, 
+								const std::string& metalness, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd);
 
 	void Cleanup();
 
@@ -61,8 +61,8 @@ private:
 
 	GP2_Texture* m_DiffuseTexture;
 	GP2_Texture* m_NormalTexture;
-	GP2_Texture* m_GlossTexture;
-	GP2_Texture* m_SpecularTexture;
+	GP2_Texture* m_RoughnessTexture;
+	GP2_Texture* m_MetalnessTexture;
 
 	GP2_Shader<Vertex3D> m_Shader;
 	std::vector<pMesh3D> m_pMeshes;
@@ -70,7 +70,7 @@ private:
 };
 
 template<class UBOPBR>
-inline GP2_PBRGraphicsPipeline<UBOPBR>::GP2_PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) :
+inline GP2_PBRMetallicPipeline<UBOPBR>::GP2_PBRMetallicPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) :
 	m_Device{},
 	m_RenderPass{},
 	m_GraphicsPipeline{},
@@ -82,45 +82,45 @@ inline GP2_PBRGraphicsPipeline<UBOPBR>::GP2_PBRGraphicsPipeline(const std::strin
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::Initialize(const VulkanContext& context)
+inline void GP2_PBRMetallicPipeline<UBOPBR>::Initialize(const VulkanContext& context)
 {
-	m_Device = context.device; 
-	m_RenderPass = context.renderPass; 
+	m_Device = context.device;
+	m_RenderPass = context.renderPass;
 
-	m_Shader.Initialize(m_Device); 
+	m_Shader.Initialize(m_Device);
 
-	std::vector<std::pair<VkImageView, VkSampler>> textureImageViewsSamplers; 
+	std::vector<std::pair<VkImageView, VkSampler>> textureImageViewsSamplers;
 
-	textureImageViewsSamplers.push_back( std::make_pair(m_DiffuseTexture->GetTextureImageView(), m_DiffuseTexture->GetTextureSampler()) );
-	textureImageViewsSamplers.push_back( std::make_pair(m_NormalTexture->GetTextureImageView(), m_NormalTexture->GetTextureSampler()) );
-	textureImageViewsSamplers.push_back( std::make_pair(m_GlossTexture->GetTextureImageView(), m_GlossTexture->GetTextureSampler()) );
-	textureImageViewsSamplers.push_back( std::make_pair(m_SpecularTexture->GetTextureImageView(), m_SpecularTexture->GetTextureSampler()) );
+	textureImageViewsSamplers.push_back(std::make_pair(m_DiffuseTexture->GetTextureImageView(), m_DiffuseTexture->GetTextureSampler()));
+	textureImageViewsSamplers.push_back(std::make_pair(m_NormalTexture->GetTextureImageView(), m_NormalTexture->GetTextureSampler()));
+	textureImageViewsSamplers.push_back(std::make_pair(m_RoughnessTexture->GetTextureImageView(), m_RoughnessTexture->GetTextureSampler()));
+	textureImageViewsSamplers.push_back(std::make_pair(m_MetalnessTexture->GetTextureImageView(), m_MetalnessTexture->GetTextureSampler()));
 
-	m_pDescriptorPool = new GP2_DescriptorPool<UBOPBR>{ m_Device, MAX_FRAMES_IN_FLIGHT, textureImageViewsSamplers.size() }; 
-	m_pDescriptorPool->Initialize(context, textureImageViewsSamplers); 
+	m_pDescriptorPool = new GP2_DescriptorPool<UBOPBR>{ m_Device, MAX_FRAMES_IN_FLIGHT, textureImageViewsSamplers.size() };
+	m_pDescriptorPool->Initialize(context, textureImageViewsSamplers);
 
-	CreateGraphicsPipeline(); 
+	CreateGraphicsPipeline();
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext& context, const std::string& diffuse, const std::string& normal, const std::string& gloss, 
-																	const std::string& specular, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd)
+inline void GP2_PBRMetallicPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext& context, const std::string& diffuse, const std::string& normal, 
+	const std::string& roughness, const std::string& metalness, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd)
 {
-	m_DiffuseTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
+	m_DiffuseTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
 	m_DiffuseTexture->Initialize(diffuse.c_str(), queueFamilyInd);
 
-	m_NormalTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
+	m_NormalTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
 	m_NormalTexture->Initialize(normal.c_str(), queueFamilyInd);
 
-	m_GlossTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_GlossTexture->Initialize(gloss.c_str(), queueFamilyInd);
+	m_RoughnessTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
+	m_RoughnessTexture->Initialize(roughness.c_str(), queueFamilyInd);
 
-	m_SpecularTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_SpecularTexture->Initialize(specular.c_str(), queueFamilyInd);
+	m_MetalnessTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
+	m_MetalnessTexture->Initialize(metalness.c_str(), queueFamilyInd); 
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::Cleanup()
+inline void GP2_PBRMetallicPipeline<UBOPBR>::Cleanup()
 {
 	for (size_t idx = 0; idx < m_pMeshes.size(); ++idx)
 	{
@@ -134,17 +134,17 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::Cleanup()
 
 	m_DiffuseTexture->CleanUp();
 	m_NormalTexture->CleanUp();
-	m_GlossTexture->CleanUp();
-	m_SpecularTexture->CleanUp();
+	m_RoughnessTexture->CleanUp();
+	m_MetalnessTexture->CleanUp();
 
-	delete m_DiffuseTexture; 
-	delete m_NormalTexture; 
-	delete m_GlossTexture;
-	delete m_SpecularTexture; 
+	delete m_DiffuseTexture;
+	delete m_NormalTexture;
+	delete m_RoughnessTexture;
+	delete m_MetalnessTexture;
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx)
+inline void GP2_PBRMetallicPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx)
 {
 	vkCmdBindPipeline(buffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 
@@ -168,7 +168,7 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buf
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& buffer)
+inline void GP2_PBRMetallicPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& buffer)
 {
 	m_pDescriptorPool->BindDescriptorSet(buffer.GetVkCommandBuffer(), m_PipelineLayout, 0);
 
@@ -179,19 +179,19 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& 
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::AddMesh(pMesh3D mesh)
+inline void GP2_PBRMetallicPipeline<UBOPBR>::AddMesh(pMesh3D mesh)
 {
 	m_pMeshes.push_back(std::move(mesh));
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::SetUBO(UBOPBR ubo, size_t uboIndex)
+inline void GP2_PBRMetallicPipeline<UBOPBR>::SetUBO(UBOPBR ubo, size_t uboIndex)
 {
 	m_pDescriptorPool->SetUBO(ubo, uboIndex);
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::CreateGraphicsPipeline()
+inline void GP2_PBRMetallicPipeline<UBOPBR>::CreateGraphicsPipeline()
 {
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -308,7 +308,7 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::CreateGraphicsPipeline()
 }
 
 template<class UBOPBR>
-inline VkPushConstantRange GP2_PBRGraphicsPipeline<UBOPBR>::CreatePushConstantRange()
+inline VkPushConstantRange GP2_PBRMetallicPipeline<UBOPBR>::CreatePushConstantRange()
 {
 	VkPushConstantRange pushConstantRange = {};
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from

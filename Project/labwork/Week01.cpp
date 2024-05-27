@@ -4,7 +4,7 @@
 
 #include "vulkanbase/VulkanBase.h"
 
-const float MOUSE_SPEED = 60.f;
+const float MOUSE_SPEED = 100.f;
 const float SENSITIVITY = 0.001f;
 const float MAX_PITCH = glm::radians(89.0f);
 
