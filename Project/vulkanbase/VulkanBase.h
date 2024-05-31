@@ -95,7 +95,7 @@ private:
 		// PBR ROUGHNESS PIPELINE
 		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
 
-		m_pCubeMesh->ParseOBJ("resources/sphereINE.obj", true);
+		m_pCubeMesh->ParseOBJ("resources/sphere.obj", true);
 		m_pCubeMesh->Initialize(m_GraphicsQueue, queueFamilyIndices);
 		m_GPMetallicPBR.AddMesh(std::move(m_pCubeMesh));
 

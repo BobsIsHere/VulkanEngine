@@ -30,8 +30,10 @@ vec3 LambertShading(const float kd, const vec3 cd)
 //--------------------------------------------
 vec3 PhongReflection(float ks, float exponent, vec3 lightVector, vec3 viewVector, vec3 normal)
 {    
-    const vec3 reflection = reflect(lightVector, normal);
-    const float angle = clamp(dot(reflection, viewVector), 0.0, 1.0);
+    const float dotProduct = dot(normal, lightVector);
+    const vec3 reflection = lightVector - (2.f * dotProduct * normal);
+
+    const float angle = max(dot(reflection, viewVector), 0.f);
     const float phong = ks * pow(angle, exponent);
 
     return vec3(phong, phong, phong);
@@ -61,16 +63,11 @@ void main()
     vec3 sampledNormal = 2.f * normalTexture - 1.f;
     sampledNormal = normalize(tangentSpaceAxis * sampledNormal);
 
-    const float observedArea = dot(sampledNormal, lightDirection);
-    if (observedArea <= 0.f)
-	{
-		outColor = vec4(0.f, 0.f, 0.f, 0.f);
-        return;
-	}
+    const float observedArea = max(dot(sampledNormal, lightDirection), 0.f);
 
-    vec3 diffuseTerm = lightIntensity * diffuseTexture.rgb * observedArea;
+    vec3 diffuseTerm = diffuseTexture / 3.14159265359;
     vec3 phong = PhongReflection(specularTexture.r, glossTexture.r * shininess, lightDirection, viewDirection, sampledNormal);
-    vec3 result = (diffuseTerm + phong) * observedArea;
+    vec3 result = ((diffuseTerm * lightIntensity) + phong) * observedArea;
 
     outColor = vec4(result, 1.0);
 }

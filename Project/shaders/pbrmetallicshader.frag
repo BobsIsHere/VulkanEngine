@@ -95,7 +95,7 @@ void main()
     float G = Geometry_Smith(sampledNormal, outViewDirection, lightDirection, roughnessTexture * roughnessTexture);
 
     vec3 numerator = F * D * G;
-    vec3 denominator = vec3(4.f * dot(outViewDirection, sampledNormal) * dot(lightDirection, sampledNormal) + 0.001f);
+    vec3 denominator = vec3(4.f * dot(outViewDirection, sampledNormal) * dot(lightDirection, sampledNormal) + 1e-6);
     vec3 specular = numerator / denominator;
 
     vec3 diffuse = Lambert(1.f - F, albedoTexture);

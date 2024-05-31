@@ -24,8 +24,7 @@ GP2_Texture::~GP2_Texture()
 void GP2_Texture::Initialize(const char* filePath, QueueFamilyIndices queueFamInd)
 {
 	LoadImageData(filePath);
-
-	// Add error checking here
+	
 	if (m_TextureWidth == 0 || m_TextureHeight == 0) 
 	{
 		throw std::runtime_error("Texture dimensions are zero!"); 
