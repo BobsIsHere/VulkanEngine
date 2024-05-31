@@ -59,26 +59,18 @@ void VulkanBase::DrawFrame()
 	BeginRenderPass(m_CommandBuffer, m_SwapChainFramebuffers[imageIndex], m_SwapChainExtent);
 
 	// Draw Specular PBR Graphics Pipeline
-	MeshData meshDataPBRSpec{};
-	VertexUBO ubo1{};
-	meshDataPBRSpec.model = glm::mat4(1.0f);  
+	MeshData meshData{};
+	VertexUBO ubo{};
+	meshData.model = glm::mat4(1.0f);  
 
-	ubo1.view = UpdateCamera();
-	ubo1.proj = glm::perspective(glm::radians(m_FOV), m_AspectRatio, 0.1f, 100.0f);
-	ubo1.proj[1][1] *= -1;
+	ubo.view = UpdateCamera();
+	ubo.proj = glm::perspective(glm::radians(m_FOV), m_AspectRatio, 0.1f, 100.0f);
+	ubo.proj[1][1] *= -1;
 
-	m_GP3DPBR.SetUBO(ubo1, 0);
+	m_GP3DPBR.SetUBO(ubo, 0);
 	m_GP3DPBR.Record(m_CommandBuffer, m_SwapChainExtent, m_CurrentFrame);
 
-	// Draw Metallic PBR Graphics Pipeline
-	MeshData meshDataPBRMetallic{};
-	VertexUBO ubo2{};
-
-	ubo2.view = UpdateCamera();
-	ubo2.proj = glm::perspective(glm::radians(m_FOV), m_AspectRatio, 0.1f, 100.0f);
-	ubo2.proj[1][1] *= -1;
-
-	m_GPMetallicPBR.SetUBO(ubo2, 0);
+	m_GPMetallicPBR.SetUBO(ubo, 0);
 	m_GPMetallicPBR.Record(m_CommandBuffer, m_SwapChainExtent, m_CurrentFrame);
 
 	m_Yaw = 0;

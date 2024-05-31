@@ -83,7 +83,7 @@ private:
 
 		// Depth Buffer
 		m_DepthBuffer.Initialize(context, m_GraphicsQueue, m_CommandPool); 
-		m_DepthBuffer.CreateDepthResources();
+		m_DepthBuffer.CreateDepthResources(queueFamilyIndices);
 
 		// PBR SPECULAR PIPELINE
 		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pVehicleMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };

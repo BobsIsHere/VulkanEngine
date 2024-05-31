@@ -70,7 +70,7 @@ private:
 };
 
 template<class UBOPBR>
-inline GP2_PBRGraphicsPipeline<UBOPBR>::GP2_PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) :
+GP2_PBRGraphicsPipeline<UBOPBR>::GP2_PBRGraphicsPipeline(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) :
 	m_Device{},
 	m_RenderPass{},
 	m_GraphicsPipeline{},
@@ -82,7 +82,7 @@ inline GP2_PBRGraphicsPipeline<UBOPBR>::GP2_PBRGraphicsPipeline(const std::strin
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::Initialize(const VulkanContext& context)
+ void GP2_PBRGraphicsPipeline<UBOPBR>::Initialize(const VulkanContext& context)
 {
 	m_Device = context.device; 
 	m_RenderPass = context.renderPass; 
@@ -103,7 +103,7 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::Initialize(const VulkanContext& con
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext& context, const std::string& diffuse, const std::string& normal, const std::string& gloss, 
+void GP2_PBRGraphicsPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext& context, const std::string& diffuse, const std::string& normal, const std::string& gloss, 
 																	const std::string& specular, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd)
 {
 	m_DiffuseTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
@@ -120,7 +120,7 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::SetTexturesSpecularPBR(const Vulkan
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::Cleanup()
+void GP2_PBRGraphicsPipeline<UBOPBR>::Cleanup()
 {
 	for (size_t idx = 0; idx < m_pMeshes.size(); ++idx)
 	{
@@ -144,7 +144,7 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::Cleanup()
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx)
+void GP2_PBRGraphicsPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buffer, VkExtent2D extent, int imageIdx)
 {
 	vkCmdBindPipeline(buffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 
@@ -168,7 +168,7 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buf
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& buffer)
+void GP2_PBRGraphicsPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& buffer)
 {
 	m_pDescriptorPool->BindDescriptorSet(buffer.GetVkCommandBuffer(), m_PipelineLayout, 0);
 
@@ -179,19 +179,19 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::DrawScene(const GP2_CommandBuffer& 
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::AddMesh(pMesh3D mesh)
+void GP2_PBRGraphicsPipeline<UBOPBR>::AddMesh(pMesh3D mesh)
 {
 	m_pMeshes.push_back(std::move(mesh));
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::SetUBO(UBOPBR ubo, size_t uboIndex)
+void GP2_PBRGraphicsPipeline<UBOPBR>::SetUBO(UBOPBR ubo, size_t uboIndex)
 {
 	m_pDescriptorPool->SetUBO(ubo, uboIndex);
 }
 
 template<class UBOPBR>
-inline void GP2_PBRGraphicsPipeline<UBOPBR>::CreateGraphicsPipeline()
+void GP2_PBRGraphicsPipeline<UBOPBR>::CreateGraphicsPipeline()
 {
 	VkPipelineViewportStateCreateInfo viewportState{};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -308,7 +308,7 @@ inline void GP2_PBRGraphicsPipeline<UBOPBR>::CreateGraphicsPipeline()
 }
 
 template<class UBOPBR>
-inline VkPushConstantRange GP2_PBRGraphicsPipeline<UBOPBR>::CreatePushConstantRange()
+VkPushConstantRange GP2_PBRGraphicsPipeline<UBOPBR>::CreatePushConstantRange()
 {
 	VkPushConstantRange pushConstantRange = {};
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from

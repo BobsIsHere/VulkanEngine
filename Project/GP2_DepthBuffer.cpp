@@ -28,7 +28,7 @@ void GP2_DepthBuffer::Cleanup()
 	vkFreeMemory(m_VulkanContext.device, m_DepthImageMemory, nullptr);
 }
 
-void GP2_DepthBuffer::CreateDepthResources()
+void GP2_DepthBuffer::CreateDepthResources(QueueFamilyIndices queueFamInd)
 {
 	VkFormat depthFormat = FindSupportedFormat(m_VulkanContext.physicalDevice, { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
 		VK_IMAGE_TILING_OPTIMAL, 
@@ -38,7 +38,7 @@ VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_DepthImage, m_DepthImageMemory);
 	m_DepthImageView = CreateImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 
-	TransitionImageLayout(m_DepthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+	TransitionImageLayout(m_DepthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, queueFamInd);
 }
 
 VkCommandBuffer GP2_DepthBuffer::BeginSingleTimeCommands()
@@ -141,9 +141,13 @@ void GP2_DepthBuffer::CreateImage(uint32_t width, uint32_t height, VkFormat form
 	vkBindImageMemory(m_VulkanContext.device, image, imageMemory, 0);
 }
 
-void GP2_DepthBuffer::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+void GP2_DepthBuffer::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, QueueFamilyIndices queueFamInd)
 {
-	VkCommandBuffer commandBuffer{ BeginSingleTimeCommands() };
+	GP2_CommandPool commandPool{};
+	commandPool.Initialize(m_VulkanContext.device, queueFamInd);
+
+	GP2_CommandBuffer commandBuffer{ commandPool.CreateCommandBuffer() };
+	commandBuffer.BeginRecording(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -210,7 +214,7 @@ void GP2_DepthBuffer::TransitionImageLayout(VkImage image, VkFormat format, VkIm
 
 	// pipeline stages where barrier is going to wait
 	vkCmdPipelineBarrier(
-		commandBuffer,
+		commandBuffer.GetVkCommandBuffer(),
 		sourceStage, destinationStage,
 		0,
 		0, nullptr,
@@ -218,7 +222,16 @@ void GP2_DepthBuffer::TransitionImageLayout(VkImage image, VkFormat format, VkIm
 		1, &barrier
 	);
 
-	EndSingleTimeCommands(commandBuffer);
+	commandBuffer.EndRecording();
+
+	VkSubmitInfo sumbitInfo{};
+	commandBuffer.Sumbit(sumbitInfo);
+	vkQueueSubmit(m_GraphicsQueue, 1, &sumbitInfo, VK_NULL_HANDLE);
+	vkQueueWaitIdle(m_GraphicsQueue);
+
+	auto buffer{ commandBuffer.GetVkCommandBuffer() };
+	vkFreeCommandBuffers(m_VulkanContext.device, commandPool.GetVkCommandPool(), 1, &buffer);
+	commandPool.Destroy();
 }
 
 bool GP2_DepthBuffer::HasStencilComponent(VkFormat format)

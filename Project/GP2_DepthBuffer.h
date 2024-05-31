@@ -37,7 +37,7 @@ public:
 	void Initialize(VulkanContext context, VkQueue graphicsQueue, GP2_CommandPool commandPool); 
 	void Cleanup();
 
-	void CreateDepthResources();
+	void CreateDepthResources(QueueFamilyIndices queueFamInd);
 	VkImageView GetDepthImageView() const { return m_DepthImageView; }
 	VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
@@ -50,7 +50,7 @@ private:
 
 	void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
 		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, QueueFamilyIndices queueFamInd);
 
 	bool HasStencilComponent(VkFormat format);
 	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
