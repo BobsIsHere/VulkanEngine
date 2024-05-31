@@ -16,19 +16,19 @@ layout(location = 1) in vec2 inTexCoord;
 layout(location = 2) in vec3 inNormal;
 layout(location = 3) in vec3 inTangent;
 
-layout(location = 0) out vec3 outPos;
-layout(location = 1) out vec2 outTexCoord;
-layout(location = 2) out vec3 outNormal;
-layout(location = 3) out vec3 outTangent;
+layout(location = 0) out vec2 outTexCoord;
+layout(location = 1) out vec3 outNormal;
+layout(location = 2) out vec3 outTangent;
+layout(location = 3) out vec3 outViewDirection;
 
 void main() 
 {
     gl_Position = ubo.proj * ubo.view * push.model * vec4(inPosition, 1.0);
-    outPos = vec3(push.model * vec4(inPosition, 1.0));
+    outViewDirection = normalize(vec3(gl_Position) - vec3(ubo.view[2][0], ubo.view[2][1], ubo.view[2][2]));
 
-    outNormal = mat3(push.model) * normalize(inNormal);
+    outNormal = normalize(mat3(push.model) * inNormal);
 
     outTexCoord = inTexCoord;
 
-    outTangent = mat3(push.model) * normalize(inTangent);
+    outTangent = normalize(mat3(push.model) * inTangent);
 }

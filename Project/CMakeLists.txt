@@ -19,7 +19,7 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
         COMMAND ${Vulkan_GLSLC_EXECUTABLE} -g ${GLSL} -o ${SPIRV}
         DEPENDS ${GLSL}
     )
-    list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+    list(APPEND SPIRV_BINARY_FILES ${SPIRV}) 
 endforeach(GLSL)
    
 add_custom_target(
