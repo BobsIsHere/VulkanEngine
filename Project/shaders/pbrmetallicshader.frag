@@ -29,15 +29,19 @@ float NormalDistribution_GGX(vec3 n, vec3 h, float roughness)
 {
     float a = roughness * roughness;
     float dpSquared = dot(n, h) * dot(n, h);
+
     float denominator = 3.14159265359 * (dpSquared * (a - 1.0) + 1.0);
     denominator = denominator * denominator;
-    return a / max(denominator, 1e-5); // Avoid division by zero
+
+    // Avoid division by zero
+    return a / max(denominator, 1e-6); 
 }
 
 float Geometry_SchlickGGX(vec3 n, vec3 v, float roughness)
 {
     float dp = dot(n, v);
     float k = (roughness * roughness) / 2.0;
+
     return dp / (dp * (1.0 - k) + k);
 }
 
@@ -45,6 +49,7 @@ float Geometry_Smith(vec3 n, vec3 v, vec3 l, float roughness)
 {
     float smith1 = Geometry_SchlickGGX(n, v, roughness);
     float smith2 = Geometry_SchlickGGX(n, l, roughness);
+
     return smith1 * smith2;
 }
 
@@ -69,39 +74,48 @@ void main()
     vec3 binormal = cross(fragNormal, fragTangent);
     vec3 sampledNormal = normalize(2.f * normalTexture - 1.f);
 
-    if (length(sampledNormal) < 1e-5) {
-        outColor = vec4(1.0, 0.0, 0.0, 1.0); // Red for invalid normals
+    if (length(sampledNormal) < 1e-6) 
+    {
+        // Red for invalid normals
+        outColor = vec4(1.0, 0.0, 0.0, 1.0); 
         return;
     }
 
-    // Fixed light direction vector (same as the previous working code)
     vec3 lightDirection = normalize(vec3(0.577f, 0.577f, 0.577f));
     vec3 viewDirection = normalize(outViewDirection);
 
-    // Check normal and view direction
-    
-
-    vec3 H = normalize(viewDirection + lightDirection);
+    vec3 halfVector = normalize(viewDirection + lightDirection);
     float observedArea = max(dot(sampledNormal, lightDirection), 0.f);
 
     // Base reflectivity of the surface
-    vec3 f0 = mix(vec3(0.04), albedoTexture, metallicTexture);
+    vec3 f0;
 
-    vec3 F = FresnelFunction_Schlick(H, viewDirection, f0);
-    float D = NormalDistribution_GGX(sampledNormal, H, roughnessTexture);
+    if (abs(metallicTexture) < 1e-6)
+    {
+        f0 = vec3(0.04f, 0.04f, 0.04f);
+    }
+    else
+    {
+        f0 = albedoTexture;
+    }
+
+    vec3 F = FresnelFunction_Schlick(halfVector, viewDirection, f0);
+    float D = NormalDistribution_GGX(sampledNormal, halfVector, roughnessTexture);
     float G = Geometry_Smith(sampledNormal, viewDirection, lightDirection, roughnessTexture);
 
     vec3 numerator = F * D * G;
-    float denominator = 4.0 * max(dot(viewDirection, sampledNormal), 0.0) * max(dot(lightDirection, sampledNormal), 0.0);
-    denominator = max(denominator, 1e-5); // Avoid division by zero
+    float denominator = 4.f * max(dot(viewDirection, sampledNormal), 0.f) * max(dot(lightDirection, sampledNormal), 0.f);
+    // Avoid division by zero
+    denominator = max(denominator, 1e-6);
     vec3 specular = numerator / denominator;
 
-    vec3 kd = vec3(1.0) - F;
-    kd *= 1.0 - metallicTexture;
+    vec3 kd = vec3(1.f) - F;
+    kd *= 1.f - metallicTexture;
     vec3 diffuse = Lambert(kd, albedoTexture);
 
     vec3 finalColor = (diffuse + specular) * observedArea;
-    finalColor = max(finalColor, vec3(0.05, 0.05, 0.05)); // Minimum brightness threshold
+    // Minimum brightness threshold
+    finalColor = max(finalColor, vec3(0.05f, 0.05f, 0.05f));
 
     outColor = vec4(finalColor, 1.0);
 }

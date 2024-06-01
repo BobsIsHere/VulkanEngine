@@ -56,6 +56,7 @@ private:
 	std::vector<uint16_t> m_MeshIndices;
 
 	MeshData m_VertexConstant; 
+	RenderingModes m_RenderingConstant;
 };
 
 template<typename VertexType>
@@ -66,6 +67,7 @@ GP2_Mesh<VertexType>::GP2_Mesh(VulkanContext context, VkQueue graphicsQueue, GP2
 	m_GraphicsQueue{ graphicsQueue },
 	m_CommandPool{ commandPool },
 	m_VertexConstant{ glm::mat4(1.f) },
+	m_RenderingConstant{ RenderingModes::Combined },
 	m_pVertexBuffer{},
 	m_pIndexBuffer{}
 {

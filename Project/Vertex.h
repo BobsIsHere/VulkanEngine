@@ -92,6 +92,14 @@ struct Vertex3D
 	}
 };
 
+enum class RenderingModes
+{
+	Albedo,
+	Normal,
+	Specular,
+	Combined
+};
+
 struct VertexUBO 
 {
 	glm::mat4 proj; 

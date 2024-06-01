@@ -16,6 +16,11 @@ layout(binding = 2) uniform sampler2D normalSampler;
 layout(binding = 3) uniform sampler2D glossSampler;
 layout(binding = 4) uniform sampler2D specularSampler;
 
+layout(push_constant) uniform PushConstants
+{
+    layout(offset = 64) int renderingMode;
+} pushRenderingMode;
+
 //--------------------------------------------
 //   Lambert Shader
 //--------------------------------------------
@@ -72,8 +77,28 @@ void main()
     vec3 phong = PhongReflection(specularTexture.r, glossTexture.r * shininess, lightDirection, viewDirection, sampledNormal); // Adjusted Phong term scaling
 
     // Combine terms and ensure minimum brightness level
-    vec3 result = ((diffuseTerm * lightIntensity) + phong) * observedArea;
-    //result = max(result, vec3(0.1, 0.1, 0.1)); // Minimum brightness threshold
+    vec3 result;
+
+     // Albedo + Lambert shading
+    if (pushRenderingMode.renderingMode == 0)
+    {
+        result = diffuseTerm;
+    }
+    // Normal
+    else if (pushRenderingMode.renderingMode == 1)
+    {
+        result = sampledNormal;
+    }
+    // Specular
+    else if (pushRenderingMode.renderingMode == 2)
+    {
+        result = phong;
+    }
+    // Combined
+    else if (pushRenderingMode.renderingMode == 3)
+    {
+        result = ((diffuseTerm * lightIntensity) + phong) * observedArea;
+    }
 
     outColor = vec4(result, 1.0);
 }

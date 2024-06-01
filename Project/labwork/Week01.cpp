@@ -54,6 +54,11 @@ void VulkanBase::KeyEvent(int key, int scancode, int action, int mods)
 	{ 
 		m_CameraPosition += m_CameraRight * MOUSE_SPEED;
 	}
+
+	if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
+	{
+		m_GP3DPBR.CycleRenderingModes();
+	}
 }
 void VulkanBase::MouseMove(GLFWwindow * window, double xpos, double ypos)
 {

@@ -24,7 +24,7 @@ layout(location = 3) out vec3 outViewDirection;
 void main() 
 {
     gl_Position = ubo.proj * ubo.view * push.model * vec4(inPosition, 1.0);
-    outViewDirection = normalize(vec3(gl_Position) - vec3(ubo.view[2][0], ubo.view[2][1], ubo.view[2][2]));
+    outViewDirection = normalize(vec3(gl_Position) - vec3(ubo.view[1][0], ubo.view[1][1], ubo.view[1][2]));
 
     outNormal = normalize(mat3(push.model) * inNormal);
 
