@@ -86,35 +86,52 @@ private:
 		m_DepthBuffer.Initialize(context, m_GraphicsQueue, m_CommandPool); 
 		m_DepthBuffer.CreateDepthResources(queueFamilyIndices);
 
+		// *********************
 		// PBR SPECULAR PIPELINE
+		// *********************
+
+		// Vehicle Mesh
 		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pVehicleMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
 		
 		m_pVehicleMesh->ParseOBJ("resources/vehicle.obj", false);
 		m_pVehicleMesh->Initialize(m_GraphicsQueue, queueFamilyIndices); 
 
-		m_pVehicleMesh->AddTexture("resources/vehicle_diffuse.png");
-		m_pVehicleMesh->AddTexture("resources/vehicle_normal.png");
-		m_pVehicleMesh->AddTexture("resources/vehicle_gloss.png");
-		m_pVehicleMesh->AddTexture("resources/vehicle_specular.png");
-
 		m_GP3DPBR.AddMesh(std::move(m_pVehicleMesh));
 
+		// Cube Mesh
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pVehicleCube{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
+
+		m_pVehicleCube->ParseOBJ("resources/cube2.obj", true);
+		m_pVehicleCube->Initialize(m_GraphicsQueue, queueFamilyIndices);
+
+		m_GP3DPBR.AddMesh(std::move(m_pVehicleCube));
+
+		// **********************
 		// PBR ROUGHNESS PIPELINE
+		// **********************
+
+		// Sphere Mesh
 		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pSphereMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
 
 		m_pSphereMesh->ParseOBJ("resources/sphere.obj", true);
 		m_pSphereMesh->Initialize(m_GraphicsQueue, queueFamilyIndices); 
 
-		m_pSphereMesh->AddTexture("resources/metal_color.jpg");
-		m_pSphereMesh->AddTexture("resources/metal_normal.png");
-		m_pSphereMesh->AddTexture("resources/metal_roughness.jpg");
-		m_pSphereMesh->AddTexture("resources/metal_metallic.jpg");
-
 		m_GPMetallicPBR.AddMesh(std::move(m_pSphereMesh));
 
+		// Cube Mesh
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCube{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
+
+		m_pCube->ParseOBJ("resources/cube.obj", false);
+		m_pCube->Initialize(m_GraphicsQueue, queueFamilyIndices);
+
+		m_GPMetallicPBR.AddMesh(std::move(m_pCube));
+
 		//SET TEXTURES
-		m_GP3DPBR.SetTexturesSpecularPBR(context, m_GraphicsQueue, m_CommandPool, queueFamilyIndices); 
-		m_GPMetallicPBR.SetTexturesSpecularPBR(context, m_GraphicsQueue, m_CommandPool, queueFamilyIndices); 
+		m_GP3DPBR.SetTexturesSpecularPBR(context, m_GraphicsQueue, m_CommandPool, queueFamilyIndices, "resources/vehicle_diffuse.png", 
+									     "resources/vehicle_normal.png", "resources/vehicle_gloss.png", "resources/vehicle_specular.png");
+
+		m_GPMetallicPBR.SetTexturesMetallicPBR(context, m_GraphicsQueue, m_CommandPool, queueFamilyIndices, "resources/metal_color.jpg", 
+											  "resources/metal_normal.png", "resources/metal_roughness.jpg", "resources/metal_metallic.jpg");
 
 		//INITIALIZE PIPELINES
 		m_GP3DPBR.Initialize(context);  
@@ -197,7 +214,7 @@ private:
 	// Camera
 	glm::vec2 m_LastMousePosition{ 0.f, 0.f };
 	
-	glm::vec3 m_CameraPosition{ 0.f, 0.f, 50.f };
+	glm::vec3 m_CameraPosition{ 15.f, 5.f, 60.f };
 	glm::vec3 m_CameraForward{ 0.f, 0.f, -1.f };
 	glm::vec3 m_CameraUp{ 0.f, 1.f, 0.f };
 	glm::vec3 m_CameraRight{ 1.f, 0.f, 0.f };

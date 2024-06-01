@@ -7,7 +7,6 @@
 #include "Vertex.h"
 #include "GP2_Shader.h"
 #include "GP2_Buffer.h"
-#include "GP2_Texture.h"
 #include "vulkanbase/VulkanUtil.h"
 
 template<typename VertexType> 
@@ -29,9 +28,6 @@ public:
 	
 	void AddVertices(std::vector<VertexType> vertices);
 	void AddIndices(const std::vector<uint16_t> indices); 
-	void AddTexture(const char* filePath);
-
-	const char* GetTexture(size_t index) const { return m_pTextures[index]; }
 
 	bool ParseOBJ(const std::string& filename, bool flipAxisAndWinding = true);
 
@@ -135,7 +131,7 @@ void GP2_Mesh<VertexType>::Draw(VkPipelineLayout pipelineLayout, VkCommandBuffer
 }
 
 template<typename VertexType>
-inline void GP2_Mesh<VertexType>::AddVertices(std::vector<VertexType> vertices) 
+void GP2_Mesh<VertexType>::AddVertices(std::vector<VertexType> vertices) 
 {
 	m_MeshVertices.insert(m_MeshVertices.end(), vertices.begin(), vertices.end());
 }
@@ -144,12 +140,6 @@ template<typename VertexType>
 void GP2_Mesh<VertexType>::AddIndices(const std::vector<uint16_t> indices)
 {
 	m_MeshIndices.insert(m_MeshIndices.end(), indices.begin(), indices.end());
-}
-
-template<typename VertexType>
-inline void GP2_Mesh<VertexType>::AddTexture(const char* filePath)
-{
-	m_pTextures.push_back(filePath); 
 }
 
 template<typename VertexType>
