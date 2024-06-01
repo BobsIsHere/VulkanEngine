@@ -16,6 +16,11 @@ layout(binding = 2) uniform sampler2D normalSampler;
 layout(binding = 3) uniform sampler2D roughnessSampler;
 layout(binding = 4) uniform sampler2D metalnessSampler;
 
+layout(push_constant) uniform PushConstants
+{
+    layout(offset = 64) int renderingMode;
+} pushRenderingMode;
+
 //--------------------------------------------
 //   Cook-Torrence
 //--------------------------------------------
@@ -113,9 +118,30 @@ void main()
     kd *= 1.f - metallicTexture;
     vec3 diffuse = Lambert(kd, albedoTexture);
 
-    vec3 finalColor = (diffuse + specular) * observedArea;
-    // Minimum brightness threshold
-    finalColor = max(finalColor, vec3(0.05f, 0.05f, 0.05f));
+    vec3 finalColor;
+
+    // Albedo + lambert shading
+    if (pushRenderingMode.renderingMode == 0)
+    {
+        finalColor = diffuse;
+    }
+    //Normal
+    else if (pushRenderingMode.renderingMode == 1)
+    {
+        finalColor = sampledNormal;
+    }
+    // Specular
+    else if (pushRenderingMode.renderingMode == 2)
+    {
+        finalColor = specular;
+    }
+    else if (pushRenderingMode.renderingMode == 3)
+    {
+        finalColor = (diffuse + specular) * observedArea;
+
+        // Minimum brightness threshold
+        finalColor = max(finalColor, vec3(0.05f, 0.05f, 0.05f));
+    }
 
     outColor = vec4(finalColor, 1.0);
 }

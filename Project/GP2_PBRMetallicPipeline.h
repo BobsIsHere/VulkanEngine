@@ -34,6 +34,7 @@ public:
 	void Initialize(const VulkanContext& context);
 
 	void SetTexturesSpecularPBR(const VulkanContext& context, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd);
+	void CycleRenderingModes(); 
 
 	void Cleanup();
 
@@ -48,7 +49,7 @@ private:
 	// Functions
 	//-----------
 	void CreateGraphicsPipeline();
-	VkPushConstantRange CreatePushConstantRange();
+	std::vector<VkPushConstantRange> CreatePushConstantRange();
 
 	//-----------
 	// Variables
@@ -66,6 +67,8 @@ private:
 	GP2_Shader<Vertex3D> m_Shader;
 	std::vector<pMesh3D> m_pMeshes;
 	GP2_DescriptorPool<UBOPBR>* m_pDescriptorPool;
+
+	RenderingModes m_RenderingMode;
 };
 
 template<class UBOPBR>
@@ -76,7 +79,8 @@ GP2_PBRMetallicPipeline<UBOPBR>::GP2_PBRMetallicPipeline(const std::string& vert
 	m_PipelineLayout{},
 	m_Shader{ vertexShaderFile, fragmentShaderFile },
 	m_pMeshes{},
-	m_pDescriptorPool{}
+	m_pDescriptorPool{},
+	m_RenderingMode{ RenderingModes::Combined } 
 {
 }
 
@@ -118,6 +122,15 @@ void GP2_PBRMetallicPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext
 		m_MetalnessTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
 		m_MetalnessTexture->Initialize(pMesh->GetTexture(3), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
 	}
+}
+
+template<class UBOPBR>
+void GP2_PBRMetallicPipeline<UBOPBR>::CycleRenderingModes()
+{
+	const int amountOfModes{ 4 }; 
+	const int nextMode{ (static_cast<int>(m_RenderingMode) + 1) % amountOfModes };
+
+	m_RenderingMode = static_cast<RenderingModes>(nextMode); 
 }
 
 template<class UBOPBR>
@@ -164,6 +177,15 @@ void GP2_PBRMetallicPipeline<UBOPBR>::Record(const GP2_CommandBuffer& buffer, Vk
 	vkCmdSetScissor(buffer.GetVkCommandBuffer(), 0, 1, &scissor);
 
 	m_pDescriptorPool->BindDescriptorSet(buffer.GetVkCommandBuffer(), m_PipelineLayout, imageIdx);
+
+	vkCmdPushConstants(
+		buffer.GetVkCommandBuffer(),
+		m_PipelineLayout,
+		VK_SHADER_STAGE_FRAGMENT_BIT,
+		sizeof(MeshData),
+		sizeof(m_RenderingMode),
+		&m_RenderingMode
+	);
 
 	DrawScene(buffer);
 }
@@ -243,10 +265,10 @@ void GP2_PBRMetallicPipeline<UBOPBR>::CreateGraphicsPipeline()
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 1;
 	pipelineLayoutInfo.pSetLayouts = &m_pDescriptorPool->GetDescriptorSetLayout();
-	pipelineLayoutInfo.pushConstantRangeCount = 1;
 
-	VkPushConstantRange pushConstantRange = CreatePushConstantRange();
-	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+	std::vector<VkPushConstantRange> pushConstantRange = CreatePushConstantRange(); 
+	pipelineLayoutInfo.pushConstantRangeCount = 2;
+	pipelineLayoutInfo.pPushConstantRanges = pushConstantRange.data(); 
 
 	if (vkCreatePipelineLayout(m_Device, &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)
 	{
@@ -309,12 +331,17 @@ void GP2_PBRMetallicPipeline<UBOPBR>::CreateGraphicsPipeline()
 }
 
 template<class UBOPBR>
-VkPushConstantRange GP2_PBRMetallicPipeline<UBOPBR>::CreatePushConstantRange()
+std::vector<VkPushConstantRange> GP2_PBRMetallicPipeline<UBOPBR>::CreatePushConstantRange()
 {
-	VkPushConstantRange pushConstantRange = {};
-	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from
-	pushConstantRange.offset = 0;
-	pushConstantRange.size = sizeof(MeshData); // Size of push constant block
+	std::vector<VkPushConstantRange> pushConstantRange(2); 
+
+	pushConstantRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Stage the push constant is accessible from
+	pushConstantRange[0].offset = 0;
+	pushConstantRange[0].size = sizeof(MeshData); // Size of push constant block
+
+	pushConstantRange[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // Stage the push constant is accessible from 
+	pushConstantRange[1].offset = sizeof(MeshData);
+	pushConstantRange[1].size = sizeof(RenderingModes); // Size of push constant block
 
 	return pushConstantRange;
 }

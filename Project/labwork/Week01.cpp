@@ -59,6 +59,10 @@ void VulkanBase::KeyEvent(int key, int scancode, int action, int mods)
 	{
 		m_GP3DPBR.CycleRenderingModes();
 	}
+	if (key == GLFW_KEY_F2 && action == GLFW_PRESS)
+	{
+		m_GPMetallicPBR.CycleRenderingModes(); 
+	}
 }
 void VulkanBase::MouseMove(GLFWwindow * window, double xpos, double ypos)
 {

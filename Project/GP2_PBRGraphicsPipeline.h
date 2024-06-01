@@ -127,7 +127,9 @@ void GP2_PBRGraphicsPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext
 template<class UBOPBR>
 void GP2_PBRGraphicsPipeline<UBOPBR>::CycleRenderingModes()
 {
-	int nextMode{ (static_cast<int>(m_RenderingMode) + 1) % 4 };
+	const int amountOfModes{ 4 };
+	const int nextMode{ (static_cast<int>(m_RenderingMode) + 1) % amountOfModes }; 
+
 	m_RenderingMode = static_cast<RenderingModes>(nextMode);  
 }
 
