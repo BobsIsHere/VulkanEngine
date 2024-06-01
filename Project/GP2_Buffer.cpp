@@ -80,7 +80,6 @@ void GP2_Buffer::CopyBuffer(GP2_Buffer srcBuffer, VkQueue graphicsQueue, QueueFa
     commandBuffer.EndRecording();
 
     VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     commandBuffer.Sumbit(submitInfo);
     vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(graphicsQueue);

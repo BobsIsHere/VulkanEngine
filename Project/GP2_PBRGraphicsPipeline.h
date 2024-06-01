@@ -107,16 +107,16 @@ void GP2_PBRGraphicsPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext
 																	const std::string& specular, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd)
 {
 	m_DiffuseTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_DiffuseTexture->Initialize(diffuse.c_str(), queueFamilyInd);
+	m_DiffuseTexture->Initialize(diffuse.c_str(), VK_FORMAT_R8G8B8A8_SRGB,queueFamilyInd);
 
 	m_NormalTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_NormalTexture->Initialize(normal.c_str(), queueFamilyInd);
+	m_NormalTexture->Initialize(normal.c_str(), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
 
 	m_GlossTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_GlossTexture->Initialize(gloss.c_str(), queueFamilyInd);
+	m_GlossTexture->Initialize(gloss.c_str(), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
 
 	m_SpecularTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
-	m_SpecularTexture->Initialize(specular.c_str(), queueFamilyInd);
+	m_SpecularTexture->Initialize(specular.c_str(), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
 }
 
 template<class UBOPBR>

@@ -21,7 +21,7 @@ GP2_Texture::~GP2_Texture()
 {
 }
 
-void GP2_Texture::Initialize(const char* filePath, QueueFamilyIndices queueFamInd)
+void GP2_Texture::Initialize(const char* filePath, VkFormat format, QueueFamilyIndices queueFamInd)
 {
 	LoadImageData(filePath);
 	
@@ -30,20 +30,20 @@ void GP2_Texture::Initialize(const char* filePath, QueueFamilyIndices queueFamIn
 		throw std::runtime_error("Texture dimensions are zero!"); 
 	}
 
-	CreateImage(VK_FORMAT_R8G8B8A8_SRGB);
+	CreateImage(format); 
 
 	// copy staging buffer to image
-	TransitionImageLayout(queueFamInd, m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	TransitionImageLayout(queueFamInd, m_TextureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	CopyBufferToImage(queueFamInd, m_StagingBuffer->GetVkBuffer(), m_TextureImage, static_cast<uint32_t>(m_TextureWidth), static_cast<uint32_t>(m_TextureHeight));
 
 	// prepare it for shader access
-	TransitionImageLayout(queueFamInd, m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	TransitionImageLayout(queueFamInd, m_TextureImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	m_StagingBuffer->Destroy(); 
 	delete m_StagingBuffer;
 	m_StagingBuffer = nullptr;
 
-	m_TextureImageView = CreateImageView(m_VulkanContext.device, m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
+	m_TextureImageView = CreateTextureImageView(m_VulkanContext.device, m_TextureImage, format, VK_IMAGE_ASPECT_COLOR_BIT);
 	CreateTextureSampler();
 }
 
@@ -54,11 +54,6 @@ void GP2_Texture::CleanUp()
 
 	vkDestroyImage(m_VulkanContext.device, m_TextureImage, nullptr);
 	vkFreeMemory(m_VulkanContext.device, m_TextureImageMemory, nullptr);
-}
-
-void GP2_Texture::CreateTextureImageView()
-{
-	m_TextureImageView = CreateImageView(m_VulkanContext.device, m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 void GP2_Texture::CreateTextureSampler()
@@ -114,7 +109,7 @@ void GP2_Texture::LoadImageData(const std::string& filePath)
 	stbi_image_free(pixels);
 }
 
-VkImageView GP2_Texture::CreateImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
+VkImageView GP2_Texture::CreateTextureImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) 
 {
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -204,8 +199,8 @@ void GP2_Texture::TransitionImageLayout(QueueFamilyIndices queueFamInd, VkImage 
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = 1;
 
-	VkPipelineStageFlags sourceStage;
-	VkPipelineStageFlags destinationStage;
+	VkPipelineStageFlags sourceStage{};
+	VkPipelineStageFlags destinationStage{};
 
 	if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
 	{

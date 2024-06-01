@@ -99,7 +99,7 @@ GP2_DescriptorPool<UBO>::~GP2_DescriptorPool()
 }
 
 template<class UBO>
-inline void GP2_DescriptorPool<UBO>::Initialize(const VulkanContext& context, const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers)
+void GP2_DescriptorPool<UBO>::Initialize(const VulkanContext& context, const std::vector<std::pair<VkImageView, VkSampler>>& textureImageViewsSamplers)
 {
 	CreateDescriptorSetLayout(context, textureImageViewsSamplers.size());
 	CreateUBOs(context);
@@ -175,7 +175,7 @@ void GP2_DescriptorPool<UBO>::BindDescriptorSet(VkCommandBuffer commandBuffer, V
 }
 
 template<class UBO>
-inline void GP2_DescriptorPool<UBO>::CreateDescriptorSetLayout(const VulkanContext& context, size_t imageCount)
+void GP2_DescriptorPool<UBO>::CreateDescriptorSetLayout(const VulkanContext& context, size_t imageCount)
 {
 	std::vector<VkDescriptorSetLayoutBinding> layoutBindings(imageCount + 1);
 
@@ -206,7 +206,7 @@ inline void GP2_DescriptorPool<UBO>::CreateDescriptorSetLayout(const VulkanConte
 }
 
 template<class UBO>
-inline void GP2_DescriptorPool<UBO>::CreateUBOs(const VulkanContext& context)
+void GP2_DescriptorPool<UBO>::CreateUBOs(const VulkanContext& context)
 {
 	m_UBOs.resize(m_Count);
 	m_UBOsMapped.resize(m_Count);
@@ -220,7 +220,7 @@ inline void GP2_DescriptorPool<UBO>::CreateUBOs(const VulkanContext& context)
 }
 
 template<class UBO>
-inline void GP2_DescriptorPool<UBO>::SetUBO(UBO src, size_t index)
+void GP2_DescriptorPool<UBO>::SetUBO(UBO src, size_t index)
 {
 	memcpy(m_UBOsMapped[index], &src, m_Size); 
 }

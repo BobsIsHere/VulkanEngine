@@ -16,15 +16,14 @@ public:
 	//-----------
 	// Functions
 	//-----------
-	void Initialize(const char* filePath, QueueFamilyIndices queueFamInd);
+	void Initialize(const char* filePath, VkFormat format, QueueFamilyIndices queueFamInd);
 	void CleanUp();
 
-	void CreateTextureImageView();
 	void CreateTextureSampler();
 
 	void LoadImageData(const std::string& filePath);
 
-	static VkImageView CreateImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+	static VkImageView CreateTextureImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags); 
 	void CreateImage(VkFormat format);
 	void TransitionImageLayout(QueueFamilyIndices queueFamInd, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
