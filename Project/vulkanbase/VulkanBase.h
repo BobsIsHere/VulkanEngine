@@ -24,6 +24,7 @@
 #include "GP2_CommandPool.h"
 #include "GP2_CommandBuffer.h"
 #include "GP2_DescriptorPool.h"
+#include "GP2_3DGraphicsPipeline.h"
 #include "GP2_PBRGraphicsPipeline.h"
 #include "GP2_PBRMetallicPipeline.h"
 
@@ -90,21 +91,32 @@ private:
 		
 		m_pVehicleMesh->ParseOBJ("resources/vehicle.obj", false);
 		m_pVehicleMesh->Initialize(m_GraphicsQueue, queueFamilyIndices); 
+
+		m_pVehicleMesh->AddTexture("resources/vehicle_diffuse.png");
+		m_pVehicleMesh->AddTexture("resources/vehicle_normal.png");
+		m_pVehicleMesh->AddTexture("resources/vehicle_gloss.png");
+		m_pVehicleMesh->AddTexture("resources/vehicle_specular.png");
+
 		m_GP3DPBR.AddMesh(std::move(m_pVehicleMesh));
 
 		// PBR ROUGHNESS PIPELINE
-		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pCubeMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
+		std::unique_ptr<GP2_Mesh<Vertex3D>> m_pSphereMesh{ std::make_unique<GP2_Mesh<Vertex3D>>(context, m_GraphicsQueue, m_CommandPool) };
 
-		m_pCubeMesh->ParseOBJ("resources/sphere.obj", true);
-		m_pCubeMesh->Initialize(m_GraphicsQueue, queueFamilyIndices);
-		m_GPMetallicPBR.AddMesh(std::move(m_pCubeMesh));
+		m_pSphereMesh->ParseOBJ("resources/sphere.obj", true);
+		m_pSphereMesh->Initialize(m_GraphicsQueue, queueFamilyIndices); 
 
-		m_GP3DPBR.SetTexturesSpecularPBR(context, "resources/vehicle_diffuse.png", "resources/vehicle_normal.png", "resources/vehicle_gloss.png", "resources/vehicle_specular.png", 
-			m_GraphicsQueue, m_CommandPool, queueFamilyIndices); 
-		m_GPMetallicPBR.SetTexturesSpecularPBR(context, "resources/TCom_SolarCells_1K_albedo.png", "resources/TCom_SolarCells_1K_normal.png",
-			"resources/TCom_SolarCells_1K_roughness.png", "resources/TCom_SolarCells_1K_metallic.png",
-			m_GraphicsQueue, m_CommandPool, queueFamilyIndices); 
+		m_pSphereMesh->AddTexture("resources/TCom_SolarCells_1K_albedo.png");
+		m_pSphereMesh->AddTexture("resources/TCom_SolarCells_1K_normal.png");
+		m_pSphereMesh->AddTexture("resources/TCom_SolarCells_1K_roughness.png");
+		m_pSphereMesh->AddTexture("resources/TCom_SolarCells_1K_metallic.png");
 
+		m_GPMetallicPBR.AddMesh(std::move(m_pSphereMesh));
+
+		//SET TEXTURES
+		m_GP3DPBR.SetTexturesSpecularPBR(context, m_GraphicsQueue, m_CommandPool, queueFamilyIndices); 
+		m_GPMetallicPBR.SetTexturesSpecularPBR(context, m_GraphicsQueue, m_CommandPool, queueFamilyIndices); 
+
+		//INITIALIZE PIPELINES
 		m_GP3DPBR.Initialize(context);  
 		m_GPMetallicPBR.Initialize(context);
 
@@ -138,7 +150,7 @@ private:
 			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
 		}
 
-		m_GP3DPBR.Cleanup();
+		m_GP3DPBR.Cleanup(); 
 		m_GPMetallicPBR.Cleanup();
 
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
@@ -175,7 +187,7 @@ private:
 		}
 	}
 
-	// Graphics Pipelines  
+	// Graphics Pipelines
 	GP2_PBRGraphicsPipeline<VertexUBO> m_GP3DPBR{ "shaders/pbrshader.vert.spv", "shaders/pbrshader.frag.spv" };
 	GP2_PBRMetallicPipeline<VertexUBO> m_GPMetallicPBR{ "shaders/pbrmetallicshader.vert.spv", "shaders/pbrmetallicshader.frag.spv" };
 

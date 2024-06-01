@@ -33,8 +33,7 @@ public:
 	//-----------
 	void Initialize(const VulkanContext& context);
 
-	void SetTexturesSpecularPBR(const VulkanContext& context, const std::string& diffuse, const std::string& normal, const std::string& roughness, 
-								const std::string& metalness, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd);
+	void SetTexturesSpecularPBR(const VulkanContext& context, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd);
 
 	void Cleanup();
 
@@ -103,20 +102,22 @@ void GP2_PBRMetallicPipeline<UBOPBR>::Initialize(const VulkanContext& context)
 }
 
 template<class UBOPBR>
-void GP2_PBRMetallicPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext& context, const std::string& diffuse, const std::string& normal, 
-	const std::string& roughness, const std::string& metalness, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd)
+void GP2_PBRMetallicPipeline<UBOPBR>::SetTexturesSpecularPBR(const VulkanContext& context, VkQueue graphicsQueue, GP2_CommandPool commandPool, QueueFamilyIndices queueFamilyInd)
 {
-	m_DiffuseTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
-	m_DiffuseTexture->Initialize(diffuse.c_str(), VK_FORMAT_R8G8B8A8_SRGB, queueFamilyInd);
+	for (auto& pMesh : m_pMeshes)
+	{
+		m_DiffuseTexture = new GP2_Texture{ context, graphicsQueue, commandPool }; 
+		m_DiffuseTexture->Initialize(pMesh->GetTexture(0), VK_FORMAT_R8G8B8A8_SRGB, queueFamilyInd);
 
-	m_NormalTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
-	m_NormalTexture->Initialize(normal.c_str(), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
+		m_NormalTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
+		m_NormalTexture->Initialize(pMesh->GetTexture(1), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
 
-	m_RoughnessTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
-	m_RoughnessTexture->Initialize(roughness.c_str(), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
+		m_RoughnessTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
+		m_RoughnessTexture->Initialize(pMesh->GetTexture(2), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
 
-	m_MetalnessTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
-	m_MetalnessTexture->Initialize(metalness.c_str(), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
+		m_MetalnessTexture = new GP2_Texture{ context, graphicsQueue, commandPool };
+		m_MetalnessTexture->Initialize(pMesh->GetTexture(3), VK_FORMAT_R8G8B8A8_UNORM, queueFamilyInd);
+	}
 }
 
 template<class UBOPBR>
