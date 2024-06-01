@@ -4,7 +4,7 @@
 //   Variables
 //--------------------------------------------
 
-layout(location = 0) in vec3 inPosition;
+layout(location = 0) in vec3 outPosition;
 layout(location = 1) in vec2 fragTexCoord;
 layout(location = 2) in vec3 fragNormal;
 layout(location = 3) in vec3 fragTangent;
@@ -46,8 +46,8 @@ vec3 PhongReflection(float ks, float exponent, vec3 lightVector, vec3 viewVector
 void main() 
 {
     const vec3 lightDirection = vec3(0.577f, 0.577f, 0.577f);
-    const vec3 viewDirection = normalize(-inPosition);
-    const float lightIntensity = 7.f;
+    const vec3 viewDirection = normalize(-outPosition);
+    const float lightIntensity = 10.f; // Increased light intensity
     const float shininess = 25.f;
 
     vec3 diffuseTexture = texture(diffuseSampler, fragTexCoord).rgb;
@@ -58,16 +58,22 @@ void main()
     const vec3 binormal = cross(fragNormal, fragTangent);
     const mat3 tangentSpaceAxis = mat3(fragTangent, binormal, fragNormal);
 
-    //sample from normal map and multiply it with matrix
-    //change range [0, 1] to [-1, 1]
+    // Sample from normal map and transform it to tangent space
     vec3 sampledNormal = 2.f * normalTexture - 1.f;
     sampledNormal = normalize(tangentSpaceAxis * sampledNormal);
 
-    const float observedArea = max(dot(sampledNormal, lightDirection), 0.f);
+    // Modified observed area calculation for more even light distribution
+    const float observedArea = 0.5f + 0.5f * max(dot(sampledNormal, lightDirection), 0.f);
 
-    vec3 diffuseTerm = diffuseTexture / 3.14159265359;
-    vec3 phong = PhongReflection(specularTexture.r, glossTexture.r * shininess, lightDirection, viewDirection, sampledNormal);
+    // Lambertian diffuse shading term
+    vec3 diffuseTerm = diffuseTexture / 3.14159265359; // Adjusted diffuse term scaling
+
+    // Phong specular reflection term
+    vec3 phong = PhongReflection(specularTexture.r, glossTexture.r * shininess, lightDirection, viewDirection, sampledNormal); // Adjusted Phong term scaling
+
+    // Combine terms and ensure minimum brightness level
     vec3 result = ((diffuseTerm * lightIntensity) + phong) * observedArea;
+    //result = max(result, vec3(0.1, 0.1, 0.1)); // Minimum brightness threshold
 
     outColor = vec4(result, 1.0);
 }

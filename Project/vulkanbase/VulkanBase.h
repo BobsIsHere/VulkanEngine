@@ -105,10 +105,10 @@ private:
 		m_pSphereMesh->ParseOBJ("resources/sphere.obj", true);
 		m_pSphereMesh->Initialize(m_GraphicsQueue, queueFamilyIndices); 
 
-		m_pSphereMesh->AddTexture("resources/TCom_SolarCells_1K_albedo.png");
-		m_pSphereMesh->AddTexture("resources/TCom_SolarCells_1K_normal.png");
-		m_pSphereMesh->AddTexture("resources/TCom_SolarCells_1K_roughness.png");
-		m_pSphereMesh->AddTexture("resources/TCom_SolarCells_1K_metallic.png");
+		m_pSphereMesh->AddTexture("resources/metal_color.jpg");
+		m_pSphereMesh->AddTexture("resources/metal_normal.png");
+		m_pSphereMesh->AddTexture("resources/metal_roughness.jpg");
+		m_pSphereMesh->AddTexture("resources/metal_metallic.jpg");
 
 		m_GPMetallicPBR.AddMesh(std::move(m_pSphereMesh));
 
